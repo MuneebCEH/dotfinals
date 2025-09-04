@@ -56,6 +56,7 @@
                         <option value="closer" {{ old('role') === 'closer' ? 'selected' : '' }}>Closer</option>
                         <option value="super_agent" {{ old('role') === 'super_agent' ? 'selected' : '' }}>Super Agent</option>
                         <option value="report_manager" {{ old('role') === 'report_manager' ? 'selected' : '' }}>Report Manager</option>
+                        <option value="lead_manager" {{ old('role') === 'lead_manager' ? 'selected' : '' }}>Lead Manager</option>
                         <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')

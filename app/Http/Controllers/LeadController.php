@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 class LeadController extends Controller
 {
     use HandleLeadFiles;
+
     /**
      * Hardcoded statuses used across the app.
      */
@@ -39,11 +40,26 @@ class LeadController extends Controller
         'Super Lead', // Added Super Lead status
     ];
 
+    /**
+     * Treat lead_manager as elevated (admin-like).
+     */
+    protected function isElevated(): bool
+    {
+        $u = auth()->user();
+        if (!$u) return false;
+
+        $isLeadManager = method_exists($u, 'hasRole')
+            ? $u->hasRole('lead_manager')
+            : (($u->role ?? null) === 'lead_manager');
+
+        return $u->isAdmin() || $isLeadManager;
+    }
+
     public function index(Request $request)
     {
-        $statuses = self::STATUSES;                  // your hard-coded statuses
+        $statuses   = self::STATUSES;                  // your hard-coded statuses
         $categories = Category::orderBy('name')->get();
-        $users = User::where('role', 'user')->orderBy('name')->get(); // Get regular users for bulk assign
+        $users      = User::where('role', 'user')->orderBy('name')->get(); // regular users for bulk assign
 
         // Get counts for available leads by status (only unassigned leads)
         $statusCounts = [
@@ -61,10 +77,12 @@ class LeadController extends Controller
                 ->count(),
         ];
 
+        $isElevated = $this->isElevated();
+
         $query = Lead::query()
             ->with(['category', 'assignee'])         // eager-load
-            // If NOT admin, show only leads assigned to this user
-            ->when(!auth()->user()->isAdmin(), function ($q) {
+            // If NOT elevated, show only leads assigned to this user
+            ->when(!$isElevated, function ($q) {
                 $q->where('assigned_to', auth()->id());
             })
             // Search filter
@@ -91,8 +109,9 @@ class LeadController extends Controller
 
         $leads = $query->paginate(10)->withQueryString();
 
-        $onlineUsers = [];
-        if (auth()->user()->isAdmin()) {
+        // Always use a Collection for $onlineUsers (prevents ->count() on array)
+        $onlineUsers = collect();
+        if ($isElevated) {
             $today = now()->format('Y-m-d');
             $onlineUsers = UserAttendance::whereDate('check_in', $today)
                 ->whereNull('check_out')
@@ -100,24 +119,24 @@ class LeadController extends Controller
                 ->get()
                 ->pluck('user')
                 ->filter()
-                ->unique();
+                ->unique()
+                ->values();
         }
 
         return view('leads.index', [
-            'onlineUsers' => $onlineUsers,
-            'leads'      => $leads,
-            'categories' => $categories,
-            'statuses'   => $statuses,
-            'users'      => $users, // Pass users for bulk assign dropdown
+            'onlineUsers'  => $onlineUsers,
+            'leads'        => $leads,
+            'categories'   => $categories,
+            'statuses'     => $statuses,
+            'users'        => $users, // Pass users for bulk assign dropdown
             'statusCounts' => $statusCounts, // Pass status counts for bulk assign modal
-            'filters'    => [
+            'filters'      => [
                 'q'        => $request->q ?? '',
                 'status'   => $request->status ?? '',
                 'category' => $request->category ?? '',
             ],
         ]);
     }
-
 
     public function myLeads(Request $request)
     {
@@ -153,12 +172,21 @@ class LeadController extends Controller
         // order + paginate; keep query string for pager links
         $leads = $query->latest()->paginate(15)->withQueryString();
 
-        return view('leads.index', compact('leads', 'statuses', 'filters'));
+        // Minimal set is fine for non-admin view
+        return view('leads.index', [
+            'leads'      => $leads,
+            'statuses'   => $statuses,
+            'filters'    => $filters,
+            'categories' => collect(),     // not shown when not elevated
+            'users'      => collect(),
+            'statusCounts' => [],
+            'onlineUsers'  => collect(),
+        ]);
     }
 
     public function create()
     {
-        abort_unless(auth()->user()?->isAdmin(), 403);
+        abort_unless($this->isElevated(), 403);
 
         $categories   = Category::orderBy('name')->get();
         $tos          = User::where('role', 'user')->orderBy('name')->get();           // “Select TO”
@@ -220,9 +248,6 @@ class LeadController extends Controller
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ];
 
-            // Store success message in session
-            session()->flash('success', 'Lead created successfully.');
-
             // Store success message and redirect URL in session
             session()->flash('success', 'Lead created successfully.');
             session()->flash('redirect_to', route('leads.show', $lead));
@@ -242,8 +267,8 @@ class LeadController extends Controller
 
     public function show(Lead $lead)
     {
-        // Only admins or the assignee can view
-        if (!Auth::user()->isAdmin() && $lead->assigned_to !== Auth::id()) {
+        // Only elevated or the assignee can view
+        if (!$this->isElevated() && $lead->assigned_to !== Auth::id()) {
             abort(403);
         }
 
@@ -254,15 +279,15 @@ class LeadController extends Controller
 
     public function edit(Lead $lead)
     {
-        // Only admins or the assignee can edit
-        if (!Auth::user()->isAdmin() && $lead->assigned_to !== Auth::id()) {
+        // Only elevated or the assignee can edit
+        if (!$this->isElevated() && $lead->assigned_to !== Auth::id()) {
             abort(403);
         }
 
         $categories  = Category::orderBy('name')->get();
         $statuses    = self::STATUSES;
 
-        // for admin: fill selects
+        // for elevated: fill selects
         $tos         = User::where('role', 'user')->orderBy('name')->get();
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();
         $closers     = User::where('role', 'closer')->orderBy('name')->get();
@@ -273,7 +298,7 @@ class LeadController extends Controller
     public function update(UpdateLeadRequest $request, Lead $lead)
     {
         $user = Auth::user();
-        if (!$user || (!$user->isAdmin() && $lead->assigned_to !== $user->id)) {
+        if (!$user || (!$this->isElevated() && $lead->assigned_to !== $user->id)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -287,8 +312,8 @@ class LeadController extends Controller
             $data['numbers'] = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
             $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
 
-            // Non-admin cannot reassign users
-            if (!Auth::user()->isAdmin()) {
+            // Non-elevated cannot reassign users
+            if (!$this->isElevated()) {
                 unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
             }
 
@@ -405,9 +430,7 @@ class LeadController extends Controller
 
     public function destroy(Lead $lead)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        abort_unless($this->isElevated(), 403);
         $lead->delete();
 
         return redirect()->route('leads.index')->with('success', 'Lead deleted.');
@@ -418,8 +441,8 @@ class LeadController extends Controller
      */
     public function bulkAssign(Request $request)
     {
-        // Only admin can bulk assign
-        abort_unless(Auth::user()->isAdmin(), 403);
+        // Only elevated can bulk assign
+        abort_unless($this->isElevated(), 403);
 
         // Validate inputs
         $data = $request->validate([
@@ -552,13 +575,12 @@ class LeadController extends Controller
         }
     }
 
-
     /**
      * Admin: quick assignment endpoint (optional).
      */
     public function assign(Request $request, Lead $lead)
     {
-        abort_unless(Auth::user()->isAdmin(), 403);
+        abort_unless($this->isElevated(), 403);
 
         $data = $request->validate([
             'assigned_to'    => ['nullable', 'exists:users,id'],
@@ -613,11 +635,7 @@ class LeadController extends Controller
         // ✅ Ensure the user is authenticated (optional, usually handled by middleware)
         abort_unless($user, 403, 'You must be logged in to download this document.');
 
-        // ✅ Remove role-based restrictions
-        // Previously: isAdmin OR assigned_to OR created_by
-        // Now: Any authenticated user is allowed
-
-        // Format all the fields into a structured .txt content
+        // ✅ Remove role-based restrictions (any authenticated user)
         $lines = [];
 
         $lines[] = "=== Lead Details ===";
@@ -693,7 +711,7 @@ class LeadController extends Controller
      */
     protected function ensureCanAccessLead(Lead $lead): void
     {
-        if (Auth::user()->isAdmin()) {
+        if ($this->isElevated()) {
             return;
         }
 
@@ -713,7 +731,7 @@ class LeadController extends Controller
     {
         // Check authorization
         $user = Auth::user();
-        $allowed = $user && ($user->isAdmin() || $lead->assigned_to === $user->id);
+        $allowed = $user && ($this->isElevated() || $lead->assigned_to === $user->id);
         abort_unless($allowed, 403, 'You are not allowed to download this report.');
 
         // Generate report content
@@ -765,7 +783,7 @@ class LeadController extends Controller
             // Add created_by manually
             $leadData['created_by'] = Auth::id();
 
-            // ✅ Fix: Use status from CSV if available, otherwise default to "New Lead"
+            // ✅ Use status from CSV if available, otherwise default to "New Lead"
             if (isset($leadData['status']) && $leadData['status'] !== '') {
                 $status = strtolower(trim($leadData['status']));
 

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory; 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -30,12 +30,18 @@ class User extends Authenticatable
         'closer',
         'super_agent',
         'admin',
-        'report_manager'
+        'report_manager',
+        'lead_manager'
     ];
 
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isLeadManager(): bool
+    {
+        return $this->role === 'lead_manager';
     }
 
     public function isCloser(): bool

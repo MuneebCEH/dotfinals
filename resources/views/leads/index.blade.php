@@ -1,15 +1,22 @@
 @php
     // User role and permissions
     $currentUser = auth()->user();
-    $isAdmin = $currentUser->isAdmin();
+
+    // Treat lead_manager like admin (admin-equivalent)
+    $isLeadManager = method_exists($currentUser, 'hasRole')
+        ? $currentUser->hasRole('lead_manager')
+        : ($currentUser->role ?? null) === 'lead_manager';
+
+    $isAdmin = $currentUser->isAdmin() || $isLeadManager;
+
     $isCloser = $currentUser->isCloser();
     $isSuperAgent = $currentUser->isSuperAgent();
 
     // Data for admin functionality
     $users = $isAdmin ? \App\Models\User::all() : collect();
 
-    // Online users (those checked in today but not checked out)
-    $onlineUsers = $isAdmin ? $onlineUsers ?? collect() : collect();
+    // Online users (ensure a Collection to safely call ->count())
+    $onlineUsers = $isAdmin ? (isset($onlineUsers) ? collect($onlineUsers) : collect()) : collect();
 
     // UI configuration
     $cardClass = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700';
@@ -29,7 +36,6 @@
         ->groupBy('assigned_to')
         ->pluck('c', 'assigned_to');
 @endphp
-
 
 @extends('layouts.app')
 
@@ -136,57 +142,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {{-- <div
-                                    class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40">
-                                    <p class="mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">Distribution</p>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <label
-                                            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer">
-                                            <input type="radio" name="distribution_strategy" value="round_robin" checked
-                                                class="text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-800 dark:text-gray-100">Round-robin</span>
-                                        </label>
-                                        <label
-                                            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 cursor-pointer">
-                                            <input type="radio" name="distribution_strategy" value="chunk"
-                                                class="text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-800 dark:text-gray-100">Chunk</span>
-                                        </label>
-                                    </div>
-
-                                    <details
-                                        class="mt-3 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                                        <summary
-                                            class="px-3 py-2 text-sm font-medium cursor-pointer select-none bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-                                            Advanced options</summary>
-                                        <div class="p-3 space-y-3 bg-gray-50 dark:bg-gray-800/60">
-                                            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                                <input id="shuffleToggle" type="checkbox" name="shuffle"
-                                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                                Shuffle teammates before assigning
-                                            </label>
-                                            <div class="grid grid-cols-2 gap-2">
-                                                <div>
-                                                    <label for="max_per_user"
-                                                        class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Max
-                                                        per user</label>
-                                                    <input id="max_per_user" name="max_per_user" type="number"
-                                                        min="1" placeholder="e.g. 5"
-                                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                                <div>
-                                                    <label for="busy_threshold"
-                                                        class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Hide
-                                                        users with ≥</label>
-                                                    <input id="busy_threshold" type="number" min="0"
-                                                        placeholder="e.g. 30"
-                                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </details>
-                                </div> --}}
 
                                 <div
                                     class="p-4 rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/60 dark:bg-blue-900/20">
@@ -361,21 +316,8 @@
     @endif
 @endpush
 
-
 @section('content')
     <div class="space-y-6" x-data="{ filterOpen: {{ $hasActiveFilters ? 'true' : 'false' }}, exportOpen: false }">
-        {{-- @if (session('success'))
-            <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-green-600 dark:text-green-400 mr-3" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span class="text-green-800 dark:text-green-200 text-sm">{{ session('success') }}</span>
-                </div>
-            </div>
-        @endif --}}
-
         @if (session('error'))
             <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div class="flex items-center">
@@ -462,7 +404,7 @@
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input id="qInput" type="text" name="q" value="{{ $filters['q'] }}"
+                            <input id="qInput" type="text" name="q" value="{{ $filters['q'] ?? '' }}"
                                 placeholder="Search by name, gen code, city, or phone..."
                                 class="pl-10 w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
@@ -474,7 +416,7 @@
                             class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">All Statuses</option>
                             @foreach ($statuses as $status)
-                                <option value="{{ $status }}" @selected($filters['status'] === $status)>{{ $status }}
+                                <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $status }}
                                 </option>
                             @endforeach
                         </select>
@@ -487,7 +429,7 @@
                                 class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">All Categories</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @selected($filters['category'] == $category->id)>
+                                    <option value="{{ $category->id }}" @selected(($filters['category'] ?? '') == $category->id)>
                                         {{ $category->name }}</option>
                                 @endforeach
                             </select>
@@ -594,21 +536,23 @@
                                         <!-- Status -->
                                         <td class="px-6 py-4">
                                             @php
+                                                // lower-case keys to match strtolower() below
                                                 $statusColors = [
-                                                    'Deal' =>
+                                                    'deal' =>
                                                         'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                                    'Call Back' =>
+                                                    'call back' =>
                                                         'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
                                                     'super lead' =>
                                                         'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
                                                     'new lead' =>
                                                         'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                                                    'submitted' =>
+                                                        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
                                                     'default' =>
                                                         'bg-gray-100 text-gray-800 dark:bg-gray-700/60 dark:text-gray-300',
                                                 ];
-                                                $statusClass =
-                                                    $statusColors[strtolower($lead->status)] ??
-                                                    $statusColors['default'];
+                                                $statusKey = strtolower(trim($lead->status ?? ''));
+                                                $statusClass = $statusColors[$statusKey] ?? $statusColors['default'];
                                             @endphp
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">{{ ucfirst($lead->status) }}</span>
@@ -738,7 +682,6 @@
         </div>
     @endif
 @endsection
-
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>

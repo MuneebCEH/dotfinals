@@ -207,7 +207,7 @@
                         @endif
                     </p>
                 </div>
-                <div class="text-sm text-gray-500 dark:text-gray-400">
+                {{-- <div class="text-sm text-gray-500 dark:text-gray-400">
                     Last updated: {{ now()->format('M j, Y g:i A') }}
                     @if ($isRegularUser)
                         <span class="block mt-1 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">User View</span>
@@ -215,7 +215,7 @@
                         <span class="block mt-1 text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Admin
                             View</span>
                     @endif
-                </div>
+                </div> --}}
             </div>
 
             {{-- Check-in/Check-out Section (Only for regular users) --}}

@@ -33,7 +33,10 @@ Route::middleware('auth')->group(function () {
         ->name('attachments.preview');
 });
 
-
+Route::middleware(['auth', 'role:lead_manager'])->group(function () {
+    // Lead Manager specific routes
+    Route::resource('leads', LeadController::class);
+});
 
 // Protected area
 Route::middleware('auth')->group(function () {
@@ -48,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
     Route::resource('leads', LeadController::class);
     Route::post('/issues/{issue}/comments', [IssueCommentController::class, 'store'])->name('issues.comments.store');
+    Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import');
 
     // Reporter (assigned user) creates issue from Leads Edit page
     Route::post('/leads/{lead}/issues', [LeadIssueController::class, 'store'])
@@ -82,7 +86,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::post('reports/export', [ReportController::class, 'export'])->name('reports.export');
-        Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import');
         Route::post('/leads/bulk-assign', [LeadController::class, 'bulkAssign'])->name('leads.bulk-assign');
     });
 
