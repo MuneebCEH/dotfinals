@@ -40,6 +40,68 @@ class LeadController extends Controller
         'Super Lead', // Added Super Lead status
     ];
 
+    protected function isLeadManagerUser(User $u): bool
+    {
+        return method_exists($u, 'hasRole') ? $u->hasRole('lead_manager')
+            : (($u->role ?? null) === 'lead_manager');
+    }
+
+    protected function isSuperAgentUser(User $u): bool
+    {
+        // supports method, role name, or boolean column (you used is_super_agent in assign())
+        return (method_exists($u, 'isSuperAgent') && $u->isSuperAgent())
+            || (method_exists($u, 'hasRole') && $u->hasRole('super_agent'))
+            || (($u->role ?? null) === 'super_agent')
+            || (property_exists($u, 'is_super_agent') && (bool) $u->is_super_agent);
+    }
+
+    protected function isCloserUser(User $u): bool
+    {
+        return (method_exists($u, 'isCloser') && $u->isCloser())
+            || (method_exists($u, 'hasRole') && $u->hasRole('closer'))
+            || (($u->role ?? null) === 'closer');
+    }
+
+    /** Admin-like (admin OR lead_manager) */
+    // protected function isElevated(): bool
+    // {
+    //     $u = auth()->user();
+    //     if (!$u) return false;
+    //     return $u->isAdmin() || $this->isLeadManagerUser($u);
+    // }
+
+    /** View guard covering all roles */
+    protected function canViewLead(?User $u, Lead $lead): bool
+    {
+        if (!$u) return false;
+        if ($this->isElevated()) return true;
+
+        if ($this->isSuperAgentUser($u) && (int)$lead->super_agent_id === (int)$u->id) {
+            return true;
+        }
+
+        if ($this->isCloserUser($u) && ((int)$lead->closer_id === (int)$u->id || (int)$lead->assigned_to === (int)$u->id)) {
+            return true;
+        }
+
+        return (int)$lead->assigned_to === (int)$u->id;
+    }
+
+    /** Edit/update guard (same as view; adjust here if you want tighter edit rules) */
+    protected function canEditLead(?User $u, Lead $lead): bool
+    {
+        // For now, same as canViewLead
+        return $this->canViewLead($u, $lead);
+    }
+
+    /** Legacy helper used elsewhere */
+    protected function ensureCanAccessLead(Lead $lead): void
+    {
+        $u = auth()->user();
+        abort_unless($this->canViewLead($u, $lead), 403);
+    }
+
+
     /**
      * Treat lead_manager as elevated (admin-like).
      */
@@ -140,18 +202,27 @@ class LeadController extends Controller
 
     public function myLeads(Request $request)
     {
-        // status list used by the blade
+        $user     = $request->user();
         $statuses = self::STATUSES;
 
-        // collect filters expected by the blade
+        // detect super_agent robustly
+        $isSuperAgent = (method_exists($user, 'isSuperAgent') && $user->isSuperAgent())
+            || (method_exists($user, 'hasRole') && $user->hasRole('super_agent'))
+            || (($user->role ?? null) === 'super_agent');
+
         $filters = [
             'q'      => trim((string) $request->input('q', '')),
             'status' => (string) $request->input('status', ''),
         ];
 
         $query = Lead::query()
-            ->with(['assignee'])            // avoid N+1 in table column
-            ->where('assigned_to', Auth::id()) // only my leads
+            ->with(['assignee']) // keep for the table
+            // visibility: super_agent sees by super_agent_id, others by assigned_to
+            ->when($isSuperAgent, function ($q) use ($user) {
+                $q->where('super_agent_id', $user->id);
+            }, function ($q) use ($user) {
+                $q->where('assigned_to', $user->id);
+            })
             ->where('status', '!=', 'submitted');
 
         // search filter (name/gen_code/city)
@@ -170,20 +241,20 @@ class LeadController extends Controller
             $query->where('status', $filters['status']);
         }
 
-        // order + paginate; keep query string for pager links
         $leads = $query->latest()->paginate(15)->withQueryString();
 
-        // Minimal set is fine for non-admin view
         return view('leads.index', [
-            'leads'      => $leads,
-            'statuses'   => $statuses,
-            'filters'    => $filters,
-            'categories' => collect(),     // not shown when not elevated
-            'users'      => collect(),
-            'statusCounts' => [],
-            'onlineUsers'  => collect(),
+            'leads'         => $leads,
+            'statuses'      => $statuses,
+            'filters'       => $filters,
+            // keep minimal sets for non-elevated view
+            'categories'    => collect(),
+            'users'         => collect(),
+            'statusCounts'  => [],
+            'onlineUsers'   => collect(),
         ]);
     }
+
 
     public function create()
     {
@@ -276,27 +347,22 @@ class LeadController extends Controller
 
     public function show(Lead $lead)
     {
-        // Only elevated or the assignee can view
-        if (!$this->isElevated() && $lead->assigned_to !== Auth::id()) {
-            abort(403);
-        }
+        abort_unless($this->canViewLead(Auth::user(), $lead), 403);
 
-        $lead->load(['category', 'assignee', 'superAgent']);
+        $lead->load(['category', 'assignee', 'superAgent', 'closer', 'creator']);
 
         return view('leads.show', compact('lead'));
     }
 
+
     public function edit(Lead $lead)
     {
-        // Only elevated or the assignee can edit
-        if (!$this->isElevated() && $lead->assigned_to !== Auth::id()) {
-            abort(403);
-        }
+        abort_unless($this->canEditLead(Auth::user(), $lead), 403);
 
         $categories  = Category::orderBy('name')->get();
         $statuses    = self::STATUSES;
 
-        // for elevated: fill selects
+        // for elevated: fill selects; others will see read-only or limited fields in Blade as you prefer
         $tos         = User::where('role', 'user')->orderBy('name')->get();
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();
         $closers     = User::where('role', 'closer')->orderBy('name')->get();
@@ -304,12 +370,11 @@ class LeadController extends Controller
         return view('leads.edit', compact('lead', 'categories', 'statuses', 'tos', 'superAgents', 'closers'));
     }
 
+
     public function update(UpdateLeadRequest $request, Lead $lead)
     {
         $user = Auth::user();
-        if (!$user || (!$this->isElevated() && $lead->assigned_to !== $user->id)) {
-            abort(403, 'Unauthorized action.');
-        }
+        abort_unless($this->canEditLead($user, $lead), 403, 'Unauthorized action.');
 
         try {
             DB::beginTransaction();
@@ -726,20 +791,20 @@ class LeadController extends Controller
     /**
      * Helper: ensure current user can see/edit this lead.
      */
-    protected function ensureCanAccessLead(Lead $lead): void
-    {
-        if ($this->isElevated()) {
-            return;
-        }
+    // protected function ensureCanAccessLead(Lead $lead): void
+    // {
+    //     if ($this->isElevated()) {
+    //         return;
+    //     }
 
-        $uid = Auth::id();
+    //     $uid = Auth::id();
 
-        abort_unless(
-            ($lead->assigned_to && $lead->assigned_to == $uid) ||
-                ($lead->super_agent_id && $lead->super_agent_id == $uid),
-            403
-        );
-    }
+    //     abort_unless(
+    //         ($lead->assigned_to && $lead->assigned_to == $uid) ||
+    //             ($lead->super_agent_id && $lead->super_agent_id == $uid),
+    //         403
+    //     );
+    // }
 
     /**
      * Download a text report for a lead

@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::kqox1bRqBQO7MBxG',
+            '_route' => 'generated::QwrE7RcBuPxzi9MD',
           ),
           1 => NULL,
           2 => 
@@ -33,7 +33,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::6KA4jdzWjQdiSjG5',
+            '_route' => 'generated::rU7SktLZShUuy7yv',
           ),
           1 => NULL,
           2 => 
@@ -100,62 +100,6 @@ app('router')->setCompiledRoutes(
           2 => 
           array (
             'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/leads' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.index',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.store',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/leads/create' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.create',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
           ),
           3 => NULL,
           4 => false,
@@ -237,16 +181,56 @@ app('router')->setCompiledRoutes(
           5 => false,
           6 => NULL,
         ),
+      ),
+      '/leads' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
         1 => 
         array (
           0 => 
           array (
-            '_route' => 'profile.updatePassword',
+            '_route' => 'leads.store',
           ),
           1 => NULL,
           2 => 
           array (
             'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/leads/create' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.create',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
           ),
           3 => NULL,
           4 => false,
@@ -299,6 +283,118 @@ app('router')->setCompiledRoutes(
           0 => 
           array (
             '_route' => 'attendance.history',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/notes' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'notes.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'notes.store',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/callbacks' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.store',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/callbacks/create' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.create',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/my-leads' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.mine',
           ),
           1 => NULL,
           2 => 
@@ -522,125 +618,13 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      '/my-leads' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.mine',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/notes' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'notes.index',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'notes.store',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/callbacks' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.index',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.store',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      '/callbacks/create' => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.create',
-          ),
-          1 => NULL,
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
       '/broadcasting/auth' => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'generated::NmI3WpiBunuGhIKJ',
+            '_route' => 'generated::F1WCof5hTSEjrKDj',
           ),
           1 => NULL,
           2 => 
@@ -658,11 +642,11 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/attachments/([^/]++)/preview(*:36)|/leads/(?|([^/]++)(?|(*:64)|/(?|edit(*:79)|pdf(*:89)|text\\-report(*:108))|(*:117))|import(*:132)|([^/]++)/issues(*:155)|issues/([^/]++)(*:178)|([^/]++)/assign(*:201)|bulk\\-assign(*:221))|/issues/([^/]++)(?|/(?|comments(*:261)|status(*:275)|priority(*:291))|(*:300))|/users/([^/]++)(?|(*:327)|/edit(*:340)|(*:348))|/ca(?|tegories/([^/]++)(?|/edit(*:388)|(*:396))|llbacks/([^/]++)(?|(*:424)|/(?|edit(*:440)|complete(*:456)|reschedule(*:474))|(*:483)))|/my\\-leads/([^/]++)(?|(*:515)|/notes(*:529))|/notes/([^/]++)(?|/edit(*:561)|(*:569))|/storage/(.*)(*:591))/?$}sDu',
+      0 => '{^(?|/attachments/(.*)/preview(*:32)|/leads/(?|([^/]++)(?|(*:60)|/(?|edit(*:75)|pdf(*:85)|text\\-report(*:104)|issues(*:118))|(*:127))|issues/([^/]++)(*:151)|([^/]++)/assign(*:174)|bulk\\-assign(*:194)|import(*:208))|/notes/([^/]++)(?|/edit(*:240)|(*:248))|/my\\-leads/([^/]++)(?|/notes(*:285)|(*:293))|/ca(?|llbacks/([^/]++)(?|(*:327)|/(?|edit(*:343)|complete(*:359)|reschedule(*:377))|(*:386))|tegories/([^/]++)(?|/edit(*:420)|(*:428)))|/issues/([^/]++)(?|(*:457)|/(?|status(*:475)|priority(*:491)))|/users/([^/]++)(?|(*:519)|/edit(*:532)|(*:540))|/storage/(.*)(*:562))/?$}sDu',
     ),
     3 => 
     array (
-      36 => 
+      32 => 
       array (
         0 => 
         array (
@@ -685,7 +669,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      64 => 
+      60 => 
       array (
         0 => 
         array (
@@ -708,7 +692,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      79 => 
+      75 => 
       array (
         0 => 
         array (
@@ -731,7 +715,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      89 => 
+      85 => 
       array (
         0 => 
         array (
@@ -754,7 +738,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      108 => 
+      104 => 
       array (
         0 => 
         array (
@@ -777,7 +761,29 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      117 => 
+      118 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.issues.store',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      127 => 
       array (
         0 => 
         array (
@@ -819,50 +825,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      132 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.import',
-          ),
-          1 => 
-          array (
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      155 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.issues.store',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      178 => 
+      151 => 
       array (
         0 => 
         array (
@@ -885,7 +848,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      201 => 
+      174 => 
       array (
         0 => 
         array (
@@ -907,7 +870,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      221 => 
+      194 => 
       array (
         0 => 
         array (
@@ -928,17 +891,16 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      261 => 
+      208 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'issues.comments.store',
+            '_route' => 'leads.import',
           ),
           1 => 
           array (
-            0 => 'issue',
           ),
           2 => 
           array (
@@ -950,404 +912,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      275 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.updateStatus',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'PATCH' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      291 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.updatePriority',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'PATCH' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      300 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.show',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      327 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'users.show',
-          ),
-          1 => 
-          array (
-            0 => 'user',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      340 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'users.edit',
-          ),
-          1 => 
-          array (
-            0 => 'user',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      348 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'users.update',
-          ),
-          1 => 
-          array (
-            0 => 'user',
-          ),
-          2 => 
-          array (
-            'PUT' => 0,
-            'PATCH' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'users.destroy',
-          ),
-          1 => 
-          array (
-            0 => 'user',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      388 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'categories.edit',
-          ),
-          1 => 
-          array (
-            0 => 'category',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      396 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'categories.update',
-          ),
-          1 => 
-          array (
-            0 => 'category',
-          ),
-          2 => 
-          array (
-            'PUT' => 0,
-            'PATCH' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'categories.destroy',
-          ),
-          1 => 
-          array (
-            0 => 'category',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      424 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.show',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      440 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.edit',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      456 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.complete',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      474 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.reschedule',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      483 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.update',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'PUT' => 0,
-            'PATCH' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'callbacks.destroy',
-          ),
-          1 => 
-          array (
-            0 => 'callback',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      515 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.assigned.update',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'PUT' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      529 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.notes.index',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      561 => 
+      240 => 
       array (
         0 => 
         array (
@@ -1370,7 +935,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      569 => 
+      248 => 
       array (
         0 => 
         array (
@@ -1412,7 +977,404 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      591 => 
+      285 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.notes.index',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      293 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.assigned.update',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'PUT' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      327 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.show',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      343 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.edit',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      359 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.complete',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      377 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.reschedule',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      386 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.update',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'PUT' => 0,
+            'PATCH' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'callbacks.destroy',
+          ),
+          1 => 
+          array (
+            0 => 'callback',
+          ),
+          2 => 
+          array (
+            'DELETE' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      420 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'categories.edit',
+          ),
+          1 => 
+          array (
+            0 => 'category',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      428 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'categories.update',
+          ),
+          1 => 
+          array (
+            0 => 'category',
+          ),
+          2 => 
+          array (
+            'PUT' => 0,
+            'PATCH' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'categories.destroy',
+          ),
+          1 => 
+          array (
+            0 => 'category',
+          ),
+          2 => 
+          array (
+            'DELETE' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      457 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.show',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      475 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.updateStatus',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'PATCH' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      491 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.updatePriority',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'PATCH' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      519 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'users.show',
+          ),
+          1 => 
+          array (
+            0 => 'user',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      532 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'users.edit',
+          ),
+          1 => 
+          array (
+            0 => 'user',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      540 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'users.update',
+          ),
+          1 => 
+          array (
+            0 => 'user',
+          ),
+          2 => 
+          array (
+            'PUT' => 0,
+            'PATCH' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'users.destroy',
+          ),
+          1 => 
+          array (
+            0 => 'user',
+          ),
+          2 => 
+          array (
+            'DELETE' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      562 => 
       array (
         0 => 
         array (
@@ -1450,7 +1412,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::kqox1bRqBQO7MBxG' => 
+    'generated::QwrE7RcBuPxzi9MD' => 
     array (
       'methods' => 
       array (
@@ -1479,7 +1441,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"000000000000051e0000000000000000";}}',
-        'as' => 'generated::kqox1bRqBQO7MBxG',
+        'as' => 'generated::QwrE7RcBuPxzi9MD',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1495,7 +1457,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::6KA4jdzWjQdiSjG5' => 
+    'generated::rU7SktLZShUuy7yv' => 
     array (
       'methods' => 
       array (
@@ -1521,7 +1483,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::6KA4jdzWjQdiSjG5',
+        'as' => 'generated::rU7SktLZShUuy7yv',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1649,6 +1611,155 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'dashboard' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'dashboard',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000052a0000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'dashboard',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'profile.edit' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'profile',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\ProfileController@edit',
+        'controller' => 'App\\Http\\Controllers\\ProfileController@edit',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'profile.edit',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'profile.update' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'PUT',
+      ),
+      'uri' => 'profile',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\ProfileController@update',
+        'controller' => 'App\\Http\\Controllers\\ProfileController@update',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'profile.update',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'profile.password' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'PUT',
+      ),
+      'uri' => 'profile/password',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
+        'controller' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'profile.password',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'attachments.preview' => 
     array (
       'methods' => 
@@ -1679,6 +1790,7 @@ app('router')->setCompiledRoutes(
       ),
       'wheres' => 
       array (
+        'path' => '.*',
       ),
       'bindingFields' => 
       array (
@@ -1951,155 +2063,6 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'dashboard' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'dashboard',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000052c0000000000000000";}}',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'dashboard',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'profile.edit' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'profile',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\ProfileController@edit',
-        'controller' => 'App\\Http\\Controllers\\ProfileController@edit',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'profile.edit',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'profile.update' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'PUT',
-      ),
-      'uri' => 'profile',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\ProfileController@update',
-        'controller' => 'App\\Http\\Controllers\\ProfileController@update',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'profile.update',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'profile.password' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'PUT',
-      ),
-      'uri' => 'profile/password',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
-        'controller' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'profile.password',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
     'leads.pdf' => 
     array (
       'methods' => 
@@ -2161,117 +2124,6 @@ app('router')->setCompiledRoutes(
         array (
         ),
         'as' => 'leads.text-report',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'profile.updatePassword' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'profile/password',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
-        'controller' => 'App\\Http\\Controllers\\ProfileController@updatePassword',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'profile.updatePassword',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'issues.comments.store' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'issues/{issue}/comments',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\IssueCommentController@store',
-        'controller' => 'App\\Http\\Controllers\\IssueCommentController@store',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'issues.comments.store',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'leads.import' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'leads/import',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-        ),
-        'uses' => 'App\\Http\\Controllers\\LeadController@import',
-        'controller' => 'App\\Http\\Controllers\\LeadController@import',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'leads.import',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2474,6 +2326,647 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'notes.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'notes',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'notes.index',
+        'uses' => 'App\\Http\\Controllers\\NoteController@index',
+        'controller' => 'App\\Http\\Controllers\\NoteController@index',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notes.store' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'notes',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'notes.store',
+        'uses' => 'App\\Http\\Controllers\\NoteController@store',
+        'controller' => 'App\\Http\\Controllers\\NoteController@store',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notes.edit' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'notes/{note}/edit',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'notes.edit',
+        'uses' => 'App\\Http\\Controllers\\NoteController@edit',
+        'controller' => 'App\\Http\\Controllers\\NoteController@edit',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notes.update' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'PUT',
+        1 => 'PATCH',
+      ),
+      'uri' => 'notes/{note}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'notes.update',
+        'uses' => 'App\\Http\\Controllers\\NoteController@update',
+        'controller' => 'App\\Http\\Controllers\\NoteController@update',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notes.destroy' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'DELETE',
+      ),
+      'uri' => 'notes/{note}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'notes.destroy',
+        'uses' => 'App\\Http\\Controllers\\NoteController@destroy',
+        'controller' => 'App\\Http\\Controllers\\NoteController@destroy',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'leads.notes.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'my-leads/{lead}/notes',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\NoteController@leadNotes',
+        'controller' => 'App\\Http\\Controllers\\NoteController@leadNotes',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.notes.index',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'callbacks',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.index',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@index',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@index',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.create' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'callbacks/create',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.create',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@create',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@create',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.store' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'callbacks',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.store',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@store',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@store',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.show' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'callbacks/{callback}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.show',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@show',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@show',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.edit' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'callbacks/{callback}/edit',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.edit',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@edit',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@edit',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.update' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'PUT',
+        1 => 'PATCH',
+      ),
+      'uri' => 'callbacks/{callback}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.update',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@update',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@update',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.destroy' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'DELETE',
+      ),
+      'uri' => 'callbacks/{callback}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'as' => 'callbacks.destroy',
+        'uses' => 'App\\Http\\Controllers\\CallbackController@destroy',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@destroy',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.complete' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'callbacks/{callback}/complete',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\CallbackController@complete',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@complete',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'callbacks.complete',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'callbacks.reschedule' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'callbacks/{callback}/reschedule',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\CallbackController@reschedule',
+        'controller' => 'App\\Http\\Controllers\\CallbackController@reschedule',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'callbacks.reschedule',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'leads.mine' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'my-leads',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'role:user|super_agent|closer',
+        ),
+        'uses' => 'App\\Http\\Controllers\\LeadController@myLeads',
+        'controller' => 'App\\Http\\Controllers\\LeadController@myLeads',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.mine',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'leads.assigned.update' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'PUT',
+      ),
+      'uri' => 'my-leads/{lead}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'role:user|super_agent|closer',
+        ),
+        'uses' => 'App\\Http\\Controllers\\LeadController@updateAssigned',
+        'controller' => 'App\\Http\\Controllers\\LeadController@updateAssigned',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.assigned.update',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'issues.index' => 
     array (
       'methods' => 
@@ -2488,8 +2981,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\LeadIssueController@index',
         'controller' => 'App\\Http\\Controllers\\LeadIssueController@index',
@@ -2528,8 +3020,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\LeadIssueController@show',
         'controller' => 'App\\Http\\Controllers\\LeadIssueController@show',
@@ -2567,8 +3058,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\LeadIssueController@updateStatus',
         'controller' => 'App\\Http\\Controllers\\LeadIssueController@updateStatus',
@@ -2606,8 +3096,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\LeadIssueController@updatePriority',
         'controller' => 'App\\Http\\Controllers\\LeadIssueController@updatePriority',
@@ -2646,8 +3135,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\ManagerNotificationController@index',
         'controller' => 'App\\Http\\Controllers\\ManagerNotificationController@index',
@@ -2685,8 +3173,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'web',
           1 => 'auth',
-          2 => 'auth',
-          3 => 'role:admin|report_manager',
+          2 => 'role:admin|report_manager',
         ),
         'uses' => 'App\\Http\\Controllers\\ManagerNotificationController@readAll',
         'controller' => 'App\\Http\\Controllers\\ManagerNotificationController@readAll',
@@ -3020,6 +3507,82 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'leads.bulk-assign' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'leads/bulk-assign',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'role:admin',
+        ),
+        'uses' => 'App\\Http\\Controllers\\LeadController@bulkAssign',
+        'controller' => 'App\\Http\\Controllers\\LeadController@bulkAssign',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.bulk-assign',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'leads.import' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'leads/import',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'role:admin',
+        ),
+        'uses' => 'App\\Http\\Controllers\\LeadController@import',
+        'controller' => 'App\\Http\\Controllers\\LeadController@import',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.import',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'categories.index' => 
     array (
       'methods' => 
@@ -3329,701 +3892,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'leads.bulk-assign' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'leads/bulk-assign',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:admin',
-        ),
-        'uses' => 'App\\Http\\Controllers\\LeadController@bulkAssign',
-        'controller' => 'App\\Http\\Controllers\\LeadController@bulkAssign',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'leads.bulk-assign',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'leads.mine' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'my-leads',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'uses' => 'App\\Http\\Controllers\\LeadController@myLeads',
-        'controller' => 'App\\Http\\Controllers\\LeadController@myLeads',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'leads.mine',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'leads.assigned.update' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'PUT',
-      ),
-      'uri' => 'my-leads/{lead}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'uses' => 'App\\Http\\Controllers\\LeadController@updateAssigned',
-        'controller' => 'App\\Http\\Controllers\\LeadController@updateAssigned',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'leads.assigned.update',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'notes.index' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'notes',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'notes.index',
-        'uses' => 'App\\Http\\Controllers\\NoteController@index',
-        'controller' => 'App\\Http\\Controllers\\NoteController@index',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'notes.store' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'notes',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'notes.store',
-        'uses' => 'App\\Http\\Controllers\\NoteController@store',
-        'controller' => 'App\\Http\\Controllers\\NoteController@store',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'notes.edit' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'notes/{note}/edit',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'notes.edit',
-        'uses' => 'App\\Http\\Controllers\\NoteController@edit',
-        'controller' => 'App\\Http\\Controllers\\NoteController@edit',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'notes.update' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'PUT',
-        1 => 'PATCH',
-      ),
-      'uri' => 'notes/{note}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'notes.update',
-        'uses' => 'App\\Http\\Controllers\\NoteController@update',
-        'controller' => 'App\\Http\\Controllers\\NoteController@update',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'notes.destroy' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'notes/{note}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'notes.destroy',
-        'uses' => 'App\\Http\\Controllers\\NoteController@destroy',
-        'controller' => 'App\\Http\\Controllers\\NoteController@destroy',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'leads.notes.index' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'my-leads/{lead}/notes',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'uses' => 'App\\Http\\Controllers\\NoteController@leadNotes',
-        'controller' => 'App\\Http\\Controllers\\NoteController@leadNotes',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'leads.notes.index',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.index' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'callbacks',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.index',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@index',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@index',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.create' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'callbacks/create',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.create',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@create',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@create',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.store' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'callbacks',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.store',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@store',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@store',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.show' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'callbacks/{callback}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.show',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@show',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@show',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.edit' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'GET',
-        1 => 'HEAD',
-      ),
-      'uri' => 'callbacks/{callback}/edit',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.edit',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@edit',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@edit',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.update' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'PUT',
-        1 => 'PATCH',
-      ),
-      'uri' => 'callbacks/{callback}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.update',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@update',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@update',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.destroy' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'DELETE',
-      ),
-      'uri' => 'callbacks/{callback}',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'as' => 'callbacks.destroy',
-        'uses' => 'App\\Http\\Controllers\\CallbackController@destroy',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@destroy',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.complete' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'callbacks/{callback}/complete',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'uses' => 'App\\Http\\Controllers\\CallbackController@complete',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@complete',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'callbacks.complete',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'callbacks.reschedule' => 
-    array (
-      'methods' => 
-      array (
-        0 => 'POST',
-      ),
-      'uri' => 'callbacks/{callback}/reschedule',
-      'action' => 
-      array (
-        'middleware' => 
-        array (
-          0 => 'web',
-          1 => 'auth',
-          2 => 'role:user|super_agent|closer',
-        ),
-        'uses' => 'App\\Http\\Controllers\\CallbackController@reschedule',
-        'controller' => 'App\\Http\\Controllers\\CallbackController@reschedule',
-        'namespace' => NULL,
-        'prefix' => '',
-        'where' => 
-        array (
-        ),
-        'as' => 'callbacks.reschedule',
-      ),
-      'fallback' => false,
-      'defaults' => 
-      array (
-      ),
-      'wheres' => 
-      array (
-      ),
-      'bindingFields' => 
-      array (
-      ),
-      'lockSeconds' => NULL,
-      'waitSeconds' => NULL,
-      'withTrashed' => false,
-    ),
-    'generated::NmI3WpiBunuGhIKJ' => 
+    'generated::F1WCof5hTSEjrKDj' => 
     array (
       'methods' => 
       array (
@@ -4049,7 +3918,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
         ),
-        'as' => 'generated::NmI3WpiBunuGhIKJ',
+        'as' => 'generated::F1WCof5hTSEjrKDj',
       ),
       'fallback' => false,
       'defaults' => 
@@ -4081,7 +3950,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"000000000000093c0000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"000000000000093a0000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

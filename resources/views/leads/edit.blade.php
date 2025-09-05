@@ -471,7 +471,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Report an Issue
+                            Issue Report
                         </button>
                     @endif
 
@@ -706,17 +706,19 @@ $latestIssueWithNotification =
                             @enderror
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Attachments</label>
-                            <input type="file" name="attachments[]" multiple
-                                class="mt-1 w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0
-                                  file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition" />
-                            <p class="text-xs text-gray-500 mt-1">Max 10MB per file. Attach any relevant files that might
-                                help the report manager understand the issue.</p>
-                            @error('attachments.*')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <!--<div>-->
+                        <!--    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Attachments</label>-->
+                        <!--    <input type="file" name="attachments[]" multiple-->
+                        <!--        class="mt-1 w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0-->
+                        <!--          file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition" />-->
+                        <!--    <p class="text-xs text-gray-500 mt-1">Max 10MB per file. Attach any relevant files that might-->
+                        <!--        help the report manager understand the issue.</p>-->
+                        <!--    @error('attachments.*')
+        -->
+                            <!--        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>-->
+                            <!--
+    @enderror-->
+                        <!--</div>-->
 
                         {{-- Footer --}}
                         <div class="pt-2 flex items-center justify-end gap-2">
