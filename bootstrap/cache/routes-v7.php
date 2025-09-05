@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::TtmWu0PdSpoTu3N2',
+            '_route' => 'generated::kqox1bRqBQO7MBxG',
           ),
           1 => NULL,
           2 => 
@@ -33,7 +33,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::l7hEmYCx2zRqRDV6',
+            '_route' => 'generated::6KA4jdzWjQdiSjG5',
           ),
           1 => NULL,
           2 => 
@@ -640,7 +640,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::8WX6ubkdTH2FbTl8',
+            '_route' => 'generated::NmI3WpiBunuGhIKJ',
           ),
           1 => NULL,
           2 => 
@@ -1450,7 +1450,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::TtmWu0PdSpoTu3N2' => 
+    'generated::kqox1bRqBQO7MBxG' => 
     array (
       'methods' => 
       array (
@@ -1479,7 +1479,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"000000000000051e0000000000000000";}}',
-        'as' => 'generated::TtmWu0PdSpoTu3N2',
+        'as' => 'generated::kqox1bRqBQO7MBxG',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1495,7 +1495,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::l7hEmYCx2zRqRDV6' => 
+    'generated::6KA4jdzWjQdiSjG5' => 
     array (
       'methods' => 
       array (
@@ -1521,7 +1521,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::l7hEmYCx2zRqRDV6',
+        'as' => 'generated::6KA4jdzWjQdiSjG5',
       ),
       'fallback' => false,
       'defaults' => 
@@ -4023,7 +4023,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::8WX6ubkdTH2FbTl8' => 
+    'generated::NmI3WpiBunuGhIKJ' => 
     array (
       'methods' => 
       array (
@@ -4049,7 +4049,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
         ),
-        'as' => 'generated::8WX6ubkdTH2FbTl8',
+        'as' => 'generated::NmI3WpiBunuGhIKJ',
       ),
       'fallback' => false,
       'defaults' => 

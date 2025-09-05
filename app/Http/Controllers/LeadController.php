@@ -151,7 +151,8 @@ class LeadController extends Controller
 
         $query = Lead::query()
             ->with(['assignee'])            // avoid N+1 in table column
-            ->where('assigned_to', Auth::id()); // only my leads
+            ->where('assigned_to', Auth::id()) // only my leads
+            ->where('status', '!=', 'submitted');
 
         // search filter (name/gen_code/city)
         if ($filters['q'] !== '') {

@@ -497,7 +497,7 @@
                         @enderror
                     </div>
 
-                    @if (auth()->user()?->isAdmin())
+                    @if (auth()->user()?->isAdmin() || auth()->user()->isLeadManager())
                         {{-- TO / assignee --}}
                         <div>
                             <label class="block text-sm font-semibold mb-3">Select TO</label>
