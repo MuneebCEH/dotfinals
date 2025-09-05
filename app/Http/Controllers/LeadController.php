@@ -232,28 +232,36 @@ class LeadController extends Controller
                 'updated_at'  => now(),
             ]);
 
-            // Generate and store text report
+            // Generate and store text report (this can remain for your internal storage)
             $textReportPath = $this->storeTextReport($lead);
-
-            // Generate and save text report
-            $content = $lead->generateTextReport();
-            $filename = $this->generateTextReportFilename($lead);
 
             DB::commit();
 
-            // Prepare response headers
-            $headers = [
-                'Content-Type' => 'text/plain',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            ];
-
-            // Store success message and redirect URL in session
+            // Success message for both paths
             session()->flash('success', 'Lead created successfully.');
-            session()->flash('redirect_to', route('leads.show', $lead));
 
-            // Return clean text file download
-            return Response::make($content, 200, $headers);
+            // Only admins should download the text document
+            if (Auth::user()->isAdmin()) {
+                // Generate on-demand content only for admins
+                $content = $lead->generateTextReport();
+                $filename = $this->generateTextReportFilename($lead);
+
+                // Prepare response headers
+                $headers = [
+                    'Content-Type' => 'text/plain',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                ];
+
+                // For UI to redirect after download (if you rely on this)
+                session()->flash('redirect_to', route('leads.show', $lead));
+
+                // Return clean text file download (admin only)
+                return Response::make($content, 200, $headers);
+            }
+
+            // Non-admins: just redirect to the lead page (no download)
+            return redirect()->route('leads.show', $lead);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Lead creation failed: ' . $e->getMessage());
@@ -400,23 +408,30 @@ class LeadController extends Controller
 
             DB::commit();
 
-            // Generate text report for download
-            $content = $lead->generateTextReport();
-            $filename = $this->generateTextReportFilename($lead);
-
-            // Prepare response headers
-            $headers = [
-                'Content-Type' => 'text/plain',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-            ];
-
-            // Store success message and redirect URL in session
+            // Success message for both paths
             session()->flash('success', 'Lead updated successfully.');
-            session()->flash('redirect_to', route('leads.show', $lead));
 
-            // Return clean text file download
-            return Response::make($content, 200, $headers);
+            // Only admins should download the text document
+            if (Auth::user()->isAdmin()) {
+                $content = $lead->generateTextReport();
+                $filename = $this->generateTextReportFilename($lead);
+
+                // Prepare response headers
+                $headers = [
+                    'Content-Type' => 'text/plain',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+                ];
+
+                // For UI to redirect after download (if you rely on this)
+                session()->flash('redirect_to', route('leads.show', $lead));
+
+                // Return clean text file download (admin only)
+                return Response::make($content, 200, $headers);
+            }
+
+            // Non-admins: just redirect to the lead page (no download)
+            return redirect()->route('leads.show', $lead);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Lead update failed: ' . $e->getMessage());
@@ -427,6 +442,7 @@ class LeadController extends Controller
                 ->withErrors(['error' => 'Failed to update lead: ' . $e->getMessage()]);
         }
     }
+
 
     public function destroy(Lead $lead)
     {
