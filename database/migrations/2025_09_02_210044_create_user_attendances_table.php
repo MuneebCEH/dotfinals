@@ -14,6 +14,8 @@ return new class extends Migration
             $table->timestamp('check_in')->nullable();
             $table->timestamp('check_out')->nullable();
             $table->decimal('hours_worked', 5, 2)->default(0);
+            $table->timestamp('last_heartbeat_at')->nullable()->index();
+            $table->string('status')->default('in'); // 'in' | 'out'
             $table->text('notes')->nullable();
             $table->timestamps();
         });

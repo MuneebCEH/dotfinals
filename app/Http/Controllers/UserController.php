@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -15,9 +16,23 @@ class UserController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')->paginate(10);
+        $users = User::query()
+            // ✅ Apply search when q is present (trim to avoid spaces-only)
+            ->when(trim((string) $request->q) !== '', function ($q) use ($request) {
+                $term = '%' . trim($request->q) . '%';
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('name', 'like', $term)
+                        ->orWhere('email', 'like', $term)
+                        ->orWhere('role', 'like', $term); // adjust if you store roles differently
+                });
+            })
+            ->orderBy('name')
+            // ✅ Keep query string during pagination so AJAX pagination stays filtered
+            ->paginate(10)->withQueryString();
+
         return view('users.index', compact('users'));
     }
 
@@ -27,7 +42,7 @@ class UserController extends Controller
     }
 
 
-    public function show($id) 
+    public function show($id)
     {
         $user = User::findOrFail($id);
         return view('users.show', compact('user'));
@@ -37,7 +52,7 @@ class UserController extends Controller
     {
         $data = $request->validated();
         $data['password'] = Hash::make($data['password']);
-        
+
         User::create($data);
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
@@ -54,13 +69,13 @@ class UserController extends Controller
         }
 
         $data = $request->validated();
-        
+
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }
-        
+
         $user->update($data);
         return redirect()->route('users.index')->with('success', 'User updated successfully');
     }

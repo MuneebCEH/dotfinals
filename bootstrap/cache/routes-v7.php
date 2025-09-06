@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::QwrE7RcBuPxzi9MD',
+            '_route' => 'generated::H4DjUn1Nb2Y3x6UA',
           ),
           1 => NULL,
           2 => 
@@ -33,7 +33,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::rU7SktLZShUuy7yv',
+            '_route' => 'generated::Acee68W72FQYWSuV',
           ),
           1 => NULL,
           2 => 
@@ -388,6 +388,44 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/attendance/heartbeat' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'attendance.heartbeat',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/attendance/close' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'attendance.close',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
       '/my-leads' => 
       array (
         0 => 
@@ -624,7 +662,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::F1WCof5hTSEjrKDj',
+            '_route' => 'generated::ht5Q2LtRtWYKg3NT',
           ),
           1 => NULL,
           2 => 
@@ -1412,7 +1450,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::QwrE7RcBuPxzi9MD' => 
+    'generated::H4DjUn1Nb2Y3x6UA' => 
     array (
       'methods' => 
       array (
@@ -1440,8 +1478,8 @@ app('router')->setCompiledRoutes(
                     return response(\\Illuminate\\Support\\Facades\\View::file(\'C:\\\\Users\\\\M.M\\\\Downloads\\\\vercel\\\\vendor\\\\laravel\\\\framework\\\\src\\\\Illuminate\\\\Foundation\\\\Configuration\'.\'/../resources/health-up.blade.php\', [
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
-                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"000000000000051e0000000000000000";}}',
-        'as' => 'generated::QwrE7RcBuPxzi9MD',
+                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000005260000000000000000";}}',
+        'as' => 'generated::H4DjUn1Nb2Y3x6UA',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1457,7 +1495,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::rU7SktLZShUuy7yv' => 
+    'generated::Acee68W72FQYWSuV' => 
     array (
       'methods' => 
       array (
@@ -1483,7 +1521,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::rU7SktLZShUuy7yv',
+        'as' => 'generated::Acee68W72FQYWSuV',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1626,7 +1664,7 @@ app('router')->setCompiledRoutes(
           0 => 'web',
           1 => 'auth',
         ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000052a0000000000000000";}}',
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000005320000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -2890,6 +2928,80 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'attendance.heartbeat' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'attendance/heartbeat',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\AttendanceBeaconController@heartbeat',
+        'controller' => 'App\\Http\\Controllers\\AttendanceBeaconController@heartbeat',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'attendance.heartbeat',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'attendance.close' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'attendance/close',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\AttendanceBeaconController@close',
+        'controller' => 'App\\Http\\Controllers\\AttendanceBeaconController@close',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'attendance.close',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'leads.mine' => 
     array (
       'methods' => 
@@ -3892,7 +4004,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::F1WCof5hTSEjrKDj' => 
+    'generated::ht5Q2LtRtWYKg3NT' => 
     array (
       'methods' => 
       array (
@@ -3918,7 +4030,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
         ),
-        'as' => 'generated::F1WCof5hTSEjrKDj',
+        'as' => 'generated::ht5Q2LtRtWYKg3NT',
       ),
       'fallback' => false,
       'defaults' => 
@@ -3950,7 +4062,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"000000000000093a0000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000009440000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,

@@ -119,22 +119,23 @@ class LeadController extends Controller
 
     public function index(Request $request)
     {
-        $statuses   = self::STATUSES;                  // your hard-coded statuses
+        $statuses   = self::STATUSES;
         $categories = Category::orderBy('name')->get();
-        $users      = User::where('role', 'user')->orderBy('name')->get(); // regular users for bulk assign
+        $users      = User::where('role', 'user')->orderBy('name')->get();
+
+        // Reuse today's date consistently (app timezone)
+        $today = now()->toDateString();
 
         // Get counts for available leads by status (only unassigned leads)
         $statusCounts = [
             'New Lead' => Lead::where('status', 'New Lead')
                 ->where(function ($q) {
-                    $q->whereNull('assigned_to')
-                        ->orWhere('assigned_to', 0);
+                    $q->whereNull('assigned_to')->orWhere('assigned_to', 0);
                 })
                 ->count(),
             'Super Lead' => Lead::where('status', 'Super Lead')
                 ->where(function ($q) {
-                    $q->whereNull('assigned_to')
-                        ->orWhere('assigned_to', 0);
+                    $q->whereNull('assigned_to')->orWhere('assigned_to', 0);
                 })
                 ->count(),
         ];
@@ -142,11 +143,9 @@ class LeadController extends Controller
         $isElevated = $this->isElevated();
 
         $query = Lead::query()
-            ->with(['category', 'assignee'])         // eager-load
+            ->with(['category', 'assignee'])
             // If NOT elevated, show only leads assigned to this user
-            ->when(!$isElevated, function ($q) {
-                $q->where('assigned_to', auth()->id());
-            })
+            ->when(!$isElevated, fn($q) => $q->where('assigned_to', auth()->id()))
             // Search filter
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';
@@ -160,21 +159,24 @@ class LeadController extends Controller
                 });
             })
             // Status filter (defensive: only apply if value is in our allowed list)
-            ->when($request->filled('status') && in_array($request->status, $statuses, true), function ($q) use ($request) {
-                $q->where('status', $request->status);
-            })
+            ->when(
+                $request->filled('status') && in_array($request->status, $statuses, true),
+                fn($q) => $q->where('status', $request->status)
+            )
             // Category filter
-            ->when($request->filled('category') && ctype_digit((string)$request->category), function ($q) use ($request) {
-                $q->where('category_id', $request->category);
-            })
+            ->when(
+                $request->filled('category') && ctype_digit((string) $request->category),
+                fn($q) => $q->where('category_id', $request->category)
+            )
+            // ✅ Today-only filter (NEW)
+            ->when($request->boolean('today'), fn($q) => $q->whereDate('created_at', $today))
             ->orderByDesc('id');
 
         $leads = $query->paginate(10)->withQueryString();
 
-        // Always use a Collection for $onlineUsers (prevents ->count() on array)
+        // Always use a Collection for $onlineUsers
         $onlineUsers = collect();
         if ($isElevated) {
-            $today = now()->format('Y-m-d');
             $onlineUsers = UserAttendance::whereDate('check_in', $today)
                 ->whereNull('check_out')
                 ->with('user')
@@ -190,15 +192,18 @@ class LeadController extends Controller
             'leads'        => $leads,
             'categories'   => $categories,
             'statuses'     => $statuses,
-            'users'        => $users, // Pass users for bulk assign dropdown
-            'statusCounts' => $statusCounts, // Pass status counts for bulk assign modal
+            'users'        => $users,
+            'statusCounts' => $statusCounts,
             'filters'      => [
                 'q'        => $request->q ?? '',
                 'status'   => $request->status ?? '',
                 'category' => $request->category ?? '',
+                // optional but nice for symmetry with others:
+                'today'    => $request->boolean('today'),
             ],
         ]);
     }
+
 
     public function myLeads(Request $request)
     {

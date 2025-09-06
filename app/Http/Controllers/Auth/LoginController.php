@@ -29,10 +29,16 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Redirect based on role (optional; both can use same dashboard)
+            // Redirect based on role
             return match (Auth::user()->role) {
-                'admin' => redirect()->route('dashboard')->with('success', 'Welcome back, Admin!'),
-                default => redirect()->route('dashboard')->with('success', 'Welcome back!'),
+                'admin'          => redirect()->route('dashboard')
+                    ->with('success', 'Welcome back, Admin!'),
+
+                'report_manager' => redirect('/issues')
+                    ->with('success', 'Welcome back, Report Manager!'),
+
+                default          => redirect()->route('dashboard')
+                    ->with('success', 'Welcome back!'),
             };
         }
 
@@ -40,6 +46,7 @@ class LoginController extends Controller
             ->withErrors(['email' => 'Invalid credentials.'])
             ->withInput($request->only('email', 'remember'));
     }
+
 
     public function destroy(Request $request)
     {

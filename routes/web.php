@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\AttendanceBeaconController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CallbackController;
@@ -68,6 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('callbacks', CallbackController::class);
     Route::post('/callbacks/{callback}/complete', [CallbackController::class, 'complete'])->name('callbacks.complete');
     Route::post('/callbacks/{callback}/reschedule', [CallbackController::class, 'reschedule'])->name('callbacks.reschedule');
+
+    Route::post('/attendance/heartbeat', [AttendanceBeaconController::class, 'heartbeat'])
+        ->name('attendance.heartbeat');
+    Route::post('/attendance/close', [AttendanceBeaconController::class, 'close'])
+        ->name('attendance.close');
 
     /*
     |--------------------------------------------------------------------------

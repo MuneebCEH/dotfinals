@@ -28,8 +28,8 @@
         ' border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
     $btnPrimaryClass = $btnBaseClass . ' bg-blue-600 text-white hover:bg-blue-700 shadow-sm';
 
-    // Filter state
-    $hasActiveFilters = request()->hasAny(['q', 'status', 'category']);
+    // Filter state (now includes "today")
+    $hasActiveFilters = request()->hasAny(['q', 'status', 'category', 'today']);
 
     // Current workload to show beside each user
     $assignedCounts = \App\Models\Lead::selectRaw('assigned_to, COUNT(*) as c')
@@ -436,10 +436,52 @@
                         </div>
                     @endif
 
+                    <!-- Today only -->
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Created
+                        </label>
+
+                        <label for="todayOnly" class="relative inline-flex items-center cursor-pointer select-none group">
+                            <!-- Screen-reader-only checkbox (keeps your existing ID/name/value) -->
+                            <input id="todayOnly" type="checkbox" name="today" value="1" class="sr-only peer"
+                                @checked(request()->boolean('today')) />
+
+                            <!-- Track -->
+                            <div
+                                class="w-11 h-6 rounded-full transition-all
+             bg-gray-200 dark:bg-gray-600
+             peer-checked:bg-blue-600
+             ring-1 ring-inset ring-gray-300 dark:ring-gray-700
+             peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue-400/60
+             peer-disabled:opacity-50 peer-disabled:cursor-not-allowed">
+                            </div>
+
+                            <!-- Thumb -->
+                            <span
+                                class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white dark:bg-gray-100
+             shadow-sm transition-transform
+             translate-x-0 peer-checked:translate-x-5">
+                            </span>
+
+                            <!-- Label text -->
+                            <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                Today only
+                            </span>
+                        </label>
+                    </div>
+
+
                     <div class="md:col-span-3 flex items-center justify-between pt-4">
                         <div id="resultsMeta" class="text-sm text-gray-600 dark:text-gray-400 font-medium">
                             Showing {{ $leads->firstItem() ?? 0 }}–{{ $leads->lastItem() ?? 0 }} of {{ $leads->total() }}
                             results
+                            @if (request()->boolean('today'))
+                                <span
+                                    class="ml-2 inline-flex items-center rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                                    Today
+                                </span>
+                            @endif
                         </div>
                         <div class="flex gap-2">
                             <button type="submit"
@@ -536,7 +578,6 @@
                                         <!-- Status -->
                                         <td class="px-6 py-4">
                                             @php
-                                                // lower-case keys to match strtolower() below
                                                 $statusColors = [
                                                     'deal' =>
                                                         'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
@@ -975,6 +1016,7 @@
             const $q = $('#qInput');
             const $status = $('#statusSelect');
             const $category = $('#categorySelect');
+            const $today = $('#todayOnly'); // NEW
             const $container = $('#leadsTableContainer');
             const $overlay = $('#ajaxOverlay');
             const $resultsMeta = $('#resultsMeta');
@@ -1016,20 +1058,24 @@
                 const s = serializeFormToQuery($form);
                 ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
             });
+
             $('#clearFilters').on('click', function(e) {
                 e.preventDefault();
                 ajaxLoad($(this).attr('href'));
             });
+
             $('.js-refresh').on('click', function(e) {
                 e.preventDefault();
                 ajaxLoad($(this).attr('href'));
             });
+
             $q.on('keyup', debounce(function() {
                 const s = serializeFormToQuery($form, {
                     q: $q.val()
                 });
                 ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
             }, 400));
+
             $status.on('change', function() {
                 const s = serializeFormToQuery($form, {
                     status: $status.val(),
@@ -1037,6 +1083,7 @@
                 });
                 ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
             });
+
             if ($category.length) {
                 $category.on('change', function() {
                     const s = serializeFormToQuery($form, {
@@ -1046,10 +1093,21 @@
                     ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
                 });
             }
+
+            // NEW: Today toggle
+            $today.on('change', function() {
+                const s = serializeFormToQuery($form, {
+                    today: $today.is(':checked') ? '1' : '',
+                    page: 1
+                });
+                ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
+            });
+
             $('#leadsTableCard').on('click', '#paginationWrap a', function(e) {
                 e.preventDefault();
                 ajaxLoad($(this).attr('href'));
             });
+
             window.addEventListener('popstate', function() {
                 ajaxLoad(location.href);
             });
