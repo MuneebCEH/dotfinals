@@ -606,6 +606,94 @@
     <div id="sidebarOverlay" class="fixed inset-0 bg-gray-600/75 backdrop-blur-sm z-40 lg:hidden hidden"></div>
 
     <script>
+        (function() {
+            const HEARTBEAT_MS = 30_000;
+            const TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            const TAB_KEY = 'attendance_tab_count';
+            const getCount = () => parseInt(localStorage.getItem(TAB_KEY) || '0', 10);
+            const setCount = (n) => localStorage.setItem(TAB_KEY, String(Math.max(0, n)));
+
+            // Increment on load (once per tab)
+            setCount(getCount() + 1);
+
+            // Heartbeat tick
+            const sendHeartbeat = () => {
+                const body = new URLSearchParams({
+                    _token: TOKEN
+                }).toString();
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon("{{ route('attendance.heartbeat') }}",
+                        new Blob([body], {
+                            type: 'application/x-www-form-urlencoded'
+                        })
+                    );
+                } else {
+                    fetch("{{ route('attendance.heartbeat') }}", {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            _token: TOKEN
+                        }),
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        keepalive: true,
+                        credentials: 'same-origin',
+                    }).catch(() => {});
+                }
+            };
+
+            // Start loop
+            const hbTimer = setInterval(sendHeartbeat, HEARTBEAT_MS);
+            // Send one quickly after load (faster first signal)
+            setTimeout(sendHeartbeat, 3_000);
+
+            // Only the LAST tab sends the "close" beacon
+            const sendCloseIfLastTab = () => {
+                const remaining = getCount() - 1;
+                setCount(remaining);
+                if (remaining === 0) {
+                    const body = new URLSearchParams({
+                        _token: TOKEN
+                    }).toString();
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon("{{ route('attendance.close') }}",
+                            new Blob([body], {
+                                type: 'application/x-www-form-urlencoded'
+                            })
+                        );
+                    } else {
+                        fetch("{{ route('attendance.close') }}", {
+                            method: 'POST',
+                            body: new URLSearchParams({
+                                _token: TOKEN
+                            }),
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            keepalive: true,
+                            credentials: 'same-origin',
+                        }).catch(() => {});
+                    }
+                }
+            };
+
+            // Close/Navigate events (all browsers)
+            window.addEventListener('pagehide', sendCloseIfLastTab);
+            window.addEventListener('beforeunload', sendCloseIfLastTab);
+            window.addEventListener('unload', sendCloseIfLastTab);
+
+            // If tab returns to foreground later, re-sync count defensively
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    setCount(getCount() + 1);
+                }
+            });
+        })();
+    </script>
+
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const openSidebarBtn = document.getElementById('openSidebar');
@@ -661,79 +749,5 @@
     {{-- Include real-time notifications component --}}
     @include('layouts.partials.notifications_echo')
 </body>
-
-<script>
-    (function() {
-        if (window.__sessBound) return;
-        window.__sessBound = true;
-
-        const PING_URL = "{{ route('attendance.ping') }}";
-        const BEACON_URL = "{{ route('logout.beacon') }}";
-        const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
-        function ping() {
-            if (document.hidden) return;
-            fetch(PING_URL, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'X-CSRF-TOKEN': CSRF,
-                    'Accept': 'application/json'
-                }
-            }).catch(() => {});
-        }
-        let hb = setInterval(ping, 60000);
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) ping();
-        }, {
-            passive: true
-        });
-        window.addEventListener('focus', ping, {
-            passive: true
-        });
-
-        const KEY = 'app_active_tab_count';
-        const getCount = () => parseInt(localStorage.getItem(KEY) || '0', 10) || 0;
-        const setCount = (n) => localStorage.setItem(KEY, String(Math.max(0, n)));
-
-        window.addEventListener('pageshow', () => setCount(getCount() + 1));
-
-        let closing = false;
-
-        function onClose() {
-            if (closing) return;
-            closing = true;
-            setCount(getCount() - 1);
-            const remaining = getCount();
-            setTimeout(() => {
-                if (remaining <= 0) {
-                    if (navigator.sendBeacon) {
-                        const blob = new Blob([JSON.stringify({
-                            reason: 'tab-or-browser-close'
-                        })], {
-                            type: 'application/json'
-                        });
-                        navigator.sendBeacon(BEACON_URL, blob);
-                    } else {
-                        fetch(BEACON_URL, {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            keepalive: true,
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-                    }
-                }
-                clearInterval(hb);
-            }, 900);
-        }
-        window.addEventListener('pagehide', onClose);
-        window.addEventListener('beforeunload', onClose);
-    })();
-</script>
-
-
-
 
 </html>

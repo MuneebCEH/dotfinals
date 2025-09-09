@@ -19,28 +19,6 @@
                 display: none !important;
             }
         }
-
-        /* PDF.js canvas container */
-        #pdfViewer {
-            max-height: 75vh;
-            overflow: auto;
-        }
-
-        #pdfViewer canvas {
-            display: block;
-            margin: 0 auto 12px auto;
-            border-radius: 12px;
-        }
-
-        /* Plain text viewer */
-        #txtViewer {
-            max-height: 75vh;
-            overflow: auto;
-        }
-
-        #txtContent {
-            white-space: pre-wrap;
-        }
     </style>
 @endpush
 
@@ -61,6 +39,7 @@
                                 {{ $issue->created_at->diffForHumans() }}
                             </span>
 
+                            <!-- View Lead Details Button -->
                             <button onclick="openLeadModal()"
                                 class="ml-4 inline-flex items-center gap-1 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,18 +83,23 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Attachments</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             @foreach ($issue->attachments as $att)
-                                @php $storageUrl = url('storage/app/public/' . ltrim($att->file_path, '/')); @endphp
+                                @php
+                                    // Build a clean public storage URL manually
+                                    $storageUrl = url('storage/app/public/' . ltrim($att->file_path, '/'));
+                                @endphp
+                        
                                 <button type="button"
                                     onclick="openPreview('{{ $storageUrl }}', '{{ e($att->file_name) }}')"
-                                    class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200/70 dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
+                                    class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200/70 
+                                           dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
                                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="none"
                                         stroke="currentColor">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2"
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        <polyline points="7 10 12 15 17 10" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round" />
-                                        <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                        <line x1="12" y1="15" x2="12" y2="3" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <line x1="12" y1="15" x2="12" y2="3"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                     <span class="truncate">{{ $att->file_name }}</span>
                                 </button>
@@ -124,7 +108,7 @@
                     </div>
                 @endif
 
-                <!-- Resolution -->
+                <!-- Resolution Information (if resolved) -->
                 @if ($issue->status === 'resolved' || $issue->status === 'closed')
                     <div
                         class="rounded-2xl border border-gray-200/60 dark:border-gray-700/60 bg-white/70 dark:bg-gray-800/50 p-6">
@@ -141,16 +125,15 @@
                     </div>
                 @endif
 
-                <!-- Solution Files -->
+                <!-- Solution Files (Preview-only) -->
                 @if ($issue->solutions && $issue->solutions->count() > 0)
                     <div
                         class="rounded-2xl border border-gray-200/60 dark:border-gray-700/60 bg-white/70 dark:bg-gray-800/50 p-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Solution Files</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             @foreach ($issue->solutions as $solution)
-                                @php $solutionUrl = url('storage/app/public/' . ltrim($solution->file_path, '/')); @endphp
                                 <button type="button"
-                                    onclick="openPreview('{{ $solutionUrl }}', '{{ e($solution->file_name) }}')"
+                                    onclick="openPreview('{{ url('storage/app/public/' . ltrim($solution->file_path, '/')) }}', '{{ e($solution->file_name) }}')"
                                     class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-gray-200/70 dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
                                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="none"
                                         stroke="currentColor">
@@ -177,7 +160,9 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Update Status</h3>
                             <form method="POST" action="{{ route('issues.updateStatus', $issue) }}" class="space-y-4"
                                 enctype="multipart/form-data">
-                                @csrf @method('PATCH')
+                                @csrf
+                                @method('PATCH')
+
                                 <div>
                                     <select name="status" id="status-select"
                                         class="w-full px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
@@ -187,7 +172,8 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div id="resolution-fields" class="space-y-3" style="display:none;">
+
+                                <div id="resolution-fields" class="space-y-3" style="display: none;">
                                     <div>
                                         <label for="resolution"
                                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Resolution
@@ -196,6 +182,7 @@
                                             class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
                                     </div>
                                 </div>
+
                                 <button
                                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow hover:shadow-lg transition">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -213,7 +200,8 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Update Priority</h3>
                             <form method="POST" action="{{ route('issues.updatePriority', $issue) }}"
                                 class="flex items-center gap-3">
-                                @csrf @method('PATCH')
+                                @csrf
+                                @method('PATCH')
                                 <select name="priority"
                                     class="px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     @foreach (['low', 'normal', 'high', 'urgent'] as $p)
@@ -242,6 +230,7 @@
             <div class="px-8 py-6 space-y-6">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Comments</h3>
 
+                <!-- Comment List -->
                 <div class="space-y-4">
                     @forelse ($comments as $comment)
                         <div
@@ -258,14 +247,14 @@
                                 <p class="whitespace-pre-wrap">{{ $comment->body }}</p>
                             </div>
 
+                            <!-- Comment Attachments (Preview-only) -->
                             @if ($comment->attachments && $comment->attachments->count())
                                 <div class="mt-3 pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
                                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attachments</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         @foreach ($comment->attachments as $attachment)
-                                            @php $commentAttUrl = url('storage/app/public/' . ltrim($attachment->file_path, '/')); @endphp
                                             <button type="button"
-                                                onclick="openPreview('{{ $commentAttUrl }}', '{{ e($attachment->file_name) }}')"
+                                                onclick="openPreview('{{ url('storage/app/public/' . ltrim($attachment->file_path, '/')) }}', '{{ e($attachment->file_name) }}')"
                                                 class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200/70 dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition text-sm">
                                                 <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24"
                                                     fill="none" stroke="currentColor">
@@ -285,7 +274,9 @@
                             @endif
                         </div>
                     @empty
-                        <div class="text-center py-6 text-gray-500 dark:text-gray-400">No comments yet.</div>
+                        <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+                            No comments yet.
+                        </div>
                     @endforelse
                 </div>
 
@@ -296,20 +287,24 @@
                     <form method="POST" action="{{ route('issues.comments.store', $issue) }}" class="space-y-4"
                         enctype="multipart/form-data">
                         @csrf
+
                         <div>
                             <textarea name="body" rows="3" required
                                 class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                 placeholder="Write your comment here..."></textarea>
                         </div>
+
                         <div>
                             <label for="comment_attachments"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Attachments
-                                (Optional)</label>
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Attachments (Optional)
+                            </label>
                             <input type="file" name="comment_attachments[]" id="comment_attachments" multiple
                                 class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Upload screenshots or relevant files
                                 (max 10MB each)</p>
                         </div>
+
                         <div class="flex justify-end">
                             <button type="submit"
                                 class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow hover:shadow-lg transition">
@@ -328,7 +323,7 @@
         </div>
     </div>
 
-    <!-- Preview Modal -->
+    <!-- Preview Modal (no download UI; disables right-click, print shortcuts, no cache-busting param) -->
     <div id="previewModal" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closePreview()"></div>
         <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
@@ -342,20 +337,15 @@
                 <div class="p-4">
                     <img id="previewImg" class="max-h-[75vh] mx-auto rounded-xl select-none hidden" draggable="false"
                         oncontextmenu="return false;">
-                    <!-- PDF.js canvas viewer (no toolbar, no download) -->
-                    <div id="pdfViewer" class="hidden">
-                        <div id="pdfViewport"></div>
-                    </div>
-                    <!-- Plain text viewer -->
-                    <div id="txtViewer" class="hidden">
-                        <pre id="txtContent" class="text-sm text-gray-800 dark:text-gray-100"></pre>
-                    </div>
+                    <iframe id="previewPdf" class="w-full h-[75vh] rounded-xl hidden"
+                        sandbox="allow-scripts allow-same-origin" referrerpolicy="no-referrer">
+                    </iframe>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Lead Details Modal (unchanged pieces omitted for brevity) -->
+    <!-- Lead Details Modal (unchanged UI) -->
     <div id="leadModal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
         <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
@@ -378,7 +368,229 @@
 
                     <div class="p-6 space-y-6">
                         @php $lead = $issue->lead; @endphp
-                        {{-- keep your existing lead sections here --}}
+
+                        <!-- Identity -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Identity
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">First Name</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->first_name ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Middle
+                                        Initial</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->middle_initial ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Surname</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->surname ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Gen Code</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->gen_code ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Age</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->age ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">SSN</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->ssn ? '***-**-****' : '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Address
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Street</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->street ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">City</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->city ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">State</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->state_abbreviation ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Zip Code</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->zip_code ?? '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 0 0 5.516 5.516l1.13-2.257a1 1 0 0 1 1.21-.502l4.493 1.498a1 1 0 0 1 .684.949V19a2 2 0 0 1-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                    </path>
+                                </svg>
+                                Contact Information
+                            </h3>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Phone Numbers</label>
+                                @php
+                                    $numbers = is_array($lead->numbers)
+                                        ? $lead->numbers
+                                        : (json_decode($lead->numbers ?? '[]', true) ?:
+                                        []);
+                                @endphp
+                                @if (count($numbers) > 0)
+                                    <div class="space-y-1 mt-1">
+                                        @foreach ($numbers as $number)
+                                            <p class="text-gray-900 dark:text-white">{{ $number }}</p>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-gray-900 dark:text-white">—</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Financial -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0 1 18 0z">
+                                    </path>
+                                </svg>
+                                Financial Information
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">FICO Score</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->fico ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Balance</label>
+                                    <p class="text-gray-900 dark:text-white">
+                                        {{ $lead->balance ? '$' . number_format($lead->balance / 100, 2) : '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Credits</label>
+                                    <p class="text-gray-900 dark:text-white">
+                                        {{ $lead->credits ? '$' . number_format($lead->credits / 100, 2) : '—' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Cards</label>
+                                @php
+                                    $cards = is_array($lead->cards_json)
+                                        ? $lead->cards_json
+                                        : (json_decode($lead->cards_json ?? '[]', true) ?:
+                                        []);
+                                @endphp
+                                @if (count($cards) > 0)
+                                    <div class="flex flex-wrap gap-2 mt-1">
+                                        @foreach ($cards as $card)
+                                            @if ($card)
+                                                <span
+                                                    class="px-2 py-1 bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 text-xs rounded-lg">{{ $card }}</span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-gray-900 dark:text-white">—</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Custom Fields -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                Custom Fields
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">XFC06</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->xfc06 ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">XFC07</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->xfc07 ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">DEMO7</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->demo7 ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">DEMO9</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->demo9 ?? '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status & Assignment -->
+                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                    </path>
+                                </svg>
+                                Status & Assignment
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Status</label>
+                                    <p class="text-gray-900 dark:text-white">
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $lead->status === 'Deal' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $lead->status ?? 'Submitted' }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Assigned To</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->assignee->name ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Super Agent</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->superAgent->name ?? '—' }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Closer</label>
+                                    <p class="text-gray-900 dark:text-white">{{ $lead->closer->name ?? '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
                         @if ($lead->notes)
                             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                                 <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -396,6 +608,7 @@
                             </div>
                         @endif
 
+                        <!-- Timestamps -->
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
                             <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
@@ -424,7 +637,10 @@
                     <div
                         class="flex justify-end gap-3 p-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-700/20 rounded-b-2xl">
                         <button onclick="closeLeadModal()"
-                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-xl transition-colors">Close</button>
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-xl transition-colors">
+                            Close
+                        </button>
+                        {{-- Download Lead Details stays as-is (separate from attachments policy) --}}
                         <a href="{{ route('leads.pdf', $lead) }}" target="_blank"
                             class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors inline-flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -442,15 +658,6 @@
 @endsection
 
 @push('scripts')
-    {{-- pdf.js (CDN). If you vendor locally, update workerSrc below accordingly. --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
-    <script>
-        if (window.pdfjsLib) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc =
-                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js";
-        }
-    </script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const statusSelect = document.getElementById('status-select');
@@ -459,66 +666,73 @@
             const currentUserId = {{ auth()->id() }};
 
             function toggleResolutionFields() {
-                resolutionFields.style.display = (statusSelect && statusSelect.value === 'resolved') ? 'block' :
-                    'none';
+                if (statusSelect && statusSelect.value === 'resolved') {
+                    resolutionFields.style.display = 'block';
+                } else if (resolutionFields) {
+                    resolutionFields.style.display = 'none';
+                }
             }
             toggleResolutionFields();
-            statusSelect?.addEventListener('change', toggleResolutionFields);
+            if (statusSelect) statusSelect.addEventListener('change', toggleResolutionFields);
 
+            // Optional real-time listeners (no-op if Echo not present)
             if (window.Echo) {
                 const issueId = {{ $issue->id }};
                 window.Echo.private(`issues.${issueId}`)
                     .listen('.issue.status.updated', (e) => {
                         const statusBadge = document.querySelector(
                             '.inline-flex.items-center.px-3.py-1.rounded-full.text-xs.font-medium.bg-white\\/20:nth-of-type(2) span'
-                            );
-                        if (statusBadge) statusBadge.textContent = e.status.charAt(0).toUpperCase() + e.status
-                            .slice(1).replace('_', ' ');
+                        );
+                        if (statusBadge) {
+                            statusBadge.textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1)
+                                .replace('_', ' ');
+                        }
                     })
                     .listen('.issue.comment.added', (e) => {
                         const noCommentsMessage = commentsList?.querySelector(
-                        '.text-center.py-6.text-gray-500');
+                            '.text-center.py-6.text-gray-500');
                         if (noCommentsMessage) noCommentsMessage.remove();
                         const el = createCommentElement(e);
                         commentsList?.appendChild(el);
                     });
             }
 
+            // Build a new comment element (used by Echo)
             function createCommentElement(comment) {
                 const wrap = document.createElement('div');
                 wrap.className =
                     'rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-white/70 dark:bg-gray-800/50 p-4';
                 const authorName = comment.user?.id === currentUserId ? 'You' : (comment.user?.name || 'Unknown');
                 let html = `
-                    <div class="flex items-start justify-between">
-                      <div>
-                        <span class="font-medium">${authorName}</span>
-                        <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">Just now</span>
-                      </div>
-                    </div>
-                    <div class="mt-2 prose dark:prose-invert max-w-none">
-                      <p class="whitespace-pre-wrap">${comment.body || ''}</p>
-                    </div>
-                `;
-                if (comment.attachments?.length) {
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="font-medium">${authorName}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">Just now</span>
+          </div>
+        </div>
+        <div class="mt-2 prose dark:prose-invert max-w-none">
+          <p class="whitespace-pre-wrap">${comment.body || ''}</p>
+        </div>
+      `;
+                if (comment.attachments && comment.attachments.length > 0) {
                     html += `
-                      <div class="mt-3 pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
-                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attachments</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    `;
+          <div class="mt-3 pt-3 border-t border-gray-200/60 dark:border-gray-700/60">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attachments</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        `;
                     comment.attachments.forEach(a => {
                         html += `
-                          <button type="button"
-                            onclick="openPreview('${a.preview_route}', '${(a.file_name || '').replace(/'/g, "\\'")}')"
-                            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200/70 dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition text-sm">
-                            <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                              <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                              <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span class="truncate">${a.file_name || 'Attachment'}</span>
-                          </button>
-                        `;
+            <button type="button"
+              onclick="openPreview('${a.preview_route}', '${(a.file_name || '').replace(/'/g, "\\'")}')"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200/70 dark:border-gray-700/70 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition text-sm">
+              <svg class="w-4 h-4 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="truncate">${a.file_name || 'Attachment'}</span>
+            </button>
+          `;
                     });
                     html += `</div></div>`;
                 }
@@ -527,133 +741,52 @@
             }
         });
 
-        // ---------- Renderers ----------
-        async function renderPdfInto(url) {
-            const viewer = document.getElementById('pdfViewer');
-            const container = document.getElementById('pdfViewport');
-            container.innerHTML = '';
-
-            if (!window.pdfjsLib) {
-                container.innerHTML =
-                    '<div class="text-center text-sm text-gray-500 dark:text-gray-400">PDF viewer failed to load.</div>';
-                return;
-            }
-            try {
-                const resp = await fetch(url, {
-                    credentials: 'same-origin',
-                    cache: 'no-store'
-                });
-                if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                const buf = await resp.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({
-                    data: buf
-                }).promise;
-
-                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                    const page = await pdf.getPage(pageNumber);
-                    const baseViewport = page.getViewport({
-                        scale: 1
-                    });
-                    const targetWidth = Math.min(1400, (viewer.clientWidth || 1000) - 32);
-                    const scale = Math.min(2, targetWidth / baseViewport.width);
-                    const viewport = page.getViewport({
-                        scale
-                    });
-
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d', {
-                        alpha: false
-                    });
-                    canvas.width = Math.floor(viewport.width);
-                    canvas.height = Math.floor(viewport.height);
-                    container.appendChild(canvas);
-
-                    await page.render({
-                        canvasContext: ctx,
-                        viewport
-                    }).promise;
-                }
-                viewer.classList.remove('hidden');
-            } catch (err) {
-                console.error('PDF render error:', err);
-                container.innerHTML =
-                    '<div class="text-center text-sm text-red-600 dark:text-red-400">Unable to preview this PDF (' + (
-                        err?.message || 'unknown error') + ').</div>';
-            }
-        }
-
-        async function renderTxtInto(url) {
-            const viewer = document.getElementById('txtViewer');
-            const pre = document.getElementById('txtContent');
-            pre.textContent = '';
-            try {
-                const resp = await fetch(url, {
-                    credentials: 'same-origin',
-                    cache: 'no-store'
-                });
-                if (!resp.ok) throw new Error('HTTP ' + resp.status);
-                let text = await resp.text();
-                const MAX_CHARS = 200000; // safety cap for very large files (~200 KB)
-                if (text.length > MAX_CHARS) {
-                    text = text.slice(0, MAX_CHARS) + '\n\n… (truncated for preview)';
-                }
-                pre.textContent = text;
-                viewer.classList.remove('hidden');
-            } catch (err) {
-                pre.textContent = 'Unable to preview this text file (' + (err?.message || 'unknown error') + ').';
-                viewer.classList.remove('hidden');
-            }
-        }
-
-        // ---------- Modal controls ----------
+        // Preview modal helpers
         function openPreview(fileUrl, title) {
             const modal = document.getElementById('previewModal');
-            const img = document.getElementById('previewImg');
-            const pdfDiv = document.getElementById('pdfViewer');
-            const pdfViewport = document.getElementById('pdfViewport');
-            const txtDiv = document.getElementById('txtViewer');
-            const txtPre = document.getElementById('txtContent');
-
+            const img   = document.getElementById('previewImg');
+            const pdf   = document.getElementById('previewPdf');
+        
             document.getElementById('previewTitle').textContent = title || 'Preview';
-
+        
             // reset
-            img.classList.add('hidden');
-            img.removeAttribute('src');
-            pdfDiv.classList.add('hidden');
-            pdfViewport.innerHTML = '';
-            txtDiv.classList.add('hidden');
-            txtPre.textContent = '';
-
+            img.classList.add('hidden');  img.removeAttribute('src');
+            pdf.classList.add('hidden');  pdf.removeAttribute('src');
+        
+            // use URL as-is (already absolute and un-encoded by Blade)
             const url = fileUrl;
             const base = url.split('?')[0].toLowerCase();
+        
             const isImage = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(base);
-            const isPdf = /\.pdf$/i.test(base);
-            const isTxt = /\.txt$/i.test(base); // preview .txt files
-
+            const isPdf   = /\.pdf$/i.test(base);
+        
             if (isPdf) {
-                renderPdfInto(url); // PDF via pdf.js
+              // load Chrome's PDF viewer (no sandbox, or Chrome will block)
+              pdf.removeAttribute('sandbox');
+              pdf.setAttribute('allow', 'clipboard-read; clipboard-write');
+              pdf.src = url;                 // e.g. /storage/app/public/issue-attachments/xxx.pdf
+              pdf.classList.remove('hidden');
             } else if (isImage) {
-                img.src = url;
-                img.classList.remove('hidden');
-            } else if (isTxt) {
-                renderTxtInto(url); // Plain text preview
+              img.src = url;                 // e.g. /storage/app/public/issue-attachments/xxx.png
+              img.classList.remove('hidden');
             } else {
-                // Unknown: try text, then fallback to pdf
-                renderTxtInto(url);
+              // Fallback: just try to show in iframe
+              pdf.removeAttribute('sandbox');
+              pdf.src = url;
+              pdf.classList.remove('hidden');
             }
-
+        
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-        }
+          }
+
 
         function closePreview() {
             const m = document.getElementById('previewModal');
             const img = document.getElementById('previewImg');
-            const pdfViewport = document.getElementById('pdfViewport');
-            const txtPre = document.getElementById('txtContent');
+            const pdf = document.getElementById('previewPdf');
             img.src = '';
-            pdfViewport.innerHTML = '';
-            txtPre.textContent = '';
+            pdf.src = '';
             m.classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
@@ -669,7 +802,9 @@
             if (!open) return;
             const k = e.key.toLowerCase();
             if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'c', 'x', 'v'].includes(k)) e.preventDefault();
-            if (e.key === 'PrintScreen') e.preventDefault();
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+            }
         });
 
         // Lead modal helpers
@@ -686,8 +821,9 @@
             if (e.target === this) closeLeadModal();
         });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !document.getElementById('leadModal').classList.contains('hidden'))
+            if (e.key === 'Escape' && !document.getElementById('leadModal').classList.contains('hidden')) {
                 closeLeadModal();
+            }
         });
     </script>
 @endpush

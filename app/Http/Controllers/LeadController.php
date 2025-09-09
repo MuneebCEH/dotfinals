@@ -209,56 +209,69 @@ class LeadController extends Controller
     {
         $user     = $request->user();
         $statuses = self::STATUSES;
-
-        // detect super_agent robustly
-        $isSuperAgent = (method_exists($user, 'isSuperAgent') && $user->isSuperAgent())
-            || (method_exists($user, 'hasRole') && $user->hasRole('super_agent'))
-            || (($user->role ?? null) === 'super_agent');
-
+    
+        // robust super_agent detection
+        $isSuperAgent =
+            (method_exists($user, 'isSuperAgent') && $user->isSuperAgent()) ||
+            (method_exists($user, 'hasRole') && $user->hasRole('super_agent')) ||
+            (($user->role ?? null) === 'super_agent');
+    
+        // ❌ Always hide submitted & deal from the UI filter options
+        $visibleStatuses = array_values(array_filter(
+            $statuses,
+            fn ($s) => !in_array(mb_strtolower($s), ['submitted', 'deal'], true)
+        ));
+    
         $filters = [
             'q'      => trim((string) $request->input('q', '')),
             'status' => (string) $request->input('status', ''),
         ];
-
+    
         $query = Lead::query()
-            ->with(['assignee']) // keep for the table
+            ->with(['assignee'])
             // visibility: super_agent sees by super_agent_id, others by assigned_to
             ->when($isSuperAgent, function ($q) use ($user) {
                 $q->where('super_agent_id', $user->id);
             }, function ($q) use ($user) {
                 $q->where('assigned_to', $user->id);
-            })
-            ->where('status', '!=', 'submitted');
-
+            });
+    
+        // ❌ Always exclude submitted & deal leads regardless of role
+        $query->where(function ($q) {
+            $q->whereNull('status')
+              ->orWhereRaw('LOWER(status) NOT IN (?, ?)', ['submitted', 'deal']);
+        });
+    
         // search filter (name/gen_code/city)
         if ($filters['q'] !== '') {
             $like = '%' . $filters['q'] . '%';
             $query->where(function ($q) use ($like) {
                 $q->where('first_name', 'like', $like)
-                    ->orWhere('surname', 'like', $like)
-                    ->orWhere('gen_code', 'like', $like)
-                    ->orWhere('city', 'like', $like);
+                  ->orWhere('surname', 'like', $like)
+                  ->orWhere('gen_code', 'like', $like)
+                  ->orWhere('city', 'like', $like);
             });
         }
-
-        // status filter (only allow valid statuses)
-        if ($filters['status'] !== '' && in_array($filters['status'], $statuses, true)) {
+    
+        // status filter (respect filtered statuses)
+        if ($filters['status'] !== '' && in_array($filters['status'], $visibleStatuses, true)) {
             $query->where('status', $filters['status']);
         }
-
+    
         $leads = $query->latest()->paginate(15)->withQueryString();
-
+    
         return view('leads.index', [
-            'leads'         => $leads,
-            'statuses'      => $statuses,
-            'filters'       => $filters,
-            // keep minimal sets for non-elevated view
-            'categories'    => collect(),
-            'users'         => collect(),
-            'statusCounts'  => [],
-            'onlineUsers'   => collect(),
+            'leads'        => $leads,
+            'statuses'     => $visibleStatuses, // hide Submitted + Deal from UI
+            'filters'      => $filters,
+            'categories'   => collect(),
+            'users'        => collect(),
+            'statusCounts' => [],
+            'onlineUsers'  => collect(),
         ]);
     }
+
+
 
 
     public function create()
@@ -275,80 +288,76 @@ class LeadController extends Controller
     }
 
     public function store(StoreLeadRequest $request)
-    {
-        $data = $request->validated();
+{
+    $data = $request->validated();
 
-        if (!Auth::user()->isAdmin()) {
-            unset($data['assigned_to'], $data['super_agent_id']);
-        }
-
-        $data['numbers'] = collect($data['numbers'] ?? [])
-            ->filter(fn($v) => filled($v))
-            ->values()
-            ->all();
-
-        $data['created_by'] = Auth::id();
-
-        if ($request->hasFile('lead_pdf')) {
-            $data['lead_pdf_path'] = $request->file('lead_pdf')->store('leads', 'public');
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Create the lead
-            $lead = Lead::create($data);
-
-            // Save to lead_user table
-            DB::table('lead_user')->insert([
-                'lead_id'     => $lead->id,
-                'user_id'     => $data['assigned_to'] ?? Auth::id(),
-                'assigned_by' => Auth::id(),
-                'is_primary'  => true,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ]);
-
-            // Generate and store text report (this can remain for your internal storage)
-            $textReportPath = $this->storeTextReport($lead);
-
-            DB::commit();
-
-            // Success message for both paths
-            session()->flash('success', 'Lead created successfully.');
-
-            // Only admins should download the text document
-            if (Auth::user()->isAdmin()) {
-                // Generate on-demand content only for admins
-                $content = $lead->generateTextReport();
-                $filename = $this->generateTextReportFilename($lead);
-
-                // Prepare response headers
-                $headers = [
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-                ];
-
-                // For UI to redirect after download (if you rely on this)
-                session()->flash('redirect_to', route('leads.show', $lead));
-
-                // Return clean text file download (admin only)
-                return Response::make($content, 200, $headers);
-            }
-
-            // Non-admins: just redirect to the lead page (no download)
-            return redirect()->route('leads.show', $lead);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Lead creation failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Failed to create lead: ' . $e->getMessage()]);
-        }
+    if (!Auth::user()->isAdmin()) {
+        unset($data['assigned_to'], $data['super_agent_id']);
+        // If you want to auto-assign to creator, uncomment:
+        // $data['assigned_to'] = Auth::id();
     }
+
+    $data['numbers'] = collect($data['numbers'] ?? [])
+        ->filter(fn($v) => filled($v))
+        ->values()
+        ->all();
+
+    $data['created_by'] = Auth::id();
+
+    if ($request->hasFile('lead_pdf')) {
+        $data['lead_pdf_path'] = $request->file('lead_pdf')->store('leads', 'public');
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // If an assignee is present on create, stamp assigned_time now
+        if (!empty($data['assigned_to'])) {
+            $data['assigned_time'] = now();
+        }
+
+        $lead = Lead::create($data);
+
+        // Save to lead_user table
+        DB::table('lead_user')->insert([
+            'lead_id'     => $lead->id,
+            'user_id'     => $data['assigned_to'] ?? Auth::id(),
+            'assigned_by' => Auth::id(),
+            'is_primary'  => true,
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+
+        $this->storeTextReport($lead);
+
+        DB::commit();
+
+        session()->flash('success', 'Lead created successfully.');
+
+        if (Auth::user()->isAdmin()) {
+            $content  = $lead->generateTextReport();
+            $filename = $this->generateTextReportFilename($lead);
+            $headers  = [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            ];
+            session()->flash('redirect_to', route('leads.show', $lead));
+            return Response::make($content, 200, $headers);
+        }
+
+        return redirect()->route('leads.show', $lead);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Lead creation failed: ' . $e->getMessage());
+        Log::error($e->getTraceAsString());
+
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['error' => 'Failed to create lead: ' . $e->getMessage()]);
+    }
+}
+
 
     public function show(Lead $lead)
     {
@@ -377,142 +386,141 @@ class LeadController extends Controller
 
 
     public function update(UpdateLeadRequest $request, Lead $lead)
-    {
-        $user = Auth::user();
-        abort_unless($this->canEditLead($user, $lead), 403, 'Unauthorized action.');
+{
+    $user = Auth::user();
+    abort_unless($this->canEditLead($user, $lead), 403, 'Unauthorized action.');
 
-        try {
-            DB::beginTransaction();
+    try {
+        DB::beginTransaction();
 
-            // Get validated data
-            $data = $request->validated();
+        $data = $request->validated();
 
-            // Process arrays and JSON
-            $data['numbers'] = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
-            $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
+        $data['numbers']    = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
+        $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
 
-            // Non-elevated cannot reassign users
-            if (!$this->isElevated()) {
-                unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
-            }
+        // Non-elevated users can't change assignment fields
+        if (!$this->isElevated()) {
+            unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
+        }
 
-            // Handle PDF file
-            $wantsRemoval = $request->boolean('remove_lead_pdf');
+        $wantsRemoval = $request->boolean('remove_lead_pdf');
 
-            if ($request->hasFile('lead_pdf')) {
-                if ($lead->lead_pdf_path) {
-                    Storage::disk('public')->delete($lead->lead_pdf_path);
-                }
-                $data['lead_pdf_path'] = $request->file('lead_pdf')->store('leads', 'public');
-            } elseif ($wantsRemoval && $lead->lead_pdf_path) {
+        if ($request->hasFile('lead_pdf')) {
+            if ($lead->lead_pdf_path) {
                 Storage::disk('public')->delete($lead->lead_pdf_path);
-                $data['lead_pdf_path'] = null;
             }
+            $data['lead_pdf_path'] = $request->file('lead_pdf')->store('leads', 'public');
+        } elseif ($wantsRemoval && $lead->lead_pdf_path) {
+            Storage::disk('public')->delete($lead->lead_pdf_path);
+            $data['lead_pdf_path'] = null;
+        }
 
-            // Capture original assignee before update for pivot table handling
-            $previousAssignedTo = $lead->assigned_to;
+        $previousAssignedTo = $lead->assigned_to;
 
-            // Update lead with validated data
-            $lead->update($data);
+        /**
+         * A) If assignment CHANGED (admin/lead_manager path), set/clear assigned_time accordingly.
+         */
+        if (array_key_exists('assigned_to', $data) && $data['assigned_to'] !== $previousAssignedTo) {
+            // on assign -> now(); on unassign -> null
+            $data['assigned_time'] = !empty($data['assigned_to']) ? now() : null;
+        } else {
+            /**
+             * B) If assignment did NOT change:
+             *    When a non-elevated user who IS the current assignee updates the lead,
+             *    refresh assigned_time to "now" to reflect latest activity.
+             */
+            if (!$this->isElevated() && (int)$lead->assigned_to === (int)$user->id) {
+                $data['assigned_time'] = now();
+            }
+        }
 
-            // Update lead_user pivot table if assignment changed
-            if (isset($data['assigned_to']) && $data['assigned_to'] !== $previousAssignedTo) {
-                $newUserId = $data['assigned_to'];
+        // Update lead
+        $lead->update($data);
 
-                if (empty($newUserId)) {
-                    // Clear assignment - demote all to non-primary
+        // Maintain lead_user pivot if assignment changed (admin/lead_manager)
+        if (isset($data['assigned_to']) && $data['assigned_to'] !== $previousAssignedTo) {
+            $newUserId = $data['assigned_to'];
+
+            if (empty($newUserId)) {
+                DB::table('lead_user')
+                    ->where('lead_id', $lead->id)
+                    ->update(['is_primary' => false, 'updated_at' => now()]);
+            } else {
+                $existingRow = DB::table('lead_user')
+                    ->where('lead_id', $lead->id)
+                    ->where('user_id', $newUserId)
+                    ->first();
+
+                if ($existingRow) {
+                    DB::table('lead_user')
+                        ->where('id', $existingRow->id)
+                        ->update([
+                            'is_primary'  => true,
+                            'assigned_by' => Auth::id(),
+                            'updated_at'  => now()
+                        ]);
+
                     DB::table('lead_user')
                         ->where('lead_id', $lead->id)
+                        ->where('id', '!=', $existingRow->id)
                         ->update(['is_primary' => false, 'updated_at' => now()]);
                 } else {
-                    // Check if new user already has a row
-                    $existingRow = DB::table('lead_user')
+                    $primaryRow = DB::table('lead_user')
                         ->where('lead_id', $lead->id)
-                        ->where('user_id', $newUserId)
+                        ->where('is_primary', true)
                         ->first();
 
-                    if ($existingRow) {
-                        // Promote existing row to primary
+                    if ($primaryRow) {
                         DB::table('lead_user')
-                            ->where('id', $existingRow->id)
+                            ->where('id', $primaryRow->id)
                             ->update([
-                                'is_primary' => true,
+                                'user_id'     => $newUserId,
                                 'assigned_by' => Auth::id(),
-                                'updated_at' => now()
+                                'updated_at'  => now()
                             ]);
-
-                        // Demote others
-                        DB::table('lead_user')
-                            ->where('lead_id', $lead->id)
-                            ->where('id', '!=', $existingRow->id)
-                            ->update(['is_primary' => false, 'updated_at' => now()]);
                     } else {
-                        // No existing row - update primary or create new
-                        $primaryRow = DB::table('lead_user')
-                            ->where('lead_id', $lead->id)
-                            ->where('is_primary', true)
-                            ->first();
-
-                        if ($primaryRow) {
-                            // Update primary row
-                            DB::table('lead_user')
-                                ->where('id', $primaryRow->id)
-                                ->update([
-                                    'user_id' => $newUserId,
-                                    'assigned_by' => Auth::id(),
-                                    'updated_at' => now()
-                                ]);
-                        } else {
-                            // Create new primary row
-                            DB::table('lead_user')->insert([
-                                'lead_id' => $lead->id,
-                                'user_id' => $newUserId,
-                                'assigned_by' => Auth::id(),
-                                'is_primary' => true,
-                                'created_at' => now(),
-                                'updated_at' => now()
-                            ]);
-                        }
+                        DB::table('lead_user')->insert([
+                            'lead_id'     => $lead->id,
+                            'user_id'     => $newUserId,
+                            'assigned_by' => Auth::id(),
+                            'is_primary'  => true,
+                            'created_at'  => now(),
+                            'updated_at'  => now()
+                        ]);
                     }
                 }
             }
-
-            DB::commit();
-
-            // Success message for both paths
-            session()->flash('success', 'Lead updated successfully.');
-
-            // Only admins should download the text document
-            if (Auth::user()->isAdmin()) {
-                $content = $lead->generateTextReport();
-                $filename = $this->generateTextReportFilename($lead);
-
-                // Prepare response headers
-                $headers = [
-                    'Content-Type' => 'text/plain',
-                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-                ];
-
-                // For UI to redirect after download (if you rely on this)
-                session()->flash('redirect_to', route('leads.show', $lead));
-
-                // Return clean text file download (admin only)
-                return Response::make($content, 200, $headers);
-            }
-
-            // Non-admins: just redirect to the lead page (no download)
-            return redirect()->route('leads.show', $lead);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Lead update failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Failed to update lead: ' . $e->getMessage()]);
         }
+
+        DB::commit();
+
+        session()->flash('success', 'Lead updated successfully.');
+
+        if (Auth::user()->isAdmin()) {
+            $content  = $lead->generateTextReport();
+            $filename = $this->generateTextReportFilename($lead);
+            $headers  = [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            ];
+            session()->flash('redirect_to', route('leads.show', $lead));
+            return Response::make($content, 200, $headers);
+        }
+
+        return redirect()->route('leads.show', $lead);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Lead update failed: ' . $e->getMessage());
+        Log::error($e->getTraceAsString());
+
+        return redirect()->back()
+            ->withInput()
+            ->withErrors(['error' => 'Failed to update lead: ' . $e->getMessage()]);
     }
+}
+
+
 
 
     public function destroy(Lead $lead)
@@ -527,163 +535,154 @@ class LeadController extends Controller
      * Bulk assign leads to a user
      */
     public function bulkAssign(Request $request)
-    {
-        // Only elevated can bulk assign
-        abort_unless($this->isElevated(), 403);
+{
+    abort_unless($this->isElevated(), 403);
 
-        // Validate inputs
-        $data = $request->validate([
-            'status'         => 'required|in:New Lead,Super Lead',
-            'assignee_ids'   => 'required|array|min:1',
-            'assignee_ids.*' => 'integer|exists:users,id',
-            'leads_count'    => 'required|integer|min:1|max:1000',
+    $data = $request->validate([
+        'status'         => 'required|in:New Lead,Super Lead',
+        'assignee_ids'   => 'required|array|min:1',
+        'assignee_ids.*' => 'integer|exists:users,id',
+        'leads_count'    => 'required|integer|min:1|max:1000',
+        'busy_threshold' => 'nullable|integer|min:0',
+    ]);
 
-            // Optional advanced filter: exclude users who already have >= X leads
-            'busy_threshold' => 'nullable|integer|min:0',
-        ]);
+    $perUser       = (int) $data['leads_count'];
+    $busyThreshold = $data['busy_threshold'] ?? null;
 
-        $perUser       = (int) $data['leads_count'];          // fixed # to give EACH selected user
-        $busyThreshold = $data['busy_threshold'] ?? null;     // null => ignore
+    try {
+        return DB::transaction(function () use ($data, $perUser, $busyThreshold) {
+            $users = User::whereIn('id', $data['assignee_ids'])->get();
 
-        try {
-            return DB::transaction(function () use ($data, $perUser, $busyThreshold) {
-                // 1) Load selected users and keep only those with role "user"
-                /** @var \Illuminate\Support\Collection<int,\App\Models\User> $users */
-                $users = User::whereIn('id', $data['assignee_ids'])->get();
+            $validUsers = $users->filter(function ($u) {
+                if (method_exists($u, 'hasRole')) return $u->hasRole('user');
+                return ($u->role ?? null) === 'user';
+            })->values();
 
-                $validUsers = $users->filter(function ($u) {
-                    // adapt if you use Spatie roles or a 'role' column
-                    if (method_exists($u, 'hasRole')) {
-                        return $u->hasRole('user');
-                    }
-                    return ($u->role ?? null) === 'user';
+            if ($validUsers->isEmpty()) {
+                return back()->with('error', 'Please select at least one teammate with the "user" role.');
+            }
+
+            $workload = Lead::selectRaw('assigned_to, COUNT(*) as c')
+                ->whereNotNull('assigned_to')
+                ->groupBy('assigned_to')
+                ->pluck('c', 'assigned_to');
+
+            if ($busyThreshold !== null) {
+                $validUsers = $validUsers->filter(function ($u) use ($workload, $busyThreshold) {
+                    $count = (int) ($workload[$u->id] ?? 0);
+                    return $count < $busyThreshold;
                 })->values();
 
                 if ($validUsers->isEmpty()) {
-                    return back()->with('error', 'Please select at least one teammate with the "user" role.');
+                    return back()->with('error', 'No eligible users after applying the "Exclude if assigned ≥" filter.');
+                }
+            }
+
+            $validUsers = $validUsers->sortBy(fn($u) => (int) ($workload[$u->id] ?? 0))->values();
+
+            $totalNeeded = $perUser * $validUsers->count();
+
+            $leads = Lead::query()
+                ->where('status', $data['status'])
+                ->where(function ($q) {
+                    $q->whereNull('assigned_to')->orWhere('assigned_to', 0);
+                })
+                ->orderBy('created_at', 'asc')
+                ->limit($totalNeeded)
+                ->get();
+
+            if ($leads->isEmpty()) {
+                return back()->with('error', 'No leads are available for the selected status.');
+            }
+
+            $assignments = [];
+            $cursor = 0;
+            $actuallyAssigned = 0;
+
+            foreach ($validUsers as $user) {
+                $remaining = max(0, $leads->count() - $cursor);
+                if ($remaining <= 0) break;
+
+                $take = min($perUser, $remaining);
+                $chunk = $leads->slice($cursor, $take);
+                $cursor += $chunk->count();
+
+                foreach ($chunk as $lead) {
+                    $lead->assigned_to   = $user->id;
+                    $lead->assigned_time = now(); // <-- stamp time
+                    $lead->save();
+
+                    DB::table('lead_user')->updateOrInsert(
+                        ['lead_id' => $lead->id, 'user_id' => $user->id],
+                        [
+                            'assigned_by' => Auth::id(),
+                            'is_primary'  => true,
+                            'created_at'  => now(),
+                            'updated_at'  => now(),
+                        ]
+                    );
                 }
 
-                // 2) Current workload (assigned leads) — used for fairness and busy filter
-                $workload = Lead::selectRaw('assigned_to, COUNT(*) as c')
-                    ->whereNotNull('assigned_to')
-                    ->groupBy('assigned_to')
-                    ->pluck('c', 'assigned_to');
+                $assignments[$user->name] = ($assignments[$user->name] ?? 0) + $chunk->count();
+                $actuallyAssigned += $chunk->count();
+            }
 
-                if ($busyThreshold !== null) {
-                    $validUsers = $validUsers->filter(function ($u) use ($workload, $busyThreshold) {
-                        $count = (int) ($workload[$u->id] ?? 0);
-                        return $count < $busyThreshold;
-                    })->values();
+            if ($actuallyAssigned === 0) {
+                return back()->with('error', 'Not enough leads to assign to the selected users.');
+            }
 
-                    if ($validUsers->isEmpty()) {
-                        return back()->with('error', 'No eligible users after applying the "Exclude if assigned ≥" filter.');
-                    }
-                }
+            $parts = [];
+            foreach ($assignments as $name => $count) {
+                $parts[] = "{$count} → {$name}";
+            }
+            $summary = implode(', ', $parts);
 
-                // Sort by current workload ascending so lower-load users are first
-                $validUsers = $validUsers->sortBy(fn($u) => (int) ($workload[$u->id] ?? 0))->values();
+            $requestedTotal = $perUser * $validUsers->count();
+            $note = $actuallyAssigned < $requestedTotal
+                ? " (assigned {$actuallyAssigned} of {$requestedTotal}; not enough available leads)"
+                : '';
 
-                // 3) Fetch the oldest, unassigned leads for the requested status
-                $totalNeeded = $perUser * $validUsers->count();
+            Log::info("Bulk assignment (per-user): {$actuallyAssigned} {$data['status']} leads. {$summary}");
 
-                $leads = Lead::query()
-                    ->where('status', $data['status'])
-                    ->where(function ($q) {
-                        $q->whereNull('assigned_to')->orWhere('assigned_to', 0);
-                    })
-                    ->orderBy('created_at', 'asc')
-                    ->limit($totalNeeded)
-                    ->get();
-
-                if ($leads->isEmpty()) {
-                    return back()->with('error', 'No leads are available for the selected status.');
-                }
-
-                // 4) Assign exactly $perUser to EACH user (or fewer if we run out)
-                $assignments = [];      // [userName => count]
-                $cursor      = 0;       // slice pointer into $leads
-                $actuallyAssigned = 0;
-
-                foreach ($validUsers as $user) {
-                    $remaining = max(0, $leads->count() - $cursor);
-                    if ($remaining <= 0) break;
-
-                    $take = min($perUser, $remaining);
-                    $chunk = $leads->slice($cursor, $take);
-                    $cursor += $chunk->count();
-
-                    foreach ($chunk as $lead) {
-                        $lead->assigned_to = $user->id;
-                        // keep the status as selected (already matches)
-                        $lead->save();
-
-                        // update pivot
-                        DB::table('lead_user')->updateOrInsert(
-                            ['lead_id' => $lead->id, 'user_id' => $user->id],
-                            [
-                                'assigned_by' => Auth::id(),
-                                'is_primary'  => true,
-                                'created_at'  => now(),
-                                'updated_at'  => now(),
-                            ]
-                        );
-                    }
-
-                    $assignments[$user->name] = ($assignments[$user->name] ?? 0) + $chunk->count();
-                    $actuallyAssigned += $chunk->count();
-                }
-
-                // 5) Build summary message
-                if ($actuallyAssigned === 0) {
-                    return back()->with('error', 'Not enough leads to assign to the selected users.');
-                }
-
-                $parts = [];
-                foreach ($assignments as $name => $count) {
-                    $parts[] = "{$count} → {$name}";
-                }
-                $summary = implode(', ', $parts);
-
-                $requestedTotal = $perUser * $validUsers->count();
-                $note = $actuallyAssigned < $requestedTotal
-                    ? " (assigned {$actuallyAssigned} of {$requestedTotal}; not enough available leads)"
-                    : '';
-
-                Log::info("Bulk assignment (per-user): {$actuallyAssigned} {$data['status']} leads. {$summary}");
-
-                return back()->with(
-                    'success',
-                    "Assigned {$perUser} {$data['status']} lead(s) to each selected user{$note}. Distribution: {$summary}"
-                );
-            });
-        } catch (\Throwable $e) {
-            Log::error('Bulk assignment failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return back()->with('error', 'Failed to assign leads. Please try again.');
-        }
+            return back()->with(
+                'success',
+                "Assigned {$perUser} {$data['status']} lead(s) to each selected user{$note}. Distribution: {$summary}"
+            );
+        });
+    } catch (\Throwable $e) {
+        Log::error('Bulk assignment failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        return back()->with('error', 'Failed to assign leads. Please try again.');
     }
+}
+
 
     /**
      * Admin: quick assignment endpoint (optional).
      */
     public function assign(Request $request, Lead $lead)
-    {
-        abort_unless($this->isElevated(), 403);
+{
+    abort_unless($this->isElevated(), 403);
 
-        $data = $request->validate([
-            'assigned_to'    => ['nullable', 'exists:users,id'],
-            'super_agent_id' => ['nullable', 'exists:users,id'],
-        ]);
+    $data = $request->validate([
+        'assigned_to'    => ['nullable', 'exists:users,id'],
+        'super_agent_id' => ['nullable', 'exists:users,id'],
+    ]);
 
-        // Ensure super_agent_id really is super agent
-        if (!empty($data['super_agent_id'])) {
-            $isSuper = User::where('id', $data['super_agent_id'])->where('is_super_agent', true)->exists();
-            abort_unless($isSuper, 422, 'Selected user is not a Super Agent.');
-        }
-
-        $lead->update($data);
-
-        return back()->with('success', 'Assignment updated');
+    if (!empty($data['super_agent_id'])) {
+        $isSuper = User::where('id', $data['super_agent_id'])->where('is_super_agent', true)->exists();
+        abort_unless($isSuper, 422, 'Selected user is not a Super Agent.');
     }
+
+    // If assignment is changing, set/clear assigned_time
+    if (array_key_exists('assigned_to', $data) && $data['assigned_to'] !== $lead->assigned_to) {
+        $data['assigned_time'] = !empty($data['assigned_to']) ? now() : null;
+    }
+
+    $lead->update($data);
+
+    return back()->with('success', 'Assignment updated');
+}
+
 
     public function downloadPdf(Lead $lead)
     {

@@ -514,6 +514,7 @@
                                     @if ($isAdmin)
                                         <th class="{{ $tableHeaderClass }}">Assigned To</th>
                                     @endif
+                                    <th class="{{ $tableHeaderClass }}">Assigned Time</th>
                                     <th class="{{ $tableHeaderClass }}">Status</th>
                                     <th class="{{ $tableHeaderClass }}">Created Date</th>
                                     <th class="{{ $tableHeaderClass }}">Actions</th>
@@ -574,6 +575,18 @@
                                                     class="text-sm text-gray-900 dark:text-white">{{ $lead->assignee->name ?? 'Unassigned' }}</span>
                                             </td>
                                         @endif
+                                        
+                                        
+                                        {{-- NEW: Assigned Time --}}
+                                        <td class="px-6 py-4">
+                                            <span class="text-sm text-gray-900 dark:text-white">
+                                                @if(!empty($lead->assigned_time))
+                                                    {{ \Illuminate\Support\Carbon::parse($lead->assigned_time)->timezone(config('app.timezone'))->format('M d, Y h:i A') }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </span>
+                                        </td>
 
                                         <!-- Status -->
                                         <td class="px-6 py-4">

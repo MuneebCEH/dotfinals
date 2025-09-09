@@ -29,26 +29,43 @@ class LeadIssueController extends Controller
     public function index(Request $request)
     {
         // $this->authorize('viewAny', LeadIssue::class);
-
-        $query = LeadIssue::with(['lead', 'reporter'])->latest();
-
-        if ($s = $request->get('status')) $query->where('status', $s);
-        if ($p = $request->get('priority')) $query->where('priority', $p);
+    
+        $user = $request->user();
+    
+        $query = LeadIssue::with(['lead', 'reporter'])
+            ->latest();
+    
+        // ðŸ”‘ Only show issues assigned to logged-in report manager
+        if ($user->role === 'report_manager') {
+            $query->where('resolver_id', $user->id);
+        }
+    
+        if ($s = $request->get('status')) {
+            $query->where('status', $s);
+        }
+    
+        if ($p = $request->get('priority')) {
+            $query->where('priority', $p);
+        }
+    
         if ($q = trim((string) $request->get('q'))) {
             $query->where(function ($x) use ($q) {
                 $x->where('title', 'like', "%{$q}%")
-                    ->orWhere('description', 'like', "%{$q}%");
+                  ->orWhere('description', 'like', "%{$q}%");
             });
         }
-
+    
+        // Count for tabs (also restricted to this manager)
         $counts = LeadIssue::selectRaw('status, COUNT(*) as c')
+            ->when($user->role === 'report_manager', fn($q) => $q->where('resolver_id', $user->id))
             ->groupBy('status')
             ->pluck('c', 'status');
-
+    
         $issues = $query->paginate(20)->withQueryString();
-
+    
         return view('issues.index', compact('issues', 'counts'));
     }
+
 
     public function show(LeadIssue $issue)
     {
@@ -61,17 +78,47 @@ class LeadIssueController extends Controller
     }
 
 
-    public function store(Request $request, Lead $lead)
+    public function store(Request $request, \App\Models\Lead $lead)
     {
-        // $this->authorize('create', [LeadIssue::class, $lead]);
-
         $data = $request->validate([
-            'title' => 'required|string|max:160',
-            'priority' => 'nullable|in:low,normal,high,urgent',
-            'description' => 'required|string|max:5000',
+            'title'         => 'required|string|max:160',
+            'priority'      => 'nullable|in:low,normal,high,urgent',
+            'description'   => 'required|string|max:5000',
             'attachments.*' => 'file|max:10240',
         ]);
-
+    
+        // 1) Get all ACTIVE report managers (checked-in, no checkout)
+        $activeRMs = DB::table('users as u')
+            ->join('user_attendances as ua', function ($j) {
+                $j->on('ua.user_id', '=', 'u.id')
+                  ->whereNull('ua.check_out')
+                  ->where('ua.status', '=', 'in');
+            })
+            ->where('u.role', 'report_manager')
+            ->select('u.id')
+            ->distinct()
+            ->pluck('id');
+    
+        $resolverId = null;
+    
+        if ($activeRMs->isNotEmpty()) {
+            // 2) Count open issues per active RM
+            $counts = LeadIssue::select('resolver_id', DB::raw('COUNT(*) as open_count'))
+                ->whereIn('resolver_id', $activeRMs)
+                ->where('status', 'open')
+                ->groupBy('resolver_id')
+                ->pluck('open_count', 'resolver_id');
+    
+            // 3) Pick RM with fewest open issues
+            $resolverId = $activeRMs->sortBy(fn ($id) => $counts[$id] ?? 0)->first();
+    
+            // 🔒 Safety: double-check that picked user is still report_manager
+            if (!User::where('id', $resolverId)->where('role', 'report_manager')->exists()) {
+                $resolverId = null;
+            }
+        }
+    
+        // 4) Create issue
         $issue = LeadIssue::create([
             'lead_id'     => $lead->id,
             'reporter_id' => $request->user()->id,
@@ -79,28 +126,42 @@ class LeadIssueController extends Controller
             'priority'    => $data['priority'] ?? 'normal',
             'description' => $data['description'],
             'status'      => 'open',
+            'resolver_id' => $resolverId,
         ]);
-
+    
+        // 5) Attach files
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 $path = $file->store("issues/{$lead->id}", 'public');
                 $issue->attachments()->create([
-                    'user_id'    => $request->user()->id,
-                    'file_path'  => $path,
-                    'file_name'  => $file->getClientOriginalName(),
-                    'file_type'  => $file->getClientMimeType(),
-                    'file_size'  => $file->getSize(),
+                    'user_id'     => $request->user()->id,
+                    'file_path'   => $path,
+                    'file_name'   => $file->getClientOriginalName(),
+                    'file_type'   => $file->getClientMimeType(),
+                    'file_size'   => $file->getSize(),
                     'is_solution' => false,
                 ]);
             }
         }
-
-        // Keep database notifications (non-broadcast)
-        User::whereIn('role', ['report_manager', 'admin'])
-            ->each(fn($u) => $u->notify(new IssueCreatedNotification($issue)));
-
-        return back()->with('success', 'Issue submitted. The report team has been notified.');
+    
+        // 6) Notify resolver (or fallback to all RMs)
+        if ($resolverId) {
+            User::whereKey($resolverId)
+                ->each(fn ($u) => $u->notify(new IssueCreatedNotification($issue)));
+        } else {
+            User::where('role', 'report_manager')
+                ->each(fn ($u) => $u->notify(new IssueCreatedNotification($issue)));
+        }
+    
+        return back()->with(
+            'success',
+            $resolverId
+                ? 'Issue submitted and assigned to the least-loaded active report manager.'
+                : 'Issue submitted. No active report manager detected; all report managers were notified.'
+        );
     }
+
+
 
     public function updateStatus(Request $request, LeadIssue $issue)
     {
