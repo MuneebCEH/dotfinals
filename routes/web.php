@@ -121,6 +121,9 @@ Route::middleware('auth')->group(function () {
         // Lead management extras
         Route::post('leads/{lead}/assign', [LeadController::class, 'assign'])->name('leads.assign');
         Route::post('/leads/bulk-assign', [LeadController::class, 'bulkAssign'])->name('leads.bulk-assign');
+        Route::get('leads/ids', [LeadController::class, 'ids'])->name('leads.ids');
+        Route::delete('leads/actions/bulk', [LeadController::class, 'bulkDestroy'])
+            ->name('leads.bulk-destroy');
         Route::post('/leads/import', [LeadController::class, 'import'])->name('leads.import');
 
         // Categories, Reports
