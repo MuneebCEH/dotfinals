@@ -53,6 +53,7 @@ return new class extends Migration
 
             // Status
             $table->string('status', 100)->default('Submitted');
+            $table->timestamp('assigned_time')->nullable()->index();
 
             // Assignments
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();

@@ -1,5 +1,10 @@
-{{-- resources/views/dashboard.blade.php --}}
+{{-- resources/views/dashboard_updated.blade.php --}}
 @extends('layouts.app')
+
+@push('head')
+    {{-- CSRF token meta for JS scripts --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -19,6 +24,15 @@
 
         // Get current user and role
         $user = auth()->user();
+        $userId = $user->id;
+
+        // Leads updated today (assigned to current user)
+        $todayLeadsCount = \App\Models\Lead::where(function ($query) use ($userId) {
+            $query->where('assigned_to', $userId)->orWhere('super_agent_id', $userId)->orWhere('closer_id', $userId);
+        })
+            ->whereDate('updated_at', Carbon::today())
+            ->count();
+
         $isRegularUser = $user->role === 'user';
 
         // Pakistan timezone anchors
@@ -27,12 +41,12 @@
         $todayEndLocal = $pakistanNow->copy()->endOfDay();
         $monthStartLocal = $pakistanNow->copy()->startOfMonth();
 
-        // Convert to UTC for DB comparisons if timestamps are stored in UTC (typical)
+        // Convert to UTC (if timestamps are stored in UTC)
         $todayStartUtc = $todayStartLocal->copy()->setTimezone('UTC');
         $todayEndUtc = $todayEndLocal->copy()->setTimezone('UTC');
         $monthStartUtc = $monthStartLocal->copy()->setTimezone('UTC');
 
-        // Get today's attendance (only for regular users) using range match (more reliable than whereDate with TZs)
+        // Today's attendance for regular users
 $todayAttendance = $isRegularUser
     ? UserAttendance::where('user_id', $user->id)
         ->whereBetween('check_in', [$todayStartUtc, $todayEndUtc])
@@ -40,9 +54,8 @@ $todayAttendance = $isRegularUser
         ->first()
     : null;
 
-// Explicitly check for null/non-null checkout to avoid "zero-dates" issues
-$isCheckedIn = $todayAttendance && $todayAttendance->check_out === null;
-$isCheckedOut = $todayAttendance && $todayAttendance->check_out !== null;
+$isCheckedIn = $todayAttendance && $todayAttendance->status === 'in';
+$isCheckedOut = $todayAttendance && $todayAttendance->status === 'out';
 
 // Base query with role-based restrictions
 $leadQuery = class_exists($LeadModel) ? $LeadModel::query() : null;
@@ -57,7 +70,7 @@ if ($isRegularUser && $leadQuery) {
     });
 }
 
-// Primary metrics (use clone() each time to avoid query state bleed)
+// Primary metrics
 $totalLeads = $leadQuery ? $leadQuery->clone()->count() : 0;
 $newLeadsToday = $leadQuery
     ? $leadQuery
@@ -88,7 +101,7 @@ $withBalance = $leadQuery
     ? (int) $leadQuery->clone()->whereNotNull('balance')->where('balance', '>', 0)->count()
     : 0;
 
-// Leads by status - FIXED QUERY
+// Leads by status
 $leadsByStatus = $leadQuery
     ? $leadQuery
         ->clone()
@@ -148,6 +161,18 @@ if (!$isRegularUser && $leadQuery) {
 // Recent leads
 $recentLeads = $leadQuery ? $leadQuery->clone()->latest()->limit(10)->get() : collect();
 
+$submittedLeadsAll = class_exists($LeadModel)
+    ? $LeadModel
+        ::query()
+        ->where('status', 'Submitted')
+        ->where(function ($q) use ($userId) {
+            $q->where('assigned_to', $userId)
+                ->orWhere('super_agent_id', $userId)
+                ->orWhere('closer_id', $userId);
+        })
+        ->count()
+    : 0;
+
 // Dynamic cards
 $cards = [
     [
@@ -159,9 +184,16 @@ $cards = [
     ],
     [
         'label' => 'New Today',
-        'value' => $newLeadsToday,
+        'value' => $todayLeadsCount,
         'icon' => 'fas fa-sun',
         'color' => 'bg-emerald-100 text-emerald-800',
+        'visible' => true,
+    ],
+    [
+        'label' => 'Submitted (All Time)',
+        'value' => $submittedLeadsAll,
+        'icon' => 'fas fa-paper-plane',
+        'color' => 'bg-fuchsia-100 text-fuchsia-800',
         'visible' => true,
     ],
     [
@@ -231,7 +263,7 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                     <div class="flex-1">
                         <p class="text-amber-900 dark:text-amber-100 font-medium">You were automatically checked out.</p>
                         <p class="text-amber-700 dark:text-amber-200 text-sm">Close/reload detected — your session was
-                            safely ended. You can check in again anytime.</p>
+                            safely ended.</p>
                     </div>
                     <button type="button" id="autoCheckoutBannerClose"
                         class="text-amber-700 dark:text-amber-200 hover:opacity-75 transition">
@@ -240,48 +272,28 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                 </div>
             </div>
 
-            {{-- Check-in/Check-out Section (Only for regular users) --}}
+            {{-- Attendance (info-only; no manual actions) --}}
             @if ($isRegularUser)
                 <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700" data-attendance-container>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Attendance Tracking</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Attendance</h3>
 
                     <div class="flex flex-col sm:flex-row gap-4">
-                        @if (!$isCheckedIn && !$isCheckedOut)
-                            {{-- Check In Form --}}
-                            <form action="{{ route('attendance.checkIn') }}" method="POST" class="flex-1">
-                                @csrf
-                                <div class="flex flex-col sm:flex-row gap-2">
-                                    <input type="text" name="notes" placeholder="Notes (optional)"
-                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <button type="submit"
-                                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                                        <i class="fas fa-sign-in-alt"></i> Check In
-                                    </button>
-                                </div>
-                            </form>
-                        @elseif($isCheckedIn && !$isCheckedOut)
-                            {{-- Checked In - Show Check Out Option --}}
+                        @if ($isCheckedIn && !$isCheckedOut)
                             <div class="flex-1 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
                                     <span class="text-green-700 dark:text-green-400 font-medium">
-                                        Checked in at
-                                        {{ $todayAttendance->check_in->setTimezone('Asia/Karachi')->format('g:i A') }}
+                                        Checked in since
+                                        {{ $todayAttendance->check_in->setTimezone('Asia/Karachi')->format('g:i A') }}.
+                                        You will be checked out automatically when you logout or close your last tab.
                                     </span>
                                 </div>
-                                <form action="{{ route('attendance.checkOut') }}" method="POST"
-                                    class="flex flex-col sm:flex-row gap-2">
-                                    @csrf
-                                    <input type="text" name="notes" placeholder="End of day notes (optional)"
-                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <button type="submit"
-                                        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                                        <i class="fas fa-sign-out-alt"></i> Check Out
-                                    </button>
-                                </form>
+                                <a href="{{ route('attendance.history') }}"
+                                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-history"></i> History
+                                </a>
                             </div>
-                        @elseif($isCheckedOut)
-                            {{-- Checked Out + Re-check-in action --}}
+                        @elseif ($isCheckedOut)
                             <div class="flex-1">
                                 <div
                                     class="p-4 rounded-xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/60 dark:bg-blue-900/20">
@@ -291,9 +303,8 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                                             <i
                                                 class="fas fa-clipboard-check text-blue-600 dark:text-blue-400 text-xl mt-1"></i>
                                             <div>
-                                                <p class="text-blue-900 dark:text-blue-100 font-semibold">
-                                                    You’re checked out for today.
-                                                </p>
+                                                <p class="text-blue-900 dark:text-blue-100 font-semibold">You're checked out
+                                                    for today.</p>
                                                 <p class="text-blue-700 dark:text-blue-300 text-sm mt-1">
                                                     Checked in:
                                                     {{ $todayAttendance->check_in->setTimezone('Asia/Karachi')->format('g:i A') }}
@@ -304,31 +315,32 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                                                     Hours worked: <span
                                                         class="font-medium">{{ number_format($todayAttendance->hours_worked, 2) }}</span>
                                                 </p>
+                                                <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                                                    You’ll be checked in automatically the next time you log in.
+                                                </p>
                                             </div>
                                         </div>
-
-                                        {{-- Re-check-in CTA --}}
-                                        <form action="{{ route('attendance.checkIn') }}" method="POST"
-                                            class="w-full sm:w-auto">
-                                            @csrf
-                                            <input type="hidden" name="notes" value="Re-check-in after earlier checkout">
-                                            <button type="submit"
-                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-                                                       bg-green-600 hover:bg-green-700 text-white shadow-md transition">
-                                                <i class="fas fa-sign-in-alt"></i>
-                                                Check In Again
-                                            </button>
-                                        </form>
+                                        <a href="{{ route('attendance.history') }}"
+                                            class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                                            <i class="fas fa-history"></i> History
+                                        </a>
                                     </div>
                                 </div>
                             </div>
+                        @else
+                            {{-- No check-in yet (first load after login) --}}
+                            <div class="flex-1 flex items-start gap-3">
+                                <i class="fas fa-circle-info text-gray-500 dark:text-gray-400 mt-1"></i>
+                                <p class="text-gray-700 dark:text-gray-300">
+                                    You’ll be checked in automatically now. Closing your last tab or logging out will check
+                                    you out automatically.
+                                </p>
+                            </div>
+                            <a href="{{ route('attendance.history') }}"
+                                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-history"></i> History
+                            </a>
                         @endif
-
-                        {{-- Attendance History Link --}}
-                        <a href="{{ route('attendance.history') }}"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                            <i class="fas fa-history"></i> History
-                        </a>
                     </div>
                 </div>
             @endif
@@ -509,11 +521,9 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                             @endphp
                             <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $fullName !== '' ? $fullName : '—' }}
-                                </td>
+                                    {{ $fullName !== '' ? $fullName : '—' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $cityState !== '' ? $cityState : '—' }}
-                                </td>
+                                    {{ $cityState !== '' ? $cityState : '—' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm capitalize">
                                     <span
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -524,16 +534,13 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $categoryName ?? 'Uncategorized' }}
-                                </td>
+                                    {{ $categoryName ?? 'Uncategorized' }}</td>
                                 @if (!$isRegularUser)
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $assignedName ?? 'Unassigned' }}
-                                    </td>
+                                        {{ $assignedName ?? 'Unassigned' }}</td>
                                 @endif
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ optional($lead->created_at)->diffForHumans() ?? '—' }}
-                                </td>
+                                    {{ optional($lead->created_at)->diffForHumans() ?? '—' }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -553,7 +560,7 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Chart.js
+        // Chart.js (unchanged)
         document.addEventListener('DOMContentLoaded', function() {
             const monthlyRaw = @json($monthlyLeadCounts);
             const labels = (monthlyRaw || []).map(r => {
@@ -627,133 +634,115 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
         });
     </script>
 
-    @if ($isRegularUser && $isCheckedIn && !$isCheckedOut)
-        <script>
-            // Auto checkout + logout on tab/browser close (safer: no visibilitychange)
-            (function() {
-                let autoActionTriggered = false;
-                let internalNav = false;
+    {{-- Session & attendance handler --}}
+    {{-- <script>
+        (function() {
+            if (window.__sessBound) return;
+            window.__sessBound = true;
 
-                // Detect internal navigation (don't auto-checkout if staying in app)
-                document.addEventListener('click', (e) => {
-                    const a = e.target.closest && e.target.closest('a');
-                    if (a && a.href && a.origin === location.origin) internalNav = true;
-                }, true);
+            // Routes
+            const PING_URL = "{{ route('attendance.ping') }}"; // CSRF-protected
+            const BEACON_URL = "{{ route('logout.beacon') }}"; // CSRF-exempt
 
-                document.addEventListener('submit', (e) => {
-                    const form = e.target;
-                    if (form && form.action && new URL(form.action, location.href).origin === location.origin) {
-                        internalNav = true;
+            // CSRF
+            const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            // --- Heartbeat (keep last_heartbeat_at fresh) ---
+            function ping() {
+                if (document.hidden) return;
+                fetch(PING_URL, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRF-TOKEN': CSRF,
+                        'Accept': 'application/json'
                     }
-                }, true);
+                }).catch(() => {});
+            }
+            const HEARTBEAT_MS = 60_000;
+            let hb = setInterval(ping, HEARTBEAT_MS);
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) ping();
+            }, {
+                passive: true
+            });
+            window.addEventListener('focus', ping, {
+                passive: true
+            });
 
-                function sendPost(url, bodyParams) {
-                    if (navigator.sendBeacon) {
-                        const blob = new Blob([bodyParams.toString()], {
-                            type: 'application/x-www-form-urlencoded'
-                        });
-                        navigator.sendBeacon(url, blob);
-                        return;
-                    }
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: bodyParams.toString(),
-                        keepalive: true,
-                        credentials: 'same-origin'
-                    }).catch(() => {});
-                }
+            // --- Multi-tab tracking ---
+            const TAB_KEY = 'app_active_tab_count';
+            const getCount = () => parseInt(localStorage.getItem(TAB_KEY) || '0', 10) || 0;
+            const setCount = (n) => localStorage.setItem(TAB_KEY, String(Math.max(0, n)));
 
-                function swapAttendanceUIImmediately() {
-                    const container = document.querySelector('[data-attendance-container]');
-                    if (!container) return;
-                    container.innerHTML = `
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Attendance Tracking</h3>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="flex-1">
-                            <div class="p-4 rounded-xl border border-blue-200/60 dark:border-blue-800/40 bg-blue-50/60 dark:bg-blue-900/20">
-                                <div class="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
-                                    <div class="flex items-start gap-3">
-                                        <i class="fas fa-clipboard-check text-blue-600 dark:text-blue-400 text-xl mt-1"></i>
-                                        <div>
-                                            <p class="text-blue-900 dark:text-blue-100 font-semibold">You’ve been checked out.</p>
-                                            <p class="text-blue-700 dark:text-blue-300 text-sm mt-1">Session ended automatically. You can check in again.</p>
-                                        </div>
-                                    </div>
-                                    <form action="{{ route('attendance.checkIn') }}" method="POST" class="w-full sm:w-auto">
-                                        @csrf
-                                        <input type="hidden" name="notes" value="Re-check-in after auto checkout">
-                                        <button type="submit"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-                                                    bg-green-600 hover:bg-green-700 text-white shadow-md transition">
-                                            <i class="fas fa-sign-in-alt"></i>
-                                            Check In Again
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="{{ route('attendance.history') }}"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                            <i class="fas fa-history"></i> History
-                        </a>
-                    </div>`;
-                }
+            // increment on (re)show
+            function markOpen() {
+                setCount(getCount() + 1);
+            }
+            // decrement and if last → beacon logout
+            let closing = false;
 
-                function triggerCheckoutAndLogout(reason) {
-                    if (autoActionTriggered || internalNav) return;
-                    autoActionTriggered = true;
+            function markClose() {
+                if (closing) return;
+                closing = true;
+                setCount(getCount() - 1);
+                const remaining = getCount();
 
-                    const csrf = @json(csrf_token());
-                    const notes = ` `;
+                // small delay to distinguish reload from real close; cancelled on pageshow
+                setTimeout(() => {
+                    if (remaining <= 0) {
+                        // flag for banner (use localStorage so it survives full browser close)
+                        try {
+                            localStorage.setItem('autoCheckedOut', String(Date.now()));
+                        } catch (_) {}
 
-                    // Mark for next load
-                    try {
-                        sessionStorage.setItem('autoCheckedOut', '1');
-                    } catch (_) {}
-
-                    const bodyParams = new URLSearchParams({
-                        _token: csrf,
-                        notes
-                    });
-
-                    // 1) Checkout
-                    sendPost(@json(route('attendance.checkOut')), bodyParams);
-
-                    // 2) Logout
-                    const logoutParams = new URLSearchParams({
-                        _token: csrf
-                    });
-                    sendPost(@json(route('logout')), logoutParams);
-
-                    // 3) Optimistic UI swap (if the user lingers briefly)
-                    swapAttendanceUIImmediately();
-                }
-
-                // Safer close events (no visibilitychange; it fires too often)
-                window.addEventListener('pagehide', (e) => {
-                    if (!e.persisted) triggerCheckoutAndLogout('pagehide');
-                });
-                window.addEventListener('beforeunload', () => {
-                    triggerCheckoutAndLogout('beforeunload');
-                });
-
-                // Show banner if we auto-checked-out previously
-                document.addEventListener('DOMContentLoaded', () => {
-                    try {
-                        if (sessionStorage.getItem('autoCheckedOut') === '1') {
-                            const banner = document.getElementById('autoCheckoutBanner');
-                            if (banner) banner.classList.remove('hidden');
-                            sessionStorage.removeItem('autoCheckedOut');
-
-                            const closeBtn = document.getElementById('autoCheckoutBannerClose');
-                            if (closeBtn) closeBtn.addEventListener('click', () => banner.classList.add('hidden'));
+                        // Logout + checkout on server
+                        if (navigator.sendBeacon) {
+                            const blob = new Blob([JSON.stringify({
+                                reason: 'tab-or-browser-close'
+                            })], {
+                                type: 'application/json'
+                            });
+                            navigator.sendBeacon(BEACON_URL, blob);
+                        } else {
+                            fetch(BEACON_URL, {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                keepalive: true,
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            }).catch(() => {});
                         }
-                    } catch (_) {}
-                });
-            })();
-        </script>
-    @endif
+                    }
+                    clearInterval(hb);
+                }, 900);
+            }
+
+            // hook lifecycle
+            window.addEventListener('pageshow', function(e) {
+                markOpen();
+                // clear "closing" if we reloaded
+                closing = false;
+            });
+            window.addEventListener('pagehide', markClose);
+            window.addEventListener('beforeunload', markClose);
+
+            // Optional: show the "auto checkout" banner if we detect a recent auto-close
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    const ts = parseInt(localStorage.getItem('autoCheckedOut') || '0', 10);
+                    // show if within last 10 minutes
+                    if (ts && (Date.now() - ts) < 10 * 60 * 1000) {
+                        const banner = document.getElementById('autoCheckoutBanner');
+                        if (banner) banner.classList.remove('hidden');
+                        const closeBtn = document.getElementById('autoCheckoutBannerClose');
+                        if (closeBtn) closeBtn.addEventListener('click', () => banner.classList.add('hidden'));
+                        // clear it so we don’t show forever
+                        localStorage.removeItem('autoCheckedOut');
+                    }
+                } catch (_) {}
+            });
+        })();
+    </script> --}}
 @endpush

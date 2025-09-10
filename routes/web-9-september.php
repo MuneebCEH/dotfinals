@@ -18,10 +18,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
 
-
-Route::get('/online-users', [AttendanceController::class, 'onlineUsersJson'])
-    ->name('users.online');
-
 /*
 |--------------------------------------------------------------------------
 | Public (auth)

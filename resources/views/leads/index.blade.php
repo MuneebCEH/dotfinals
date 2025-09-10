@@ -514,6 +514,7 @@
                                     @if ($isAdmin)
                                         <th class="{{ $tableHeaderClass }}">Assigned To</th>
                                     @endif
+                                    <th class="{{ $tableHeaderClass }}">Assigned Time</th>
                                     <th class="{{ $tableHeaderClass }}">Status</th>
                                     <th class="{{ $tableHeaderClass }}">Created Date</th>
                                     <th class="{{ $tableHeaderClass }}">Actions</th>
@@ -574,6 +575,18 @@
                                                     class="text-sm text-gray-900 dark:text-white">{{ $lead->assignee->name ?? 'Unassigned' }}</span>
                                             </td>
                                         @endif
+                                        
+                                        
+                                        {{-- NEW: Assigned Time --}}
+                                        <td class="px-6 py-4">
+                                            <span class="text-sm text-gray-900 dark:text-white">
+                                                @if(!empty($lead->assigned_time))
+                                                    {{ \Illuminate\Support\Carbon::parse($lead->assigned_time)->timezone(config('app.timezone'))->format('M d, Y h:i A') }}
+                                                @else
+                                                    —
+                                                @endif
+                                            </span>
+                                        </td>
 
                                         <!-- Status -->
                                         <td class="px-6 py-4">
@@ -1123,5 +1136,124 @@
                 });
             }
         });
+        
+        
+        (function () {
+  // ---- Config ----
+  const ONLINE_URL = "{{ route('users.online', ['minutes' => 3, 'tz' => 'Asia/Karachi']) }}";
+  const ASSIGNED_COUNTS = @json($assignedCounts ?? []);
+  const ONLINE_WRAP_SEL = '#usersOnlineWrap';
+  const ONLINE_TAB_BTN  = '[data-user-tab="online"]';
+
+  let onlineRefreshTimer = null;
+
+  async function loadOnlineUsers() {
+    try {
+      const res = await fetch(ONLINE_URL, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Failed to fetch online users');
+      const json = await res.json();
+      const list = Array.isArray(json?.data) ? json.data : [];
+
+      renderOnlineUsers(list);
+      updateOnlineTabCount(list.length);
+
+      // Reapply UX helpers
+      applySearchAndSort();
+      recalcState();
+    } catch (e) {
+      // Optional: you could show a toast here
+      // console.warn(e);
+      renderOnlineUsers([]); // fallback empty list
+      updateOnlineTabCount(0);
+    }
+  }
+
+  function updateOnlineTabCount(n) {
+    const btn = document.querySelector(ONLINE_TAB_BTN);
+    if (!btn) return;
+    // Try to replace "(...)" in the label, or append when missing
+    const text = btn.textContent || 'Online';
+    if (/\(.*\)/.test(text)) {
+      btn.textContent = text.replace(/\(.*\)/, `(${n})`);
+    } else {
+      btn.textContent = text.trim() + ` (${n})`;
+    }
+  }
+
+  function renderOnlineUsers(users) {
+    const wrap = document.querySelector(ONLINE_WRAP_SEL);
+    if (!wrap) return;
+
+    if (!users.length) {
+      wrap.innerHTML = `
+        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-300">
+          No team members are currently online.
+        </div>`;
+      return;
+    }
+
+    // Sort by last_seen (newest first)
+    users.sort((a, b) => new Date(b.last_seen || 0) - new Date(a.last_seen || 0));
+
+    const rowsHtml = users.map(u => {
+      const id   = u.user_id ?? u.id;
+      const name = (u.name || 'Unknown').toString();
+      const role = (u.role || '').toString();
+      const eligible = role === 'user'; // only normal "user" should be assignable
+      const load = parseInt(ASSIGNED_COUNTS[id] ?? 0, 10) || 0;
+
+      // Keep your existing classes/attributes so search/sort/selection logic keeps working
+      return `
+      <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border ${eligible
+          ? 'border-emerald-200 dark:border-emerald-900/40 bg-white dark:bg-gray-800'
+          : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40'}"
+           data-name="${name.toLowerCase()}"
+           data-email=""
+           data-load="${load}"
+           data-eligible="${eligible ? '1' : '0'}">
+        <div class="flex items-center gap-3 min-w-0">
+          <input type="checkbox" name="assignee_ids[]" value="${id}"
+            class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            ${eligible ? '' : 'disabled'}>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <div class="min-w-0">
+            <label class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate cursor-pointer">${name}</label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">—</p>
+          </div>
+        </div>
+        <span class="shrink-0 text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">${load} assigned</span>
+      </div>`;
+    }).join('');
+
+    wrap.innerHTML = rowsHtml;
+  }
+
+  // Hook into your modal open/close to start/stop refresh
+  const _openBulkAssignModal = window.openBulkAssignModal;
+  const _closeBulkAssignModal = window.closeBulkAssignModal;
+
+  window.openBulkAssignModal = function () {
+    if (typeof _openBulkAssignModal === 'function') _openBulkAssignModal();
+
+    // Load immediately and refresh while modal is open
+    loadOnlineUsers();
+    clearInterval(onlineRefreshTimer);
+    onlineRefreshTimer = setInterval(loadOnlineUsers, 60_000);
+  };
+
+  window.closeBulkAssignModal = function () {
+    if (typeof _closeBulkAssignModal === 'function') _closeBulkAssignModal();
+    clearInterval(onlineRefreshTimer);
+  };
+
+  // Optional: also refresh when switching to the Online tab
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-user-tab="online"]');
+    if (!btn) return;
+    // Small delay so the tab DOM is visible before we apply filtering
+    setTimeout(() => loadOnlineUsers(), 50);
+  });
+
+})();
     </script>
 @endpush
