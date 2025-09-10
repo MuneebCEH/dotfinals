@@ -46,25 +46,40 @@
 
 @section('content')
     {{-- Alpine wrapper controls modal state for the whole page --}}
-    <div class="space-y-8 animate-on-load" x-data="{
-        issueOpen: false,
-        isSubmitting: false,
-        handleSubmit(event) {
-            if (this.isSubmitting) {
-                event.preventDefault();
-                return false;
+    <div class="space-y-8 animate-on-load"
+         x-data="{
+            issueOpen: false,
+            isSubmitting: false,
+            handleSubmit(event) {
+                if (this.isSubmitting) {
+                    event.preventDefault();
+                    return false;
+                }
+                this.isSubmitting = true;
+
+                // Add reload after 2 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+
+                return true;
             }
-            this.isSubmitting = true;
-    
-            // Add reload after 2 seconds
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-    
-            return true;
-        }
-    }" x-init="$nextTick(() => { if (@json($errors->has('title') || $errors->has('description') || $errors->has('priority') || $errors->has('attachments.*'))) issueOpen = true })"
-        @keydown.escape.window="issueOpen=false">
+         }"
+         x-init="
+            // Open modal if there are validation errors
+            $nextTick(() => {
+                if (@json($errors->has('title') || $errors->has('description') || $errors->has('priority') || $errors->has('attachments.*'))) {
+                    issueOpen = true
+                }
+            });
+
+            // Lock body scroll and focus title when modal opens
+            $watch('issueOpen', (open) => {
+                document.body.style.overflow = open ? 'hidden' : '';
+                if (open) { $nextTick(() => { $refs.issueTitle?.focus(); }); }
+            });
+         "
+         @keydown.escape.window="issueOpen=false">
 
         <!-- Header -->
         <div
@@ -76,10 +91,10 @@
                         possible.</p>
                 </div>
                 <a href="{{ route('leads.index') }}"
-                    class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                   class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                              d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Back to Leads
                 </a>
@@ -103,12 +118,12 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <a href="{{ Storage::url($lead->lead_pdf_path) }}" target="_blank"
-                            class="px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition">
+                           class="px-3 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition">
                             View / Download
                         </a>
                         @if (Route::has('leads.pdf'))
                             <a href="{{ route('leads.pdf', $lead) }}"
-                                class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                               class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 Force Download
                             </a>
                         @endif
@@ -116,9 +131,9 @@
                 </div>
 
                 <div class="p-4">
-                    <div class="rounded-xl overflow-hidden border border-gray-200/70 dark:border-gray-700/70">
+                    <div class="rounded-xl overflow-hidden border border-gray-200/70 dark:border-gray-700/70 relative z-0">
                         <iframe src="{{ Storage::url($lead->lead_pdf_path) }}" class="w-full h-[70vh] min-h-[420px]"
-                            frameborder="0" loading="lazy"></iframe>
+                                frameborder="0" loading="lazy"></iframe>
                     </div>
                 </div>
             </div>
@@ -135,7 +150,7 @@
                         class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                                  d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 dark:text-white">Lead Information</h3>
@@ -143,7 +158,7 @@
             </div>
 
             <form method="POST" action="{{ route('leads.update', $lead) }}" class="p-8 space-y-10"
-                enctype="multipart/form-data" @submit="handleSubmit($event)">
+                  enctype="multipart/form-data" @submit="handleSubmit($event)">
                 @csrf
                 @method('PUT')
 
@@ -152,26 +167,26 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">First Name *</label>
                         <input name="first_name" value="{{ old('first_name', $lead->first_name) }}" required
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('first_name')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">Middle Initial</label>
                         <input name="middle_initial" value="{{ old('middle_initial', $lead->middle_initial) }}"
-                            maxlength="2"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               maxlength="2"
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('middle_initial')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">Surname *</label>
                         <input name="surname" value="{{ old('surname', $lead->surname) }}" required
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('surname')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -181,26 +196,26 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">Street</label>
                         <input name="street" value="{{ old('street', $lead->street) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('street')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">City</label>
                         <input name="city" value="{{ old('city', $lead->city) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('city')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">State Abbreviation</label>
                         <input name="state_abbreviation" value="{{ old('state_abbreviation', $lead->state_abbreviation) }}"
-                            maxlength="5"
-                            class="uppercase block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               maxlength="5"
+                               class="uppercase block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('state_abbreviation')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -210,25 +225,25 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">Gen Code</label>
                         <input name="gen_code" value="{{ old('gen_code', $lead->gen_code) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('gen_code')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">Zip Code</label>
                         <input name="zip_code" value="{{ old('zip_code', $lead->zip_code) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('zip_code')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">Age</label>
                         <input type="number" min="0" name="age" value="{{ old('age', $lead->age) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('age')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -238,9 +253,9 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">SSN</label>
                         <input name="ssn" value="{{ old('ssn', $lead->ssn) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('ssn')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -266,38 +281,38 @@
                             @foreach ($numberValues as $n)
                                 <div class="flex gap-2">
                                     <input name="numbers[]" value="{{ $n }}"
-                                        class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                        placeholder="(###) ###-####">
+                                           class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                           placeholder="(###) ###-####">
                                     <button type="button"
-                                        class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                        onclick="removeNumberRow(this)" title="Remove">&times;</button>
+                                            class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            onclick="removeNumberRow(this)" title="Remove">&times;</button>
                                 </div>
                             @endforeach
                         </div>
                         <div class="mt-3">
                             <button type="button" id="addNumberBtn"
-                                class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
+                                    class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6v12m6-6H6" />
+                                          d="M12 6v12m6-6H6" />
                                 </svg>
                                 Add Number
                             </button>
                         </div>
                         @error('numbers')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                         @error('numbers.*')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold mb-3">XFC06</label>
                         <input name="xfc06" value="{{ old('xfc06', $lead->xfc06) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('xfc06')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -307,25 +322,25 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">XFC07</label>
                         <input name="xfc07" value="{{ old('xfc07', $lead->xfc07) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('xfc07')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">DEMO7</label>
                         <input name="demo7" value="{{ old('demo7', $lead->demo7) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('demo7')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-3">DEMO9</label>
                         <input name="demo9" value="{{ old('demo9', $lead->demo9) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('demo9')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -336,9 +351,9 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">FICO</label>
                         <input type="number" name="fico" value="{{ old('fico', $lead->fico) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('fico')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -366,29 +381,29 @@
                             @foreach ($cardsValues as $c)
                                 <div class="flex gap-2">
                                     <input name="cards_json[]" value="{{ $c }}"
-                                        class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                        placeholder="e.g., Visa / Amex / Mastercard">
+                                           class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                           placeholder="e.g., Visa / Amex / Mastercard">
                                     <button type="button"
-                                        class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                        onclick="removeCardRow(this)" title="Remove">&times;</button>
+                                            class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            onclick="removeCardRow(this)" title="Remove">&times;</button>
                                 </div>
                             @endforeach
                         </div>
                         <div class="mt-3">
                             <button type="button" id="addCardBtn"
-                                class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
+                                    class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6v12m6-6H6" />
+                                          d="M12 6v12m6-6H6" />
                                 </svg>
                                 Add Card
                             </button>
                         </div>
                         @error('cards_json')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                         @error('cards_json.*')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -396,10 +411,10 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">Balance</label>
                         <input type="number" step="0.01" name="balance"
-                            value="{{ old('balance', $lead->balance) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               value="{{ old('balance', $lead->balance) }}"
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('balance')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -407,12 +422,12 @@
                 {{-- Row: CREDITS --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
-                        <label class="block text-sm font-semibold mb-3">Credits</label>
+                        <label class="block text-sm font-semibold mb-3">Credit Score</label>
                         <input type="number" step="0.01" name="credits"
-                            value="{{ old('credits', $lead->credits) }}"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                               value="{{ old('credits', $lead->credits) }}"
+                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         @error('credits')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="md:col-span-2"></div>
@@ -424,23 +439,25 @@
                 <div class="space-y-4">
                     <h4 class="text-base font-semibold text-gray-900 dark:text-white">Documents & Notes</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="md:col-span-1">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                {{ $lead->lead_pdf_path ? 'Replace PDF (optional)' : 'Upload PDF (optional)' }}
-                            </label>
-                            <input type="file" name="lead_pdf" accept="application/pdf"
-                                class="block w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition">
-                            @error('lead_pdf')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <!--<div class="md:col-span-1">-->
+                        <!--    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">-->
+                        <!--        {{ $lead->lead_pdf_path ? 'Replace PDF (optional)' : 'Upload PDF (optional)' }}-->
+                        <!--    </label>-->
+                        <!--    <input type="file" name="lead_pdf" accept="application/pdf"-->
+                        <!--        class="block w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition">-->
+                        <!--    @error('lead_pdf')-->
+                        <!--        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>-->
+                        <!--    @enderror-->
+                        <!--</div>-->
+
+                        <!--muneeb-->
                         <div class="md:col-span-2">
                             @if ($lead->lead_pdf_path)
                                 <label
                                     class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Actions</label>
                                 <label class="inline-flex items-center gap-2">
                                     <input type="checkbox" name="remove_lead_pdf" value="1"
-                                        class="rounded border-gray-300 dark:border-gray-600">
+                                           class="rounded border-gray-300 dark:border-gray-600">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">Remove current PDF</span>
                                 </label>
                             @endif
@@ -451,10 +468,10 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">Messages / Notes</label>
                         <textarea name="notes" rows="8"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                            placeholder="Notes...">{{ old('notes', $lead->notes) }}</textarea>
+                                  class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                  placeholder="Notes...">{{ old('notes', $lead->notes) }}</textarea>
                         @error('notes')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -466,12 +483,12 @@
 
                     @if ($canReport && !$hasExistingIssue)
                         <button type="button" @click="issueOpen = true"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition">
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Issue Report
+                            Request Report
                         </button>
                     @endif
 
@@ -483,7 +500,7 @@
                     <div>
                         <label class="block text-sm font-semibold mb-3">Select Status</label>
                         <select name="status"
-                            class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             <option value="">Select Status</option>
                             @foreach ($statuses as $s)
                                 <option value="{{ $s }}"
@@ -493,7 +510,7 @@
                             @endforeach
                         </select>
                         @error('status')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -502,7 +519,7 @@
                         <div>
                             <label class="block text-sm font-semibold mb-3">Select TO</label>
                             <select name="assigned_to"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                 <option value="">Select TO</option>
                                 @foreach ($tos as $to)
                                     <option value="{{ $to->id }}"
@@ -512,7 +529,7 @@
                                 @endforeach
                             </select>
                             @error('assigned_to')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -520,7 +537,7 @@
                         <div>
                             <label class="block text-sm font-semibold mb-3">Select Super Agent</label>
                             <select name="super_agent_id"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                 <option value="">Select Super Agent</option>
                                 @foreach ($superAgents as $agent)
                                     <option value="{{ $agent->id }}"
@@ -530,7 +547,7 @@
                                 @endforeach
                             </select>
                             @error('super_agent_id')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -538,7 +555,7 @@
                         <div>
                             <label class="block text-sm font-semibold mb-3">Select Closer</label>
                             <select name="closer_id"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                 <option value="">Select Closer</option>
                                 @foreach ($closers as $closer)
                                     <option value="{{ $closer->id }}"
@@ -548,7 +565,7 @@
                                 @endforeach
                             </select>
                             @error('closer_id')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                             @enderror
                         </div>
                     @else
@@ -561,27 +578,27 @@
                     class="flex items-center justify-between space-x-4 pt-6 border-t border-gray-200/50 dark:border-gray-700/50">
                     @php
                         // Get unread notifications related to this lead's issues
-$leadIssues = $lead->issues()->pluck('id')->toArray();
-$unreadNotifications = auth()
-    ->user()
-    ->unreadNotifications->filter(function ($notification) use ($leadIssues) {
-        return isset($notification->data['issue_id']) &&
-            in_array($notification->data['issue_id'], $leadIssues);
-    });
-$unreadCount = $unreadNotifications->count();
+                        $leadIssues = $lead->issues()->pluck('id')->toArray();
+                        $unreadNotifications = auth()
+                            ->user()
+                            ->unreadNotifications->filter(function ($notification) use ($leadIssues) {
+                                return isset($notification->data['issue_id']) &&
+                                    in_array($notification->data['issue_id'], $leadIssues);
+                            });
+                        $unreadCount = $unreadNotifications->count();
 
-// Get issue IDs from notifications, handling potential data structure differences
-$notificationIssueIds = [];
-foreach ($unreadNotifications as $notification) {
-    if (isset($notification->data['issue_id'])) {
-        $notificationIssueIds[] = $notification->data['issue_id'];
-    }
-}
+                        // Get issue IDs from notifications, handling potential data structure differences
+                        $notificationIssueIds = [];
+                        foreach ($unreadNotifications as $notification) {
+                            if (isset($notification->data['issue_id'])) {
+                                $notificationIssueIds[] = $notification->data['issue_id'];
+                            }
+                        }
 
-// Get the most recent issue with notifications
-$latestIssueWithNotification =
-    $unreadCount > 0 && !empty($notificationIssueIds)
-        ? $lead->issues()->whereIn('id', $notificationIssueIds)->latest()->first()
+                        // Get the most recent issue with notifications
+                        $latestIssueWithNotification =
+                            $unreadCount > 0 && !empty($notificationIssueIds)
+                                ? $lead->issues()->whereIn('id', $notificationIssueIds)->latest()->first()
                                 : null;
 
                         // Check if lead has any issues at all
@@ -591,10 +608,10 @@ $latestIssueWithNotification =
                     @if ($latestIssueWithNotification)
                         <div class="flex space-x-2">
                             <a href="{{ route('leads.issues.show', $latestIssueWithNotification) }}"
-                                class="inline-flex items-center px-6 py-3 border border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                               class="inline-flex items-center px-6 py-3 border border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                                 View Responses
                                 @if ($unreadCount > 0)
@@ -606,12 +623,12 @@ $latestIssueWithNotification =
                     @elseif ($hasAnyIssues)
                         <div class="flex space-x-2">
                             <a href="{{ route('leads.issues.show', $lead->issues()->latest()->first()) }}"
-                                class="inline-flex items-center px-6 py-3 border border-gray-500 text-gray-700 bg-gray-50 dark:bg-gray-900/30 dark:text-gray-300 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                               class="inline-flex items-center px-6 py-3 border border-gray-500 text-gray-700 bg-gray-50 dark:bg-gray-900/30 dark:text-gray-300 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
-                                View Issue
+                                View Report
                             </a>
                         </div>
                     @else
@@ -620,16 +637,16 @@ $latestIssueWithNotification =
 
                     <div class="flex items-center space-x-4">
                         <a href="{{ route('leads.index') }}"
-                            class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                           class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
                             Cancel
                         </a>
                         <button type="submit"
-                            class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="isSubmitting" :class="{ 'btn-loading': isSubmitting }">
+                                class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                :disabled="isSubmitting" :class="{ 'btn-loading': isSubmitting }">
                             <span class="btn-text flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
+                                          d="M5 13l4 4L19 7" />
                                 </svg>
                                 Save Changes
                             </span>
@@ -639,103 +656,107 @@ $latestIssueWithNotification =
             </form>
         </div>
 
-        {{-- ===== Issue Report Modal (inside Alpine scope) - Show only if no existing issues ===== --}}
+        {{-- ===== Issue Report Modal (teleported to <body>) - Show only if no existing issues ===== --}}
         @if (!$hasExistingIssue)
-            <div x-cloak x-show="issueOpen" x-transition.opacity
-                class="fixed inset-0 z-50 flex items-center justify-center p-4">
-                {{-- Backdrop (click to close) --}}
-                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="issueOpen=false"></div>
+            <template x-teleport="body">
+                <div x-cloak x-show="issueOpen" x-transition.opacity
+                     class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    {{-- Backdrop (click to close) --}}
+                    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="issueOpen=false"></div>
 
-                {{-- Dialog --}}
-                <div
-                    class="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50
-                    bg-white/90 dark:bg-gray-800/90 shadow-2xl">
-                    {{-- Header --}}
-                    <div class="px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold">Report an Issue</h3>
-                            <button type="button" @click="issueOpen=false" class="p-1 rounded hover:bg-white/20"
-                                aria-label="Close">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+                    {{-- Dialog --}}
+                    <div
+                        role="dialog" aria-modal="true" aria-labelledby="issue-dialog-title"
+                        class="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50
+                               bg-white/90 dark:bg-gray-800/90 shadow-2xl">
 
-                    {{-- Body --}}
-                    <form id="issue-report-form" method="POST" action="{{ route('leads.issues.store', $lead) }}"
-                        enctype="multipart/form-data" class="p-6 space-y-4">
-                        @csrf
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
-                            <input name="title" required maxlength="160"
-                                class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                                  bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('title')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Priority</label>
-                                <select name="priority"
-                                    class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                                       bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                    <option value="normal" selected>Normal</option>
-                                    <option value="low">Low</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
-                                </select>
-                                @error('priority')
-                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                        {{-- Header --}}
+                        <div class="px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <h3 id="issue-dialog-title" class="text-lg font-semibold">Report a Request</h3>
+                                <button type="button" @click="issueOpen=false" class="p-1 rounded hover:bg-white/20"
+                                        aria-label="Close">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
-                            <textarea name="description" required maxlength="5000" rows="5"
-                                class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                                     bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
-                            @error('description')
+                        {{-- Body (scrollable on small screens) --}}
+                        <form id="issue-report-form" method="POST" action="{{ route('leads.issues.store', $lead) }}"
+                              enctype="multipart/form-data"
+                              class="p-6 space-y-4 overflow-y-auto"
+                              style="max-height: calc(90vh - 64px - 72px);"> {{-- subtract header/footer heights --}}
+                            @csrf
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+                                <input x-ref="issueTitle" name="title" required maxlength="160"
+                                       class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                                              bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                @error('title')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                @enderror
+                            </div>
 
-                        <!--<div>-->
-                        <!--    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Attachments</label>-->
-                        <!--    <input type="file" name="attachments[]" multiple-->
-                        <!--        class="mt-1 w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0-->
-                        <!--          file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition" />-->
-                        <!--    <p class="text-xs text-gray-500 mt-1">Max 10MB per file. Attach any relevant files that might-->
-                        <!--        help the report manager understand the issue.</p>-->
-                        <!--    @error('attachments.*')
-        -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Priority</label>
+                                    <select name="priority"
+                                            class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                                                   bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="low">Low</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                    @error('priority')
+                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
+                                <textarea name="description" required maxlength="5000" rows="5"
+                                          class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                                                 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
+                                @error('description')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!--<div>-->
+                            <!--    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Attachments</label>-->
+                            <!--    <input type="file" name="attachments[]" multiple-->
+                            <!--        class="mt-1 w-full text-sm file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0-->
+                            <!--          file:bg-primary-600 file:text-white hover:file:bg-primary-700 transition" />-->
+                            <!--    <p class="text-xs text-gray-500 mt-1">Max 10MB per file. Attach any relevant files that might-->
+                            <!--        help the report manager understand the issue.</p>-->
+                            <!--    @error('attachments.*')-->
                             <!--        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>-->
-                            <!--
-    @enderror-->
-                        <!--</div>-->
+                            <!--    @enderror-->
+                            <!--</div>-->
+                        </form>
 
-                        {{-- Footer --}}
-                        <div class="pt-2 flex items-center justify-end gap-2">
+                        {{-- Footer (sticks under the scroll area) --}}
+                        <div class="px-6 py-4 flex items-center justify-end gap-2 border-t border-gray-200/50 dark:border-gray-700/50">
                             <button type="button" @click="issueOpen=false"
-                                class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
-                                   bg-white/80 dark:bg-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                    class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600
+                                           bg-white/80 dark:bg-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 Cancel
                             </button>
-                            <button type="submit"
-                                class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white
-                                   shadow hover:shadow-md transition">
-                                Submit Issue
+                            <button type="submit" form="issue-report-form"
+                                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white
+                                           shadow hover:shadow-md transition">
+                                Submit Request
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </template>
         @endif
         {{-- ===== /Issue Report Modal ===== --}}
 

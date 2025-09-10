@@ -103,8 +103,6 @@ class StoreLeadRequest extends FormRequest
                     'Paid Off',
                     'Not Qualified (NQ)',
                     'Submitted',
-                    'New Lead',
-                    'Super Lead'
                 ]),
             ],
 

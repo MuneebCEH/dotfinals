@@ -28,6 +28,6 @@ trait HandleLeadFiles
     {
         $base = trim($lead->first_name . ' ' . $lead->surname) ?: 'Lead';
         $base = str_replace(' ', '_', $base);
-        return $base . '_' . now()->format('Y-m-d_H-i-s') . '.pdf';
+        return $base . '_' . now()->format('Y-m-d_H-i-s') . '.txt';
     }
 }

@@ -10,14 +10,31 @@ return new class extends Migration
     {
         Schema::create('user_attendances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->timestamp('check_in')->nullable();
+
+            // The user this attendance belongs to
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+
+            // Check-in/out timestamps (store in UTC)
+            $table->timestamp('check_in'); // always required on create
             $table->timestamp('check_out')->nullable();
-            $table->decimal('hours_worked', 5, 2)->default(0);
+
+            // Total hours worked for this session
+            $table->decimal('hours_worked', 7, 2)->default(0); // 99999.99 max
+
+            // For session heartbeats / detecting abandoned sessions
             $table->timestamp('last_heartbeat_at')->nullable()->index();
-            $table->string('status')->default('in'); // 'in' | 'out'
+
+            // Session status ("in" or "out")
+            $table->enum('status', ['in', 'out'])->default('in');
+
+            // Optional notes (manual or auto-appended)
             $table->text('notes')->nullable();
+
             $table->timestamps();
+
+            // Helpful indexes for daily lookups
+            $table->index(['user_id', 'check_in']);
+            $table->index(['user_id', 'check_in', 'check_out']);
         });
     }
 

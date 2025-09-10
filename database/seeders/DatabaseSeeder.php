@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Create attendance records for 30 online agents
-        $this->createAttendanceForOnlineAgents($agents);
+        // $this->createAttendanceForOnlineAgents($agents);
     }
 
     /**

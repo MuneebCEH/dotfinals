@@ -52,6 +52,7 @@ class Lead extends Model
         'numbers',
         'lead_pdf_path',
         'notes',
+        'assigned_time'
     ];
 
     protected $casts = [
@@ -206,5 +207,11 @@ class Lead extends Model
 
         // Fallback: nothing or your preferred owner column
         return $query->where('assigned_to', $user->id);
+    }
+    
+    public function callbacks()
+    {
+        // assumes callbacks table has a `lead_id` FK to leads.id
+        return $this->hasMany(Callback::class, 'lead_id');
     }
 }

@@ -2,26 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attachment; // adjust namespace if different
-use App\Models\LeadIssue;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-
 class AttachmentController extends Controller
 {
-    /**
-     * Inline-preview an attachment (best-effort anti-download).
-     * Serves from storage/app/public/<file_path>.
-     */
-    // In your controller
-    public function preview($path)
+    private function decodePath(string $encoded): string
     {
-        $file = storage_path('app/public/' . $path);
-        abort_unless(file_exists($file), 404);
+        // URL-safe base64 decode
+        $decoded = base64_decode(strtr($encoded, '-_', '+/'), true);
+        abort_unless($decoded !== false, 404);
+        return ltrim($decoded, '/');
+    }
+
+    public function stream(string $encoded)
+    {
+        $relPath = $this->decodePath($encoded);
+        $file = storage_path('app/public/' . $relPath);
+        abort_unless(is_file($file), 404);
 
         return response()->file($file, [
-            'Content-Disposition' => 'inline', // forces inline preview
-            'Content-Type' => mime_content_type($file)
+            'Content-Type' => mime_content_type($file),
+            'Content-Disposition' => 'inline',
         ]);
+    }
+
+    public function preview(string $encoded)
+    {
+        $relPath = $this->decodePath($encoded);
+        $fileUrl = route('attachments.stream', ['encoded' => strtr(base64_encode($relPath), '+/', '-_')]);
+        return view('attachments.preview', compact('fileUrl'));
     }
 }

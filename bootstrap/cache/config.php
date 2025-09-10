@@ -70,7 +70,7 @@
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'cipher' => 'AES-256-CBC',
-    'key' => 'base64:jSkeSj2MyYnKQ+iMQcVo5vG9pwWCBF2+VYiqzpaUJqg=',
+    'key' => 'base64:CZJqTajTxSqBRTg2hfG3PbdijP6C7Vqjjrh82TdtvIY=',
     'previous_keys' => 
     array (
     ),
@@ -112,6 +112,7 @@
       'Arr' => 'Illuminate\\Support\\Arr',
       'Artisan' => 'Illuminate\\Support\\Facades\\Artisan',
       'Auth' => 'Illuminate\\Support\\Facades\\Auth',
+      'Benchmark' => 'Illuminate\\Support\\Benchmark',
       'Blade' => 'Illuminate\\Support\\Facades\\Blade',
       'Broadcast' => 'Illuminate\\Support\\Facades\\Broadcast',
       'Bus' => 'Illuminate\\Support\\Facades\\Bus',
@@ -148,8 +149,8 @@
       'Session' => 'Illuminate\\Support\\Facades\\Session',
       'Storage' => 'Illuminate\\Support\\Facades\\Storage',
       'Str' => 'Illuminate\\Support\\Str',
-      'URL' => 'Illuminate\\Support\\Facades\\URL',
       'Uri' => 'Illuminate\\Support\\Uri',
+      'URL' => 'Illuminate\\Support\\Facades\\URL',
       'Validator' => 'Illuminate\\Support\\Facades\\Validator',
       'View' => 'Illuminate\\Support\\Facades\\View',
       'Vite' => 'Illuminate\\Support\\Facades\\Vite',
@@ -859,7 +860,7 @@
   array (
     'driver' => 'file',
     'lifetime' => 120,
-    'expire_on_close' => false,
+    'expire_on_close' => true,
     'encrypt' => false,
     'files' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\framework/sessions',
     'connection' => NULL,

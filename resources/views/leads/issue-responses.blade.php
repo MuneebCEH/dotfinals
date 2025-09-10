@@ -215,16 +215,16 @@
                                     class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                                     placeholder="Write your comment here..."></textarea>
                             </div>
-                            <div>
-                                <label for="comment_attachments"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Attachments (Optional)
-                                </label>
-                                <input type="file" name="comment_attachments[]" id="comment_attachments" multiple
-                                    class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Upload screenshots or relevant
-                                    files (max 10MB each)</p>
-                            </div>
+                            <!--<div>-->
+                            <!--    <label for="comment_attachments"-->
+                            <!--        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">-->
+                            <!--        Attachments (Optional)-->
+                            <!--    </label>-->
+                            <!--    <input type="file" name="comment_attachments[]" id="comment_attachments" multiple-->
+                            <!--        class="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">-->
+                            <!--    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Upload screenshots or relevant-->
+                            <!--        files (max 10MB each)</p>-->
+                            <!--</div>-->
                             <div class="flex justify-end">
                                 <button type="submit"
                                     class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow hover:shadow-lg transition">
@@ -234,7 +234,7 @@
                                         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    Post Comment
+                                    Post Report
                                 </button>
                             </div>
                         </form>
