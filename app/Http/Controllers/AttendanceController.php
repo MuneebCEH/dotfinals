@@ -53,6 +53,7 @@ class AttendanceController extends Controller
             return $this->noContentIfJson($request, 'Already checked in.');
         }
 
+<<<<<<< HEAD
         // First check-in today
         UserAttendance::create([
             'user_id'           => $userId,
@@ -62,6 +63,21 @@ class AttendanceController extends Controller
             'notes'             => $request->filled('notes') ? trim((string)$request->string('notes')) : null,
         ]);
 
+=======
+        $now = now();
+
+        // First check-in today
+        UserAttendance::create([
+            'user_id'           => $userId,
+            'check_in'          => $now,       // set once
+            'check_out'         => $now,       // start rolling window at login time
+            'hours_worked'      => 0.00,       // start at zero
+            'status'            => 'in',
+            'last_heartbeat_at' => $now,
+            'notes'             => $request->filled('notes') ? trim((string)$request->string('notes')) : null,
+        ]);
+
+>>>>>>> 5ef97175f7f017a4a3cb89de250b8b0719e957c5
         return $this->noContentIfJson($request, 'Checked in successfully.');
     }
 
@@ -199,18 +215,32 @@ class AttendanceController extends Controller
 
         $attendance = UserAttendance::where('user_id', $userId)
             ->whereBetween('check_in', [$startUtc, $endUtc])
+<<<<<<< HEAD
             // BEFORE: ->whereNull('check_out')
             ->where('status', 'in')            // AFTER: open = status 'in'
+=======
+            ->where('status', 'in')                    // <-- changed
+>>>>>>> 5ef97175f7f017a4a3cb89de250b8b0719e957c5
             ->latest('check_in')
             ->first();
 
         if ($attendance) {
+<<<<<<< HEAD
             $attendance->check_out         = $now;
             $attendance->hours_worked      = round(Carbon::parse($attendance->check_in)->diffInMinutes($now) / 60, 2);
             $attendance->last_heartbeat_at = $now;
             $attendance->status            = 'out';
             $attendance->notes             = self::appendNoteStatic($attendance->notes, '[Auto-checkout]');
             $attendance->save();
+=======
+            $attendance->update([
+                'check_out'         => $now,
+                'hours_worked'      => round(Carbon::parse($attendance->check_in)->diffInMinutes($now) / 60, 2),
+                'last_heartbeat_at' => $now,
+                'status'            => 'out',
+                'notes'             => self::appendNoteStatic($attendance->notes, '[Auto-checkout]'),
+            ]);
+>>>>>>> 5ef97175f7f017a4a3cb89de250b8b0719e957c5
         }
     }
 
@@ -246,6 +276,7 @@ class AttendanceController extends Controller
         }
         return back()->with('success', $flash);
     }
+<<<<<<< HEAD
     
     public function onlineUsersJson(Request $request)
 {
@@ -299,4 +330,6 @@ class AttendanceController extends Controller
     ]);
 }
 
+=======
+>>>>>>> 5ef97175f7f017a4a3cb89de250b8b0719e957c5
 }

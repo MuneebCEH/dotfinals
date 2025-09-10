@@ -736,5 +736,219 @@
     </script>
 
     {{-- === Auto check-in/out logic (fixed guard + server-state aware) === --}}
+<<<<<<< HEAD
     
+=======
+    <script>
+        (function() {
+            // ===== Server truth from Blade =====
+            const IS_REPORTER = @json($isReporter);
+            const SERVER_SAYS_IN = @json($isCheckedIn);
+            const SERVER_SAYS_OUT = @json($isCheckedOut);
+            const HAS_TODAY_ATTENDANCE = @json((bool) $todayAttendance);
+            const USER_ID = @json(optional(auth()->user())->id);
+            const TODAY_YYYY_MM_DD = @json(now()->setTimezone('Asia/Karachi')->format('Y-m-d'));
+
+            // ===== Routes & CSRF =====
+            const LOGOUT_URL = @json(route('logout'));
+            const CHECKIN_URL = @json($isReporter ? route('attendance.checkIn') : null);
+            const CHECKOUT_URL = @json($isReporter ? route('attendance.checkOut') : null);
+            const CSRF = (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')) ||
+                @json(csrf_token());
+
+            // ===== Keys (date-scoped) =====
+            const TAB_KEY = 'app_active_tab_count';
+            const GUARD_KEY = `checked_in_once:${USER_ID || 'anon'}:${TODAY_YYYY_MM_DD}`;
+            const ORIGIN = location.origin;
+
+            // ===== Debug helper =====
+            function dbg(msg, data) {
+                const panel = document.getElementById('debug-panel');
+                if (!panel) return;
+                const pre = document.createElement('div');
+                pre.className = 'debug-pre mb-1';
+                pre.textContent =
+                    `[${new Date().toLocaleTimeString()}] ${msg}${data !== undefined ? '\n' + (typeof data === 'string' ? data : JSON.stringify(data, null, 2)) : ''}`;
+                panel.prepend(pre);
+            }
+
+            // ===== HTTP helpers =====
+            function sendFormBeacon(url, payload = {}) {
+                if (!url) return false;
+                try {
+                    const bodyStr = new URLSearchParams(Object.assign({
+                        _token: CSRF
+                    }, payload)).toString();
+                    const blob = new Blob([bodyStr], {
+                        type: 'application/x-www-form-urlencoded;charset=UTF-8'
+                    });
+                    const ok = navigator.sendBeacon(url, blob);
+                    dbg('sendBeacon', {
+                        url,
+                        ok
+                    });
+                    return ok;
+                } catch (e) {
+                    dbg('sendBeacon error', String(e));
+                    return false;
+                }
+            }
+            async function postForm(url, payload = {}, opts = {}) {
+                if (!url) return;
+                const body = new URLSearchParams(Object.assign({
+                    _token: CSRF
+                }, payload));
+                try {
+                    const resp = await fetch(url, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json, text/plain, */*',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                            'X-CSRF-TOKEN': CSRF
+                        },
+                        body,
+                        keepalive: !!opts.keepalive
+                    });
+                    dbg('fetch POST', {
+                        url,
+                        status: resp.status
+                    });
+                    return resp;
+                } catch (e) {
+                    dbg('fetch error', String(e));
+                }
+            }
+
+            // ===== Tab counters =====
+            const getCount = () => parseInt(localStorage.getItem(TAB_KEY) || '0', 10) || 0;
+            const setCount = (n) => localStorage.setItem(TAB_KEY, String(Math.max(0, n)));
+
+            // ===== Auto CHECK-IN =====
+            function allowAnotherAutoCheckIn() {
+                // If server says OUT (or no attendance today), allow check-in again
+                if (SERVER_SAYS_OUT || !HAS_TODAY_ATTENDANCE) {
+                    sessionStorage.removeItem(GUARD_KEY);
+                    dbg('Cleared guard (server OUT or no today row)');
+                }
+            }
+            async function ensureCheckInNow(reason = 'auto') {
+                if (!IS_REPORTER || !CHECKIN_URL) return;
+                allowAnotherAutoCheckIn();
+
+                if (sessionStorage.getItem(GUARD_KEY)) {
+                    dbg(`auto check-in skipped (guard present)`);
+                    return;
+                }
+                sessionStorage.setItem(GUARD_KEY, '1');
+                dbg(`auto check-in START [${reason}]`);
+
+                const ok = sendFormBeacon(CHECKIN_URL);
+                if (!ok) await postForm(CHECKIN_URL);
+
+                // optional soft verify
+                setTimeout(() => {
+                    if (SERVER_SAYS_OUT) {
+                        dbg('server still OUT after 1s — retry check-in');
+                        sendFormBeacon(CHECKIN_URL) || postForm(CHECKIN_URL);
+                    }
+                }, 1000);
+            }
+
+            // ===== Auto CHECK-OUT (last tab or explicit logout) =====
+            let skipCloseFlow = false,
+                isLoggingOut = false,
+                leavingFired = false;
+
+            document.addEventListener('click', (e) => {
+                const a = e.target.closest?.('a[href]');
+                if (!a) return;
+                try {
+                    const url = new URL(a.href, ORIGIN);
+                    if (url.origin === ORIGIN) {
+                        if (url.href === LOGOUT_URL) isLoggingOut = true;
+                        else skipCloseFlow = true;
+                    }
+                } catch (_) {}
+            }, true);
+
+            document.addEventListener('submit', (e) => {
+                const form = e.target;
+                try {
+                    const actionUrl = new URL((form.getAttribute('action') || ''), ORIGIN).href;
+                    if (actionUrl === LOGOUT_URL) {
+                        isLoggingOut = true;
+                        if (IS_REPORTER && CHECKOUT_URL) sendFormBeacon(CHECKOUT_URL);
+                    } else skipCloseFlow = true;
+                } catch (_) {
+                    skipCloseFlow = true;
+                }
+            }, true);
+
+            async function handleLeaving() {
+                if (leavingFired) return;
+                leavingFired = true;
+                setCount(getCount() - 1);
+                const remaining = getCount();
+
+                if (isLoggingOut) {
+                    if (IS_REPORTER && CHECKOUT_URL) sendFormBeacon(CHECKOUT_URL);
+                    return;
+                }
+                if (skipCloseFlow) return;
+
+                if (remaining === 0) {
+                    // ✅ Only auto-checkout, DO NOT log user out on reload
+                    if (IS_REPORTER && CHECKOUT_URL) {
+                        if (!sendFormBeacon(CHECKOUT_URL)) postForm(CHECKOUT_URL, {}, {
+                            keepalive: true
+                        });
+                    }
+                    try {
+                        sessionStorage.setItem('autoCheckedOut', '1');
+                    } catch (_) {}
+                    sessionStorage.removeItem(GUARD_KEY);
+                }
+            }
+
+            // ===== Lifecycle =====
+            window.addEventListener('pageshow', function() {
+                setCount(getCount() + 1);
+                if (IS_REPORTER) ensureCheckInNow('pageshow');
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (IS_REPORTER) ensureCheckInNow('domready');
+                try {
+                    if (sessionStorage.getItem('autoCheckedOut') === '1') {
+                        document.getElementById('autoCheckoutBanner')?.classList.remove('hidden');
+                        sessionStorage.removeItem('autoCheckedOut');
+                        sessionStorage.removeItem(GUARD_KEY);
+                    }
+                } catch (_) {}
+            });
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible' && IS_REPORTER) ensureCheckInNow('visibility');
+            });
+
+            window.addEventListener('beforeunload', handleLeaving);
+            window.addEventListener('pagehide', handleLeaving);
+
+            window.addEventListener('storage', function(e) {
+                if (e.key === TAB_KEY && e.newValue == null) setCount(1);
+            });
+
+            dbg('BOOT', {
+                IS_REPORTER,
+                SERVER_SAYS_IN,
+                SERVER_SAYS_OUT,
+                HAS_TODAY_ATTENDANCE,
+                GUARD_KEY,
+                CHECKIN_URL,
+                CHECKOUT_URL
+            });
+        })();
+    </script>
+>>>>>>> 5ef97175f7f017a4a3cb89de250b8b0719e957c5
 @endpush
