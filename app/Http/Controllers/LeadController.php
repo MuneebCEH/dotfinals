@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Lead;
 use App\Models\User;
 use App\Http\Controllers\Traits\HandleLeadFiles;
+use App\Models\LeadIssue;
 use App\Models\UserAttendance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use App\Models\IssueAttachment;
 
 class LeadController extends Controller
 {
@@ -721,13 +724,10 @@ class LeadController extends Controller
     public function downloadTxt(Lead $lead)
     {
         $user = auth()->user();
-
-        // ✅ Ensure the user is authenticated (optional, usually handled by middleware)
         abort_unless($user, 403, 'You must be logged in to download this document.');
 
-        // ✅ Remove role-based restrictions (any authenticated user)
+        // Build TXT content
         $lines = [];
-
         $lines[] = "=== Lead Details ===";
         $lines[] = "Name: " . trim($lead->first_name . ' ' . $lead->middle_initial . ' ' . $lead->surname);
         $lines[] = "Gen Code: " . ($lead->gen_code ?: '—');
@@ -743,12 +743,8 @@ class LeadController extends Controller
 
         $lines[] = "";
         $lines[] = "Phone Numbers:";
-        $numbers = is_array($lead->numbers)
-            ? $lead->numbers
-            : (json_decode($lead->numbers ?? '[]', true) ?? []);
-        $lines[] = count($numbers)
-            ? implode(PHP_EOL, array_map(fn($n) => "- $n", $numbers))
-            : "- No numbers found";
+        $numbers = is_array($lead->numbers) ? $lead->numbers : (json_decode($lead->numbers ?? '[]', true) ?? []);
+        $lines[] = count($numbers) ? implode(PHP_EOL, array_map(fn($n) => "- $n", $numbers)) : "- No numbers found";
 
         $lines[] = "";
         $lines[] = "Custom Fields:";
@@ -764,12 +760,8 @@ class LeadController extends Controller
         $lines[] = "- Credits: " . ($lead->credits ?: '—');
 
         $lines[] = "- Cards:";
-        $cards = is_array($lead->cards_json)
-            ? $lead->cards_json
-            : (json_decode($lead->cards_json ?? '[]', true) ?? []);
-        $lines[] = count($cards)
-            ? implode(PHP_EOL, array_map(fn($c) => "  - $c", $cards))
-            : "  - None";
+        $cards = is_array($lead->cards_json) ? $lead->cards_json : (json_decode($lead->cards_json ?? '[]', true) ?? []);
+        $lines[] = count($cards) ? implode(PHP_EOL, array_map(fn($c) => "  - $c", $cards)) : "  - None";
 
         $lines[] = "";
         $lines[] = "Status: " . ($lead->status ?: '—');
@@ -785,15 +777,142 @@ class LeadController extends Controller
         $lines[] = "Created At: " . ($lead->created_at?->toDateTimeString() ?? '—');
         $lines[] = "Created By: " . optional($lead->creator)->name;
 
-        $content = implode(PHP_EOL, $lines);
+        $content     = implode(PHP_EOL, $lines);
+        $baseName    = str_replace(' ', '_', trim($lead->first_name . ' ' . $lead->surname) ?: 'Lead') . '_Details';
+        $txtFilename = $baseName . '.txt';
 
-        $filename = str_replace(' ', '_', trim($lead->first_name . ' ' . $lead->surname) ?: 'Lead') . '_Details.txt';
+        // Latest issue
+        $latestIssue = LeadIssue::where('lead_id', $lead->id)->orderByDesc('created_at')->first();
+        if (!$latestIssue) {
+            return response($content, 200, [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]);
+        }
 
-        return response($content, 200, [
-            'Content-Type' => 'text/plain',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        // Latest attachment
+        $latestAttachment = IssueAttachment::where('lead_issue_id', $latestIssue->id)->orderByDesc('created_at')->first();
+        if (!$latestAttachment) {
+            return response($content, 200, [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]);
+        }
+
+        // Prepare ZIP
+        $zipDownloadName = $baseName . '_with_attachment.zip';
+        $tmpDir = storage_path('app/tmp');
+        if (!is_dir($tmpDir)) {
+            @mkdir($tmpDir, 0775, true);
+        }
+        $zipPath = $tmpDir . '/' . Str::uuid()->toString() . '.zip';
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return response($content, 200, [
+                'Content-Type'        => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
+                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            ]);
+        }
+
+        // Add TXT
+        $zip->addFromString($txtFilename, $content);
+
+        // ---------- Robust attachment resolution ----------
+        $origPath = $latestAttachment->file_path;
+        $attachmentName = basename($latestAttachment->file_name ?: $origPath);
+
+        $disksToTry = array_values(array_unique([config('filesystems.default'), 'public', 'local']));
+        $pathsToTry = [$origPath, 'public/' . ltrim($origPath, '/')];
+
+        $resolvedDisk = null;
+        $resolvedPath = null;
+
+        foreach ($disksToTry as $disk) {
+            foreach ($pathsToTry as $p) {
+                try {
+                    if (Storage::disk($disk)->exists($p)) {
+                        $resolvedDisk = $disk;
+                        $resolvedPath = $p;
+                        break 2;
+                    }
+                } catch (\Throwable $e) {
+                    // ignore and try next
+                }
+            }
+        }
+
+        $manifest = [];
+        $manifest[] = "Package: {$zipDownloadName}";
+        $manifest[] = "Generated: " . now()->toDateTimeString();
+        $manifest[] = "";
+        $manifest[] = "Files:";
+        $manifest[] = "- {$txtFilename} (text/plain, " . strlen($content) . " bytes)";
+
+        if (!$resolvedDisk) {
+            // Could not resolve actual stored file
+            $zip->addFromString(
+                'Attachment/READ_ERROR.txt',
+                "Could not locate attachment on any tried disk/path.\n" .
+                    "Original path: {$origPath}\n" .
+                    "Tried disks: " . implode(', ', $disksToTry) . "\n" .
+                    "Tried paths: " . implode(', ', $pathsToTry) . "\n"
+            );
+            $manifest[] = "- Attachment/{$attachmentName} (READ_ERROR: file not found on tried disks/paths)";
+        } else {
+            // Read bytes first; do not let metadata failures block inclusion
+            $bytes = null;
+            $readErr = null;
+
+            try {
+                $bytes = Storage::disk($resolvedDisk)->get($resolvedPath);
+            } catch (\Throwable $e) {
+                $readErr = $e->getMessage();
+            }
+
+            if ($bytes === null) {
+                $zip->addFromString(
+                    'Attachment/READ_ERROR.txt',
+                    "Failed to read attachment.\nDisk: {$resolvedDisk}\nPath: {$resolvedPath}\nError: {$readErr}"
+                );
+                $manifest[] = "- Attachment/{$attachmentName} (READ_ERROR: {$readErr})";
+            } else {
+                // Add file to ZIP
+                $zip->addFromString('Attachment/' . $attachmentName, $bytes);
+
+                // Try metadata individually; fall back if unavailable
+                $mime = 'application/octet-stream';
+                try {
+                    $tmpMime = Storage::disk($resolvedDisk)->mimeType($resolvedPath);
+                    if ($tmpMime) $mime = $tmpMime;
+                } catch (\Throwable $e) { /* ignore */
+                }
+
+                $size = strlen($bytes);
+                try {
+                    $tmpSize = Storage::disk($resolvedDisk)->size($resolvedPath);
+                    if (is_numeric($tmpSize)) $size = (int)$tmpSize;
+                } catch (\Throwable $e) { /* ignore */
+                }
+
+                $hash = hash('sha256', $bytes);
+
+                $manifest[] = "- Attachment/{$attachmentName} ({$mime}, {$size} bytes, sha256={$hash})";
+                $manifest[] = "  Stored at → disk: {$resolvedDisk}, path: {$resolvedPath}";
+            }
+        }
+
+        // Add MANIFEST
+        $zip->addFromString('MANIFEST.txt', implode(PHP_EOL, $manifest));
+        $zip->close();
+
+        return response()->download($zipPath, $zipDownloadName, [
+            'Content-Type'  => 'application/zip',
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-        ]);
+        ])->deleteFileAfterSend(true);
     }
 
     /**

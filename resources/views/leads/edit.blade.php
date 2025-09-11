@@ -306,44 +306,8 @@
                         <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">XFC06</label>
-                        <input name="xfc06" value="{{ old('xfc06', $lead->xfc06) }}"
-                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('xfc06')
-                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
                 </div>
-
-                {{-- Row: XFC07 / DEMO7 / DEMO9 --}}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">XFC07</label>
-                        <input name="xfc07" value="{{ old('xfc07', $lead->xfc07) }}"
-                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('xfc07')
-                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">DEMO7</label>
-                        <input name="demo7" value="{{ old('demo7', $lead->demo7) }}"
-                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('demo7')
-                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-3">DEMO9</label>
-                        <input name="demo9" value="{{ old('demo9', $lead->demo9) }}"
-                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                        @error('demo9')
-                        <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
+                
 
                 {{-- Row: FICO / CARDS(JSON) / BALANCE --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
