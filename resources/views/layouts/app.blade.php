@@ -11,10 +11,11 @@
     {{-- Alpine Js --}}
     <script src="//unpkg.com/alpinejs" defer></script>
 
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet" />
+
+    <meta name="lead-realtime-url" content="{{ route('leads.realtime') }}">
 
     <!-- Auto Redirect Component -->
     <x-auto-redirect />
@@ -177,6 +178,10 @@
 
     <!-- Additional Styles -->
     <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
         .sidebar-transition {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -240,10 +245,29 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(55, 65, 81, .3);
         }
+
+        /* Toast styles kept minimal; dropdown is primary UI */
+        .notification-container {
+            position: fixed;
+            top: 5rem;
+            right: 1rem;
+            z-index: 1000;
+            width: 24rem;
+            max-width: 90vw;
+        }
     </style>
 
     @stack('styles')
 </head>
+
+@php
+    $user = auth()->user();
+    $isAdmin =
+        $user &&
+        ((method_exists($user, 'isAdmin') && $user->isAdmin()) ||
+            (method_exists($user, 'hasRole') && $user->hasRole('admin')) ||
+            ($user->role ?? null) === 'admin');
+@endphp
 
 <body
     class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 font-sans">
@@ -350,7 +374,7 @@
                {{ request()->routeIs('reports.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
                             <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z" />
                             </svg>
                             Reports
                         </a>
@@ -370,7 +394,7 @@
                {{ request()->routeIs('dashboard') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
                             <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0-2-2z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
                             </svg>
@@ -473,16 +497,185 @@
                     </div>
 
                     <div class="flex items-center space-x-4">
-                        {{-- <button
-                            class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 17h5l-5 5v-5zM4.83 19.07A11 11 0 015 12c0-6.075 4.925-11 11-11s11 4.925 11 11a11 11 0 01-1.07 7.07M4.83 19.07L9 15M4.83 19.07l-2.83 2.83">
-                                </path>
-                            </svg>
-                            <span
-                                class="absolute top-1 right-1 block h-3 w-3 rounded-full bg-red-400 animate-pulse"></span>
-                        </button> --}}
+                        <!-- Notifications Button & Dropdown (hidden for admins) -->
+                        @if ($user->role == 'user')
+                            <div class="relative" x-data="notificationsDropdown({ initialUnread: {{ auth()->user()->unreadNotifications()->count() }} })" x-init="init()">
+                                <button @click="toggle()"
+                                    class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 relative hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    aria-label="Notifications">
+                                    <!-- bell -->
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M14.857 17.082A4.002 4.002 0 0 1 12 19a4.002 4.002 0 0 1-2.857-1.918M6.5 8a5.5 5.5 0 1 1 11 0c0 3.07.582 4.626 1.08 5.428.38.608.57.912.566 1.107a.75.75 0 0 1-.428.63c-.174.085-.526.085-1.23.085H6.512c-.704 0-1.056 0-1.23-.085a.75.75 0 0 1-.428-.63c-.004-.195.185-.499.566-1.107C5.918 12.626 6.5 11.07 6.5 8Z" />
+                                    </svg>
+                                    <!-- badge with total unread (DB + realtime) -->
+                                    <template x-if="unreadTotal > 0">
+                                        <span
+                                            class="absolute -top-1 -right-1 min-w-[1.1rem] h-5 px-1 grid place-items-center rounded-full bg-red-600 text-white text-[10px] font-semibold shadow"
+                                            x-text="unreadTotal"></span>
+                                    </template>
+                                </button>
+
+                                <!-- Notifications Dropdown -->
+                                <div x-show="open" @click.away="open = false"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform scale-95"
+                                    x-transition:enter-end="opacity-100 transform scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="opacity-100 transform scale-100"
+                                    x-transition:leave-end="opacity-0 transform scale-95"
+                                    class="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl shadow-2xl py-2 z-50 border border-gray-200/50 dark:border-gray-700/50 hidden"
+                                    :class="{ 'hidden': !open }" style="display: none;">
+                                    <div
+                                        class="px-4 py-2 border-b border-gray-200/50 dark:border-gray-700/50 flex justify-between items-center">
+                                        <h3 class="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                        <button @click="markAllRead()"
+                                            class="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 cursor-pointer">
+                                            Mark all as read
+                                        </button>
+                                    </div>
+
+                                    <div class="max-h-96 overflow-y-auto">
+                                        <!-- Realtime lead updates (injected via polling) -->
+                                        <template x-if="rtItems.length > 0">
+                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">Recent
+                                                lead updates</div>
+                                        </template>
+                                        <!-- We wrap the list in a container so we can count DOM items if needed -->
+                                        <div x-ref="rtList">
+                                            <template x-for="it in rtItems" :key="it.id + '-' + it.updated_at">
+                                                <div
+                                                    class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors">
+                                                    <a :href="it.url" class="block">
+                                                        <div class="flex items-start">
+                                                            <div class="flex-shrink-0 mt-0.5">
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                                                    <svg class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <div class="ml-3 flex-1">
+                                                                <p class="text-sm font-medium text-gray-900 dark:text-white"
+                                                                    x-text="`#${it.id} · ${it.name || 'Lead'}`"></p>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                    <span class="inline-flex items-center gap-1">
+                                                                        <span
+                                                                            class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span>
+                                                                        <span x-text="it.status || 'updated'"></span>
+                                                                    </span>
+                                                                </p>
+                                                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1"
+                                                                    x-text="timeAgo(it.updated_at)"></p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Divider if both types exist -->
+                                        <template x-if="rtItems.length > 0 && hasDbNotifs">
+                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">System
+                                                notifications</div>
+                                        </template>
+
+                                        <!-- Server-rendered DB notifications (initial) - only unread -->
+                                        @if (auth()->user()->unreadNotifications()->count() > 0)
+                                            @foreach (auth()->user()->unreadNotifications()->take(10) as $notification)
+                                                <div class="px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors db-notif"
+                                                    data-notif-id="{{ $notification->id }}">
+                                                    <div class="flex items-start">
+                                                        <div class="flex-shrink-0 mt-0.5">
+                                                            @if ($notification->type === 'App\Notifications\LeadAssigned')
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                                                                    <svg class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                    </svg>
+                                                                </div>
+                                                            @elseif($notification->type === 'App\Notifications\IssueReported')
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-warning-100 dark:bg-warning-900/30 flex items-center justify-center">
+                                                                    <svg class="h-5 w-5 text-warning-600 dark:text-warning-400"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                                                    </svg>
+                                                                </div>
+                                                            @else
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                                    <svg class="h-5 w-5 text-gray-600 dark:text-gray-400"
+                                                                        fill="none" stroke="currentColor"
+                                                                        viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="ml-3 flex-1">
+                                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                {{ $notification->data['title'] ?? 'Notification' }}
+                                                            </p>
+                                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                {{ $notification->data['message'] ?? '' }}
+                                                            </p>
+                                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                                                {{ $notification->created_at->diffForHumans() }}
+                                                            </p>
+                                                        </div>
+                                                        @if ($notification->unread())
+                                                            <button onclick="markAsRead('{{ $notification->id }}')"
+                                                                class="ml-2 flex-shrink-0" title="Mark as read">
+                                                                <svg class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                                                    fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="px-4 py-6 text-center">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 17h5l-5 5v-5zM4.83 19.07A11 11 0 015 12c0-6.075 4.925-11 11-11s11 4.925 11 11a11 11 0 01-1.07 7.07M4.83 19.07L9 15M4.83 19.07l-2.83 2.83" />
+                                                </svg>
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No notifications
+                                                    yet</p>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <template x-if="hasDbNotifs">
+                                        <div class="px-4 py-2 border-t border-gray-200/50 dark:border-gray-700/50">
+                                            <a href="{{ route('rm.notifications') }}"
+                                                class="block text-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
+                                                View all notifications
+                                            </a>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="relative">
                             <button id="userMenuButton"
@@ -655,11 +848,228 @@
         });
     </script>
 
+    {{-- Alpine helper for Notifications Dropdown (polling, no Echo/Pusher) --}}
+    @unless ($isAdmin)
+        <script>
+            function notificationsDropdown({
+                initialUnread = 0
+            } = {}) {
+                // Local unread management for realtime items
+                const LS_LAST_SEEN_KEY = 'notif:last_seen_iso';
+                const nowIso = () => new Date().toISOString();
+                const getLastSeen = () => localStorage.getItem(LS_LAST_SEEN_KEY) || '';
+                const setLastSeen = (iso) => localStorage.setItem(LS_LAST_SEEN_KEY, iso || nowIso());
+
+                // Get the server-side notifications_read_at timestamp
+                const serverNotificationsReadAt = '{{ auth()->user()->getNotificationsReadAt()?->toISOString() ?? '' }}';
+
+                return {
+                    open: false,
+                    // DB unread shown in dropdown "System notifications"
+                    unreadDbCount: initialUnread,
+                    // Realtime unread derived from last_seen vs updated_at
+                    unreadRtCount: 0,
+
+                    _seen: new Set(), // to avoid duplicates
+                    hasDbNotifs: {{ auth()->user()->unreadNotifications()->count() > 0 ? 'true' : 'false' }},
+                    rtItems: [],
+                    _sinceISO: new Date(Date.now() - 60 * 1000).toISOString(),
+                    _url: null,
+                    _interval: 10000,
+                    _timer: null,
+
+                    // Bell badge: sum of DB unread + realtime unread
+                    get unreadTotal() {
+                        return Math.max(0, (this.unreadDbCount || 0) + (this.unreadRtCount || 0));
+                    },
+
+                    init() {
+                        const meta = document.querySelector('meta[name="lead-realtime-url"]');
+                        if (meta) this._url = meta.content;
+
+                        // Initialize last_seen if missing (keeps old items "unread" until first open)
+                        if (!getLastSeen()) setLastSeen('');
+
+                        // DB unread event listeners (from per-item markAsRead & mark-all)
+                        window.addEventListener('db:read-one', () => {
+                            if (this.unreadDbCount > 0) this.unreadDbCount--;
+                        });
+                        window.addEventListener('db:read-all', () => {
+                            this.unreadDbCount = 0;
+                        });
+
+                        if (this._url) this._tick();
+                    },
+
+                    toggle() {
+                        this.open = !this.open;
+                        if (this.open) {
+                            // Just recompute unread count, don't mark as seen automatically
+                            this._recomputeUnread();
+                        }
+                    },
+
+                    async _tick() {
+                        try {
+                            const lastSeen = encodeURIComponent(getLastSeen() || '');
+                            // Only use server-side notifications_read_at for explicit "mark all as read"
+                            // For general polling, use localStorage lastSeen
+                            const res = await fetch(
+                                `${this._url}?since=${encodeURIComponent(this._sinceISO)}&last_seen=${lastSeen}`, {
+                                    credentials: 'same-origin',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                });
+                            if (!res.ok) throw new Error('network');
+                            const data = await res.json();
+
+                            if (data.since) this._sinceISO = data.since;
+
+                            if (Array.isArray(data.items) && data.items.length) {
+                                const newest = data.items.reverse();
+                                for (const it of newest) {
+                                    const key = `${it.id}-${it.updated_at}`;
+                                    if (this._seen.has(key)) continue; // avoid duplicates
+                                    this._seen.add(key);
+                                    // compute unread flag against last_seen
+                                    it.unread = this._isUnread(it.updated_at);
+                                    this.rtItems.unshift(it);
+                                }
+                                if (this.rtItems.length > 100) this.rtItems.length = 100;
+                            }
+
+                            // Prefer server-provided count; otherwise compute locally
+                            if (typeof data.unread_count === 'number') {
+                                this.unreadRtCount = data.unread_count;
+                            } else {
+                                this._recomputeUnread();
+                            }
+
+                            this._interval = 10000; // reset after success
+                        } catch (e) {
+                            this._interval = Math.min(this._interval * 1.5, 60000);
+                        } finally {
+                            clearTimeout(this._timer);
+                            this._timer = setTimeout(() => this._tick(), this._interval);
+                        }
+                    },
+
+                    _isUnread(iso) {
+                        if (!iso) return false;
+                        const lastSeen = getLastSeen();
+                        return lastSeen ? (new Date(iso) > new Date(lastSeen)) : true;
+                    },
+
+                    _recomputeUnread() {
+                        let count = 0;
+                        const lastSeen = getLastSeen();
+                        this.rtItems.forEach(it => {
+                            it.unread = lastSeen ? (new Date(it.updated_at) > new Date(lastSeen)) : true;
+                            if (it.unread) count++;
+                        });
+                        this.unreadRtCount = count;
+                    },
+
+                    timeAgo(iso) {
+                        const d = new Date(iso);
+                        const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+                        if (sec < 60) return `${sec}s ago`;
+                        const m = Math.floor(sec / 60);
+                        if (m < 60) return `${m}m ago`;
+                        const h = Math.floor(m / 60);
+                        if (h < 24) return `${h}h ago`;
+                        return `${Math.floor(h/24)}d ago`;
+                    },
+
+                    // Single authoritative "Mark all as read"
+                    async markAllRead() {
+                        // 1) Tell server to mark DB notifications as read
+                        try {
+                            const response = await fetch('/notifications/mark-all-as-read', {
+                                credentials: 'same-origin',
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                }
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+
+                            const result = await response.json();
+                            console.log('Notifications marked as read:', result);
+                        } catch (e) {
+                            console.error('Error marking all notifications as read:', e);
+                            // Show user-friendly error message
+                            alert('Failed to mark notifications as read. Please try again.');
+                            return;
+                        }
+
+                        // 2) Mark realtime as read (advance last-seen)
+                        setLastSeen(nowIso());
+
+                        // 3) Clear all realtime notifications from UI
+                        this.rtItems = [];
+                        this.unreadRtCount = 0;
+
+                        // 4) Clear DB unread count + visually remove DB items
+                        document.querySelectorAll('.db-notif').forEach(n => n.remove());
+                        this.unreadDbCount = 0;
+
+                        // 5) Update the hasDbNotifs flag since all DB notifications are now read
+                        this.hasDbNotifs = false;
+
+                        // 6) Notify any listeners
+                        window.dispatchEvent(new CustomEvent('db:read-all'));
+
+                        // 7) Close the dropdown to show the effect
+                        this.open = false;
+
+                        // 8) Force refresh of realtime data to respect new server-side timestamp
+                        if (this._url) {
+                            setTimeout(() => this._tick(), 100);
+                        }
+
+                        console.log('All notifications removed from UI');
+                    }
+                }
+            }
+        </script>
+    @endunless
+
+    <!-- Helpers for DB notifications actions (emit events the Alpine component listens for) -->
+    <script>
+        function markAsRead(notificationId) {
+            fetch(`/notifications/${notificationId}/mark-as-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => r.json()).then(data => {
+                    if (data.success) {
+                        const el = document.querySelector(`.db-notif[data-notif-id="${notificationId}"]`);
+                        if (el) el.remove();
+                        window.dispatchEvent(new CustomEvent('db:read-one'));
+                    }
+                }).catch(e => {
+                    console.error('Error marking notification as read:', e);
+                });
+        }
+        // NOTE: Removed the old global markAllAsRead() to avoid conflicts.
+    </script>
+
     @stack('scripts')
     @stack('modals')
 
-    {{-- Include real-time notifications component --}}
-    @include('layouts.partials.notifications_echo')
+    {{-- NO Echo/Pusher include: realtime via simple polling --}}
+    {{-- @include('layouts.partials.notifications_echo') --}}
 </body>
 
 <script>
@@ -732,8 +1142,5 @@
         window.addEventListener('beforeunload', onClose);
     })();
 </script>
-
-
-
 
 </html>

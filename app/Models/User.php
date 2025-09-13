@@ -17,11 +17,13 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
-        'company'
+        'company',
+        'notifications_read_at'
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'notifications_read_at' => 'datetime',
         'dark_mode' => 'boolean'
     ];
 
@@ -70,5 +72,21 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Lead::class, 'lead_user', 'user_id', 'lead_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Mark all notifications as read by updating the notifications_read_at timestamp
+     */
+    public function markAllNotificationsAsRead(): void
+    {
+        $this->update(['notifications_read_at' => now()]);
+    }
+
+    /**
+     * Get the timestamp when all notifications were last marked as read
+     */
+    public function getNotificationsReadAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->notifications_read_at;
     }
 }

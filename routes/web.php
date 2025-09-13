@@ -9,8 +9,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IssueCommentController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadIssueController;
+use App\Http\Controllers\LeadRealtimeController;
 use App\Http\Controllers\ManagerNotificationController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
@@ -21,6 +23,18 @@ Route::redirect('/', '/login');
 
 Route::get('/online-users', [AttendanceController::class, 'onlineUsersJson'])
     ->name('users.online');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/leads/realtime', [LeadRealtimeController::class, 'since'])
+        ->name('leads.realtime');
+});
+
+Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])
+    ->name('notifications.markAllAsRead')
+    ->middleware('auth');
+Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markOneAsRead'])
+    ->name('notifications.markOneAsRead')
+    ->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +100,13 @@ Route::middleware('auth')->group(function () {
         ->name('attendance.heartbeat');
     Route::post('/attendance/close', [AttendanceBeaconController::class, 'close'])
         ->name('attendance.close');
+
+
+
+    // Generic user notifications helpers
+    Route::get('/notifications/unread-count', function () {
+        return response()->json(['count' => auth()->user()->unreadNotifications()->count()]);
+    })->name('notifications.unread_count');
 
 
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');

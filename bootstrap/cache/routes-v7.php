@@ -13,7 +13,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::u1a2VwZxj07yyffP',
+            '_route' => 'generated::EVSkmcg88Vy9KQdj',
           ),
           1 => NULL,
           2 => 
@@ -33,7 +33,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::sNn4CJTTduRB2A95',
+            '_route' => 'generated::oc34DgrXNPxOm3AH',
           ),
           1 => NULL,
           2 => 
@@ -65,6 +65,45 @@ app('router')->setCompiledRoutes(
           array (
             'GET' => 0,
             'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/leads/realtime' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.realtime',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/notifications/mark-all-as-read' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'notifications.markAllAsRead',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
           ),
           3 => NULL,
           4 => false,
@@ -522,6 +561,26 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
+      '/notifications/unread-count' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'notifications.unread_count',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
       '/profile/password' => 
       array (
         0 => 
@@ -796,7 +855,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WT2hkZvW1qwZmBSH',
+            '_route' => 'generated::qor1hUxMBLlAUGvB',
           ),
           1 => NULL,
           2 => 
@@ -814,136 +873,21 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/attachments/(.*)/preview(*:32)|/leads/(?|([^/]++)(?|(*:60)|/(?|edit(*:75)|pdf(*:85)|text\\-report(*:104)|issues(*:118))|(*:127))|issues/([^/]++)(*:151)|([^/]++)/assign(*:174)|bulk\\-assign(*:194)|i(?|ds(*:208)|mport(*:221)))|/issues/([^/]++)(?|/(?|comments(*:262)|status(*:276)|priority(*:292))|(*:301))|/notes/([^/]++)(?|/edit(*:333)|(*:341))|/my\\-leads/([^/]++)(?|/notes(*:378)|(*:386))|/ca(?|llbacks/([^/]++)(?|(*:420)|/(?|edit(*:436)|complete(*:452)|reschedule(*:470))|(*:479))|tegories/([^/]++)(?|/edit(*:513)|(*:521)))|/users/([^/]++)(?|(*:549)|/edit(*:562)|(*:570))|/storage/(.*)(*:592))/?$}sDu',
+      0 => '{^(?|/not(?|ifications/([^/]++)/mark\\-as\\-read(*:48)|es/([^/]++)(?|/edit(*:74)|(*:81)))|/attachments/(.*)/preview(*:115)|/leads/(?|([^/]++)(?|(*:144)|/(?|edit(*:160)|pdf(*:171)|text\\-report(*:191)|issues(*:205))|(*:214))|issues/([^/]++)(*:238)|([^/]++)/assign(*:261)|bulk\\-assign(*:281)|i(?|ds(*:295)|mport(*:308)))|/issues/([^/]++)(?|/(?|comments(*:349)|status(*:363)|priority(*:379))|(*:388))|/my\\-leads/([^/]++)(?|/notes(*:425)|(*:433))|/ca(?|llbacks/([^/]++)(?|(*:467)|/(?|edit(*:483)|complete(*:499)|reschedule(*:517))|(*:526))|tegories/([^/]++)(?|/edit(*:560)|(*:568)))|/users/([^/]++)(?|(*:596)|/edit(*:609)|(*:617))|/storage/(.*)(*:639))/?$}sDu',
     ),
     3 => 
     array (
-      32 => 
+      48 => 
       array (
         0 => 
         array (
           0 => 
           array (
-            '_route' => 'attachments.preview',
+            '_route' => 'notifications.markOneAsRead',
           ),
           1 => 
           array (
-            0 => 'path',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      60 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.show',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      75 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.edit',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      85 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.pdf',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      104 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.text-report',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      118 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.issues.store',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
+            0 => 'notification',
           ),
           2 => 
           array (
@@ -955,247 +899,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      127 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.update',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'PUT' => 0,
-            'PATCH' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-        1 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.destroy',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'DELETE' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      151 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.issues.show',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      174 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.assign',
-          ),
-          1 => 
-          array (
-            0 => 'lead',
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      194 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.bulk-assign',
-          ),
-          1 => 
-          array (
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      208 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.ids',
-          ),
-          1 => 
-          array (
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      221 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'leads.import',
-          ),
-          1 => 
-          array (
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      262 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.comments.store',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'POST' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      276 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.updateStatus',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'PATCH' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      292 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.updatePriority',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'PATCH' => 0,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => false,
-          6 => NULL,
-        ),
-      ),
-      301 => 
-      array (
-        0 => 
-        array (
-          0 => 
-          array (
-            '_route' => 'issues.show',
-          ),
-          1 => 
-          array (
-            0 => 'issue',
-          ),
-          2 => 
-          array (
-            'GET' => 0,
-            'HEAD' => 1,
-          ),
-          3 => NULL,
-          4 => false,
-          5 => true,
-          6 => NULL,
-        ),
-      ),
-      333 => 
+      74 => 
       array (
         0 => 
         array (
@@ -1218,7 +922,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      341 => 
+      81 => 
       array (
         0 => 
         array (
@@ -1260,7 +964,384 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      378 => 
+      115 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'attachments.preview',
+          ),
+          1 => 
+          array (
+            0 => 'path',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      144 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.show',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      160 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.edit',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      171 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.pdf',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      191 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.text-report',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      205 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.issues.store',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      214 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.update',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'PUT' => 0,
+            'PATCH' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+        1 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.destroy',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'DELETE' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      238 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.issues.show',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      261 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.assign',
+          ),
+          1 => 
+          array (
+            0 => 'lead',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      281 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.bulk-assign',
+          ),
+          1 => 
+          array (
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      295 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.ids',
+          ),
+          1 => 
+          array (
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      308 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'leads.import',
+          ),
+          1 => 
+          array (
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      349 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.comments.store',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      363 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.updateStatus',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'PATCH' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      379 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.updatePriority',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'PATCH' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      388 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'issues.show',
+          ),
+          1 => 
+          array (
+            0 => 'issue',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      425 => 
       array (
         0 => 
         array (
@@ -1283,7 +1364,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      386 => 
+      433 => 
       array (
         0 => 
         array (
@@ -1305,7 +1386,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      420 => 
+      467 => 
       array (
         0 => 
         array (
@@ -1328,7 +1409,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      436 => 
+      483 => 
       array (
         0 => 
         array (
@@ -1351,7 +1432,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      452 => 
+      499 => 
       array (
         0 => 
         array (
@@ -1373,7 +1454,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      470 => 
+      517 => 
       array (
         0 => 
         array (
@@ -1395,7 +1476,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      479 => 
+      526 => 
       array (
         0 => 
         array (
@@ -1437,7 +1518,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      513 => 
+      560 => 
       array (
         0 => 
         array (
@@ -1460,7 +1541,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      521 => 
+      568 => 
       array (
         0 => 
         array (
@@ -1502,7 +1583,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      549 => 
+      596 => 
       array (
         0 => 
         array (
@@ -1525,7 +1606,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      562 => 
+      609 => 
       array (
         0 => 
         array (
@@ -1548,7 +1629,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      570 => 
+      617 => 
       array (
         0 => 
         array (
@@ -1590,7 +1671,7 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      592 => 
+      639 => 
       array (
         0 => 
         array (
@@ -1628,7 +1709,7 @@ app('router')->setCompiledRoutes(
   ),
   'attributes' => 
   array (
-    'generated::u1a2VwZxj07yyffP' => 
+    'generated::EVSkmcg88Vy9KQdj' => 
     array (
       'methods' => 
       array (
@@ -1657,7 +1738,7 @@ app('router')->setCompiledRoutes(
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
                 }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000005370000000000000000";}}',
-        'as' => 'generated::u1a2VwZxj07yyffP',
+        'as' => 'generated::EVSkmcg88Vy9KQdj',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1673,7 +1754,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::sNn4CJTTduRB2A95' => 
+    'generated::oc34DgrXNPxOm3AH' => 
     array (
       'methods' => 
       array (
@@ -1699,7 +1780,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::sNn4CJTTduRB2A95',
+        'as' => 'generated::oc34DgrXNPxOm3AH',
       ),
       'fallback' => false,
       'defaults' => 
@@ -1739,6 +1820,118 @@ app('router')->setCompiledRoutes(
         array (
         ),
         'as' => 'users.online',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'leads.realtime' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'leads/realtime',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\LeadRealtimeController@since',
+        'controller' => 'App\\Http\\Controllers\\LeadRealtimeController@since',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'leads.realtime',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notifications.markAllAsRead' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'notifications/mark-all-as-read',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\NotificationController@markAllAsRead',
+        'controller' => 'App\\Http\\Controllers\\NotificationController@markAllAsRead',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'notifications.markAllAsRead',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'notifications.markOneAsRead' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'notifications/{notification}/mark-as-read',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'App\\Http\\Controllers\\NotificationController@markOneAsRead',
+        'controller' => 'App\\Http\\Controllers\\NotificationController@markOneAsRead',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'notifications.markOneAsRead',
       ),
       'fallback' => false,
       'defaults' => 
@@ -2059,7 +2252,7 @@ app('router')->setCompiledRoutes(
           0 => 'web',
           1 => 'auth',
         ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000005490000000000000000";}}',
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:26:"fn() => \\view(\'dashboard\')";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000054c0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -3397,6 +3590,45 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'notifications.unread_count' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'notifications/unread-count',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+        ),
+        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:117:"function () {
+        return \\response()->json([\'count\' => \\auth()->user()->unreadNotifications()->count()]);
+    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000008190000000000000000";}}',
+        'namespace' => NULL,
+        'prefix' => '',
+        'where' => 
+        array (
+        ),
+        'as' => 'notifications.unread_count',
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'profile.updatePassword' => 
     array (
       'methods' => 
@@ -4513,7 +4745,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WT2hkZvW1qwZmBSH' => 
+    'generated::qor1hUxMBLlAUGvB' => 
     array (
       'methods' => 
       array (
@@ -4539,7 +4771,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 'Illuminate\\Foundation\\Http\\Middleware\\VerifyCsrfToken',
         ),
-        'as' => 'generated::WT2hkZvW1qwZmBSH',
+        'as' => 'generated::qor1hUxMBLlAUGvB',
       ),
       'fallback' => false,
       'defaults' => 
@@ -4571,7 +4803,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000008470000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"000000000000084c0000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,
