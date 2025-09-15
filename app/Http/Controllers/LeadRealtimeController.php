@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class LeadRealtimeController extends Controller
 {
@@ -35,62 +37,52 @@ class LeadRealtimeController extends Controller
     public function since(Request $request)
     {
         $user = $request->user();
-        abort_unless($user, 403);
 
-        // Hide notifications for admins altogether
-        if ($this->isAdminUser($user)) {
-            return response()->json([
-                'since'        => now()->toIso8601String(),
-                'count'        => 0,
-                'unread_count' => 0,
-                'items'        => [],
-            ]);
+        // Parse "since" query param; fallback to 24h ago if missing/invalid
+        $since = $request->query('since');
+        try {
+            $sinceAt = $since ? Carbon::parse($since) : now()->subDay();
+        } catch (\Throwable $e) {
+            $sinceAt = now()->subDay();
         }
 
-        $sinceAt = $request->query('since')
-            ? now()->parse($request->query('since'))
-            : now()->subSeconds(120);
+        // Determine the assignee column name used by the schema
+        $assigneeColumn = Schema::hasColumn('leads', 'assigned_to')
+            ? 'assigned_to'
+            : (Schema::hasColumn('leads', 'assigned_id') ? 'assigned_id' : 'assigned_to');
 
-        $lastSeen = $request->query('last_seen') ? now()->parse($request->query('last_seen')) : null;
-
-        // Get the user's notifications_read_at timestamp to filter out read notifications
-        // This should only be used when explicitly marking all as read
-        $notificationsReadAt = $user->getNotificationsReadAt();
-
-        $q = Lead::query()
-            ->when(!$this->isElevated($user), fn($q) => $q->where('assigned_to', $user->id))
+        // Build a strict query limited to the current user's assigned leads
+        $items = Lead::query()
+            ->where($assigneeColumn, $user->id)
             ->where('updated_at', '>', $sinceAt)
             ->orderBy('updated_at', 'asc')
             ->limit(50)
-            ->select(['id', 'first_name', 'surname', 'status', 'assigned_to', 'updated_at']);
+            ->get([
+                'id',
+                'first_name',
+                'surname',
+                'status',
+                // Return a consistent key in the payload for the client
+                $assigneeColumn . ' as assigned_to',
+                'updated_at',
+            ]);
 
-        $items = $q->get()->map(function ($lead) {
-            return [
-                'id'          => $lead->id,
-                'name'        => trim(($lead->first_name ?? '') . ' ' . ($lead->surname ?? '')),
-                'status'      => $lead->status,
-                'assigned_to' => (int) $lead->assigned_to,
-                'updated_at'  => optional($lead->updated_at)->toIso8601String(),
-                'url'         => route('leads.show', $lead->id),
-            ];
-        });
+        // Map the response for the client dropdown / UI
+        $payload = [
+            'since'  => $sinceAt->toIso8601String(),
+            'count'  => $items->count(),
+            'items'  => $items->map(function ($lead) {
+                return [
+                    'id'           => $lead->id,
+                    'first_name'   => $lead->first_name ?? null,
+                    'surname'      => $lead->surname ?? null,
+                    'status'       => $lead->status ?? null,
+                    'assigned_to'  => $lead->assigned_to, // normalized alias above
+                    'updated_at'   => optional($lead->updated_at)->toIso8601String(),
+                ];
+            })->all(),
+        ];
 
-        // NOTE: Do not filter items by notifications_read_at so read items still render in the dropdown.
-
-        $unread = 0;
-        if ($lastSeen) {
-            $unread = $items->filter(function ($it) use ($lastSeen) {
-                return $it['updated_at'] && now()->parse($it['updated_at'])->gt($lastSeen);
-            })->count();
-        } else {
-            $unread = $items->count();
-        }
-
-        return response()->json([
-            'since'        => now()->toIso8601String(),
-            'count'        => $items->count(),
-            'unread_count' => $unread,
-            'items'        => $items,
-        ]);
+        return response()->json($payload);
     }
 }
