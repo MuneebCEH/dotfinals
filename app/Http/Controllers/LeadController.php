@@ -726,62 +726,97 @@ class LeadController extends Controller
         $user = auth()->user();
         abort_unless($user, 403, 'You must be logged in to download this document.');
 
-        // Build TXT content
+        // ---------- Normalize data ----------
+        // Phone numbers (array or JSON -> trimmed, non-empty)
+        $numbers = is_array($lead->numbers)
+            ? $lead->numbers
+            : (json_decode($lead->numbers ?? '[]', true) ?? []);
+        $numbers = array_values(array_filter(array_map(
+            fn($n) => trim((string)$n),
+            is_array($numbers) ? $numbers : []
+        ), fn($n) => $n !== ''));
+
+        // Cards (you said you only store the card number; keep a single string per entry)
+        $rawCards = is_array($lead->cards_json)
+            ? $lead->cards_json
+            : (json_decode($lead->cards_json ?? '[]', true) ?? []);
+
+        $cardNumbers = [];
+        foreach ($rawCards as $c) {
+            if (is_string($c)) {
+                $val = trim($c);
+                if ($val !== '') $cardNumbers[] = $val;
+            } elseif (is_array($c)) {
+                // Just in case someone saved a structure: pick the most likely number string
+                $candidate = $c['cc'] ?? $c['card'] ?? $c['number'] ?? '';
+                if (!$candidate) {
+                    $candidate = implode(' ', array_filter(array_map(
+                        fn($v) => is_scalar($v) ? trim((string)$v) : '',
+                        $c
+                    )));
+                }
+                $candidate = trim($candidate);
+                if ($candidate !== '') $cardNumbers[] = $candidate;
+            }
+        }
+
+        // Helper
+        $L = fn(string $label, $value = '') => $label . ': ' . (isset($value) ? (string)$value : '');
+
+        $fullName = trim(implode(' ', array_filter([
+            $lead->first_name,
+            $lead->middle_initial,
+            $lead->surname,
+        ], fn($v) => (string)$v !== '')));
+
+        // ---------- Build TXT content ----------
         $lines = [];
-        $lines[] = "=== Lead Details ===";
-        $lines[] = "Name: " . trim($lead->first_name . ' ' . $lead->middle_initial . ' ' . $lead->surname);
-        $lines[] = "Gen Code: " . ($lead->gen_code ?: '—');
-        $lines[] = "Age: " . ($lead->age ?: '—');
-        $lines[] = "SSN: " . ($lead->ssn ?: '—');
+        $lines[] = $L('Name', $fullName);
+        $lines[] = $L('Street', $lead->street);
+        $lines[] = $L('City', $lead->city);
+        $lines[] = $L('State', $lead->state_abbreviation);
+        $lines[] = $L('Zip Code', $lead->zip_code);
 
-        $lines[] = "";
-        $lines[] = "Address:";
-        $lines[] = "- Street: " . ($lead->street ?: '—');
-        $lines[] = "- City: " . ($lead->city ?: '—');
-        $lines[] = "- State: " . ($lead->state_abbreviation ?: '—');
-        $lines[] = "- Zip Code: " . ($lead->zip_code ?: '—');
+        // 🟢 All phone numbers FIRST
+        if (count($numbers)) {
+            foreach ($numbers as $i => $num) {
+                $lines[] = $L('Number ' . ($i + 1), $num);
+            }
+        } else {
+            $lines[] = $L('Number', '');
+        }
 
-        $lines[] = "";
-        $lines[] = "Phone Numbers:";
-        $numbers = is_array($lead->numbers) ? $lead->numbers : (json_decode($lead->numbers ?? '[]', true) ?? []);
-        $lines[] = count($numbers) ? implode(PHP_EOL, array_map(fn($n) => "- $n", $numbers)) : "- No numbers found";
+        // Identity/contact (kept simple)
+        $lines[] = $L('SSN', $lead->ssn);
+        $lines[] = '';
 
-        $lines[] = "";
-        $lines[] = "Custom Fields:";
-        $lines[] = "- XFC06: " . ($lead->xfc06 ?: '—');
-        $lines[] = "- XFC07: " . ($lead->xfc07 ?: '—');
-        $lines[] = "- DEMO7: " . ($lead->demo7 ?: '—');
-        $lines[] = "- DEMO9: " . ($lead->demo9 ?: '—');
+        // 🟦 BANK DETAILS (cards only)
+        $lines[] = 'BANK DETAILS:';
+        if (count($cardNumbers)) {
+            foreach ($cardNumbers as $i => $num) {
+                $lines[] = 'CARD ' . ($i + 1) . ': ' . $num;
+            }
+        } else {
+            $lines[] = 'CARD 1:';
+        }
+        $lines[] = '';
 
-        $lines[] = "";
-        $lines[] = "Financial:";
-        $lines[] = "- FICO: " . ($lead->fico ?: '—');
-        $lines[] = "- Balance: " . ($lead->balance ?: '—');
-        $lines[] = "- Credits: " . ($lead->credits ?: '—');
+        // Notes
+        $lines[] = 'NOTES:';
+        $notes = trim((string)($lead->notes ?? ''));
+        $lines[] = $notes !== '' ? $notes : '';
+        $lines[] = '';
 
-        $lines[] = "- Cards:";
-        $cards = is_array($lead->cards_json) ? $lead->cards_json : (json_decode($lead->cards_json ?? '[]', true) ?? []);
-        $lines[] = count($cards) ? implode(PHP_EOL, array_map(fn($c) => "  - $c", $cards)) : "  - None";
-
-        $lines[] = "";
-        $lines[] = "Status: " . ($lead->status ?: '—');
-        $lines[] = "Assigned To: " . optional($lead->assignee)->name;
-        $lines[] = "Super Agent: " . optional($lead->superAgent)->name;
-        $lines[] = "Closer: " . optional($lead->closer)->name;
-
-        $lines[] = "";
-        $lines[] = "Notes:";
-        $lines[] = $lead->notes ?: '—';
-
-        $lines[] = "";
-        $lines[] = "Created At: " . ($lead->created_at?->toDateTimeString() ?? '—');
-        $lines[] = "Created By: " . optional($lead->creator)->name;
+        // Totals
+        $lines[] = $L('TOTAL DEBT', $lead->balance);                 // maps to your Balance field
+        $lines[] = $L('TOTAL CARDS', (string)count($cardNumbers));
+        // $lines[] = $L('TOTAL CHARGE', '');                           // no field provided
 
         $content     = implode(PHP_EOL, $lines);
-        $baseName    = str_replace(' ', '_', trim($lead->first_name . ' ' . $lead->surname) ?: 'Lead') . '_Details';
+        $baseName    = str_replace(' ', '_', $fullName ?: 'Lead') . '_Details';
         $txtFilename = $baseName . '.txt';
 
-        // Latest issue
+        // ---------- ZIP / attachment packaging (unchanged) ----------
         $latestIssue = LeadIssue::where('lead_id', $lead->id)->orderByDesc('created_at')->first();
         if (!$latestIssue) {
             return response($content, 200, [
@@ -791,7 +826,6 @@ class LeadController extends Controller
             ]);
         }
 
-        // Latest attachment
         $latestAttachment = IssueAttachment::where('lead_issue_id', $latestIssue->id)->orderByDesc('created_at')->first();
         if (!$latestAttachment) {
             return response($content, 200, [
@@ -801,7 +835,6 @@ class LeadController extends Controller
             ]);
         }
 
-        // Prepare ZIP
         $zipDownloadName = $baseName . '_with_attachment.zip';
         $tmpDir = storage_path('app/tmp');
         if (!is_dir($tmpDir)) {
@@ -821,7 +854,7 @@ class LeadController extends Controller
         // Add TXT
         $zip->addFromString($txtFilename, $content);
 
-        // ---------- Robust attachment resolution ----------
+        // Attachment resolution (unchanged)
         $origPath = $latestAttachment->file_path;
         $attachmentName = basename($latestAttachment->file_name ?: $origPath);
 
@@ -830,7 +863,6 @@ class LeadController extends Controller
 
         $resolvedDisk = null;
         $resolvedPath = null;
-
         foreach ($disksToTry as $disk) {
             foreach ($pathsToTry as $p) {
                 try {
@@ -840,7 +872,6 @@ class LeadController extends Controller
                         break 2;
                     }
                 } catch (\Throwable $e) {
-                    // ignore and try next
                 }
             }
         }
@@ -853,7 +884,6 @@ class LeadController extends Controller
         $manifest[] = "- {$txtFilename} (text/plain, " . strlen($content) . " bytes)";
 
         if (!$resolvedDisk) {
-            // Could not resolve actual stored file
             $zip->addFromString(
                 'Attachment/READ_ERROR.txt',
                 "Could not locate attachment on any tried disk/path.\n" .
@@ -863,13 +893,10 @@ class LeadController extends Controller
             );
             $manifest[] = "- Attachment/{$attachmentName} (READ_ERROR: file not found on tried disks/paths)";
         } else {
-            // Read bytes first; do not let metadata failures block inclusion
-            $bytes = null;
-            $readErr = null;
-
             try {
                 $bytes = Storage::disk($resolvedDisk)->get($resolvedPath);
             } catch (\Throwable $e) {
+                $bytes = null;
                 $readErr = $e->getMessage();
             }
 
@@ -880,32 +907,27 @@ class LeadController extends Controller
                 );
                 $manifest[] = "- Attachment/{$attachmentName} (READ_ERROR: {$readErr})";
             } else {
-                // Add file to ZIP
                 $zip->addFromString('Attachment/' . $attachmentName, $bytes);
 
-                // Try metadata individually; fall back if unavailable
                 $mime = 'application/octet-stream';
                 try {
                     $tmpMime = Storage::disk($resolvedDisk)->mimeType($resolvedPath);
                     if ($tmpMime) $mime = $tmpMime;
-                } catch (\Throwable $e) { /* ignore */
+                } catch (\Throwable $e) {
                 }
-
                 $size = strlen($bytes);
                 try {
                     $tmpSize = Storage::disk($resolvedDisk)->size($resolvedPath);
                     if (is_numeric($tmpSize)) $size = (int)$tmpSize;
-                } catch (\Throwable $e) { /* ignore */
+                } catch (\Throwable $e) {
                 }
 
                 $hash = hash('sha256', $bytes);
-
                 $manifest[] = "- Attachment/{$attachmentName} ({$mime}, {$size} bytes, sha256={$hash})";
                 $manifest[] = "  Stored at → disk: {$resolvedDisk}, path: {$resolvedPath}";
             }
         }
 
-        // Add MANIFEST
         $zip->addFromString('MANIFEST.txt', implode(PHP_EOL, $manifest));
         $zip->close();
 
