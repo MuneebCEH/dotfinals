@@ -498,8 +498,24 @@
 
                     <div class="flex items-center space-x-4">
                         <!-- Notifications Button & Dropdown (hidden for admins) -->
-                        @if ($user->role == 'user')
-                            <div class="relative" x-data="notificationsDropdown({ initialUnread: {{ auth()->user()->unreadNotifications()->count() }} })" x-init="init()">
+                        @if ($user->role == 'user' || $user->role == 'report_manager')
+                            <div class="relative" x-data="{
+                                ...notificationsDropdown({ 
+                                    initialUnread: {{ $user->role == 'report_manager' ? 
+                                        auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count() : 
+                                        auth()->user()->unreadNotifications()->count() }},
+                                    isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
+                                    userId: {{ auth()->id() }},
+                                    unreadRtCount: 0,
+                                    unreadDbCount: {{ auth()->user()->unreadNotifications()->count() }}
+                                }),
+                                getNotificationUrl(item) {
+                                    if (!this._isReportManager && item.id) {
+                                        return `/leads/${item.id}/edit`;
+                                    }
+                                    return item.url || '#';
+                                }
+                            }" x-init="init()">
                                 <button @click="toggle()"
                                     class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 relative hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                     aria-label="Notifications">
@@ -509,11 +525,9 @@
                                             d="M14.857 17.082A4.002 4.002 0 0 1 12 19a4.002 4.002 0 0 1-2.857-1.918M6.5 8a5.5 5.5 0 1 1 11 0c0 3.07.582 4.626 1.08 5.428.38.608.57.912.566 1.107a.75.75 0 0 1-.428.63c-.174.085-.526.085-1.23.085H6.512c-.704 0-1.056 0-1.23-.085a.75.75 0 0 1-.428-.63c-.004-.195.185-.499.566-1.107C5.918 12.626 6.5 11.07 6.5 8Z" />
                                     </svg>
                                     <!-- badge with total unread (DB + realtime) -->
-                                    <template x-if="unreadTotal > 0">
-                                        <span
-                                            class="absolute -top-1 -right-1 min-w-[1.1rem] h-5 px-1 grid place-items-center rounded-full bg-red-600 text-white text-[10px] font-semibold shadow"
-                                            x-text="unreadTotal"></span>
-                                    </template>
+                                    <span x-show="unreadRtCount > 0 || unreadDbCount > 0"
+                                        class="absolute -top-1 -right-1 min-w-[1.1rem] h-5 px-1 grid place-items-center rounded-full bg-red-600 text-white text-[10px] font-semibold shadow animate-pulse"
+                                        x-text="unreadRtCount + unreadDbCount"></span>
                                 </button>
 
                                 <!-- Notifications Dropdown -->
@@ -538,20 +552,22 @@
                                     <div class="max-h-96 overflow-y-auto">
                                         <!-- Realtime lead updates (injected via polling) -->
                                         <template x-if="rtItems.length > 0">
-                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">Recent
-                                                lead updates</div>
+                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500" 
+                                                 x-text="isReportManager ? 'Report Requests' : 'Recent Lead Updates'">
+                                            </div>
                                         </template>
                                         <!-- We wrap the list in a container so we can count DOM items if needed -->
                                         <div x-ref="rtList">
                                             <template x-for="it in rtItems" :key="it.id + '-' + it.updated_at">
                                                 <div
-                                                    class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors">
-                                                    <a :href="it.url" class="block">
+                                                    class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors"
+                                                    :class="{ 'bg-red-50 dark:bg-red-900/10': it.unread }">
+                                                    <a :href="getNotificationUrl(it)" class="block" @click="markAsRead(it)">
                                                         <div class="flex items-start">
                                                             <div class="flex-shrink-0 mt-0.5">
-                                                                <div
-                                                                    class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                                                                    <svg class="h-5 w-5 text-primary-600 dark:text-primary-400"
+                                                                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center"
+                                                                     :class="{ 'bg-red-100 dark:bg-red-900/30': it.unread }">
+                                                                    <svg class="h-5 w-5" :class="it.unread ? 'text-red-600 dark:text-red-400' : 'text-primary-600 dark:text-primary-400'"
                                                                         fill="none" stroke="currentColor"
                                                                         viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round"
@@ -561,9 +577,12 @@
                                                                 </div>
                                                             </div>
                                                             <div class="ml-3 flex-1">
-                                                                <p class="text-sm font-medium text-gray-900 dark:text-white"
-                                                                    x-text="`#${it.id} · ${it.name || 'Lead'}`"></p>
-                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                    <span x-text="it.issue ? `Issue #${it.issue.id}` : `Lead #${it.id}`"></span>
+                                                                    <span x-show="it.unread" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">New</span>
+                                                                </p>
+                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                                                   x-text="it.message || (it.issue ? it.issue.title : `${it.first_name || ''} ${it.surname || ''}`)"
                                                                     <span class="inline-flex items-center gap-1">
                                                                         <span
                                                                             class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span>
@@ -571,7 +590,7 @@
                                                                     </span>
                                                                 </p>
                                                                 <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1"
-                                                                    x-text="timeAgo(it.updated_at)"></p>
+                                                                    x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)"></p>
                                                             </div>
                                                         </div>
                                                     </a>
@@ -585,11 +604,18 @@
                                                 notifications</div>
                                         </template>
 
-                                        <!-- Server-rendered DB notifications (initial) - only unread -->
+                                        <!-- Server-rendered DB notifications (initial) - only unread and open issues -->
                                         @if (auth()->user()->unreadNotifications()->count() > 0)
                                             @foreach (auth()->user()->unreadNotifications()->take(10) as $notification)
+                                                @php
+                                                    $issueStatus = $notification->data['issue_status'] ?? '';
+                                                    if ($user->role === 'report_manager' && $issueStatus !== 'open') {
+                                                        continue;
+                                                    }
+                                                @endphp
                                                 <div class="px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors db-notif"
-                                                    data-notif-id="{{ $notification->id }}">
+                                                    data-notif-id="{{ $notification->id }}"
+                                                    data-issue-status="{{ $issueStatus }}">
                                                     <div class="flex items-start">
                                                         <div class="flex-shrink-0 mt-0.5">
                                                             @if ($notification->type === 'App\Notifications\LeadAssigned')
@@ -852,7 +878,9 @@
     @unless ($isAdmin)
         <script>
             function notificationsDropdown({
-                initialUnread = 0
+                initialUnread = 0,
+                isReportManager = false,
+                userId = null
             } = {}) {
                 // Local unread management for realtime items
                 const LS_LAST_SEEN_KEY = 'notif:last_seen_iso';
@@ -877,10 +905,88 @@
                     _url: null,
                     _interval: 10000,
                     _timer: null,
+                    _isReportManager: isReportManager,
+                    _userId: userId,
+
+                    // Helper method to check if notification should be shown
+                    shouldShowNotification(item) {
+                        if (!this._isReportManager) {
+                            return true; // Regular users see all notifications
+                        }
+                        // For report managers, only show open issues where they are the resolver
+                        if (item.issue && 
+                            item.issue.resolver_id === this._userId && 
+                            item.issue.status === 'open') {
+                            return true;
+                        }
+                        return false;
+                    },
+
+                    _isUnread(itemDate, issueDate) {
+                        const lastSeen = getLastSeen();
+                        if (!lastSeen) return true;
+                        const compareDate = issueDate || itemDate;
+                        return new Date(compareDate) > new Date(lastSeen);
+                    },
+
+                    _recomputeUnread() {
+                        // Filter and count notifications based on role
+                        if (this._isReportManager) {
+                            // For report managers: only show open issues assigned to them
+                            this.rtItems = this.rtItems.filter(it => 
+                                it.issue && 
+                                it.issue.resolver_id === this._userId && 
+                                it.issue.status === 'open'
+                            );
+                            this.unreadRtCount = this.rtItems.length;
+                        } else {
+                            // For regular users: show all unread notifications
+                            this.unreadRtCount = this.rtItems.filter(it => it.unread).length;
+                        }
+                        
+                        // Update total unread count
+                        this.unreadTotal = this.unreadRtCount + this.unreadDbCount;
+
+                        // Update total unread count
+                        this.unreadTotal = this.unreadRtCount + this.unreadDbCount;
+
+                        // If we're a report manager, also check DB notifications for open issues
+                        if (this._isReportManager) {
+                            this.unreadDbCount = document.querySelectorAll('.db-notif[data-issue-status="open"]').length;
+                        }
+                        
+                        // Update total unread count in UI
+                        this.unreadTotal = this.unreadDbCount + this.unreadRtCount;
+                    },
 
                     // Bell badge: sum of DB unread + realtime unread
                     get unreadTotal() {
                         return Math.max(0, (this.unreadDbCount || 0) + (this.unreadRtCount || 0));
+                    },
+
+                    markAllRead() {
+                        // 1) Update the global notifications_read_at on the server
+                        fetch('/notifications/mark-all-read', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        }).then(() => {
+                            // 2) Mark realtime as read (advance last-seen)
+                            setLastSeen(nowIso());
+                            // 3) Reset realtime unread count
+                            this.unreadRtCount = 0;
+                            // 4) Mark all items as read
+                            this.rtItems.forEach(it => it.unread = false);
+                            // 5) Clear DB unread count
+                            this.unreadDbCount = 0;
+                            // 6) Update hasDbNotifs flag
+                            this.hasDbNotifs = false;
+                            // 7) Close dropdown
+                            this.open = false;
+                        }).catch(console.error);
                     },
 
                     init() {
@@ -899,6 +1005,23 @@
                         });
 
                         if (this._url) this._tick();
+                    },
+
+                    markAsRead(item) {
+                        item.unread = false;
+                        this._recomputeUnread();
+                        
+                        // If it's an issue notification and we're a report manager, update the server
+                        if (this._isReportManager && item.issue) {
+                            fetch(`/notifications/${item.issue.id}/mark-as-read`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                }
+                            }).catch(console.error);
+                        }
                     },
 
                     toggle() {
@@ -931,10 +1054,19 @@
                                 for (const it of newest) {
                                     const key = `${it.id}-${it.updated_at}`;
                                     if (this._seen.has(key)) continue; // avoid duplicates
-                                    this._seen.add(key);
-                                    // compute unread flag against last_seen
-                                    it.unread = this._isUnread(it.updated_at);
-                                    this.rtItems.unshift(it);
+                                    
+                                    // Only add notification if it should be shown based on role
+                                    if (this.shouldShowNotification(it)) {
+                                        this._seen.add(key);
+                                        // compute unread flag against last_seen
+                                        const relevantDate = it.issue ? it.issue.updated_at : it.updated_at;
+                                        it.unread = this._isUnread(it.updated_at, it.issue?.updated_at);
+                                        this.rtItems.unshift(it);
+                                        // Increment unread count if item is unread
+                                        if (it.unread) {
+                                            this.unreadRtCount++;
+                                        }
+                                    }
                                 }
                                 if (this.rtItems.length > 100) this.rtItems.length = 100;
                             }

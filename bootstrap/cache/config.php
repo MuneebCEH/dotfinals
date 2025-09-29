@@ -53,13 +53,13 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\Users\\M.M\\Downloads\\vercel\\resources\\views',
+      0 => 'E:\\Saad\\reincarnationcloud\\crm_portal\\resources\\views',
     ),
-    'compiled' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\framework\\views',
+    'compiled' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\framework\\views',
   ),
   'app' => 
   array (
-    'name' => 'CRM',
+    'name' => 'Laravel',
     'env' => 'local',
     'debug' => true,
     'url' => 'http://localhost',
@@ -70,7 +70,7 @@
     'fallback_locale' => 'en',
     'faker_locale' => 'en_US',
     'cipher' => 'AES-256-CBC',
-    'key' => 'base64:jSkeSj2MyYnKQ+iMQcVo5vG9pwWCBF2+VYiqzpaUJqg=',
+    'key' => 'base64:7QfGJUO1l2H0yA7F/qHUcUuIzt9UW4FMAyrYlF73CHY=',
     'previous_keys' => 
     array (
     ),
@@ -193,21 +193,21 @@
   ),
   'broadcasting' => 
   array (
-    'default' => 'reverb',
+    'default' => 'log',
     'connections' => 
     array (
       'reverb' => 
       array (
         'driver' => 'reverb',
-        'key' => 'vpbtlyw7whpsqcfbpmmi',
-        'secret' => 'ozylg8qfutr9mb0psbca',
-        'app_id' => '137003',
+        'key' => NULL,
+        'secret' => NULL,
+        'app_id' => NULL,
         'options' => 
         array (
-          'host' => 'localhost',
-          'port' => '8080',
-          'scheme' => 'http',
-          'useTLS' => false,
+          'host' => NULL,
+          'port' => 443,
+          'scheme' => 'https',
+          'useTLS' => true,
         ),
         'client_options' => 
         array (
@@ -268,8 +268,8 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\framework/cache/data',
-        'lock_path' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\framework/cache/data',
+        'path' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\framework/cache/data',
+        'lock_path' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -313,7 +313,7 @@
         'driver' => 'octane',
       ),
     ),
-    'prefix' => 'crm-cache-',
+    'prefix' => 'laravel-cache-',
   ),
   'database' => 
   array (
@@ -324,7 +324,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'internal_leads_portal',
+        'database' => 'leads_management_portal',
         'prefix' => '',
         'foreign_key_constraints' => true,
         'busy_timeout' => NULL,
@@ -337,7 +337,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'internal_leads_portal',
+        'database' => 'leads_management_portal',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -357,7 +357,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'internal_leads_portal',
+        'database' => 'leads_management_portal',
         'username' => 'root',
         'password' => '',
         'unix_socket' => '',
@@ -377,7 +377,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'internal_leads_portal',
+        'database' => 'leads_management_portal',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -392,7 +392,7 @@
         'url' => NULL,
         'host' => '127.0.0.1',
         'port' => '3306',
-        'database' => 'internal_leads_portal',
+        'database' => 'leads_management_portal',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8',
@@ -411,7 +411,7 @@
       'options' => 
       array (
         'cluster' => 'redis',
-        'prefix' => 'crm-database-',
+        'prefix' => 'laravel-database-',
         'persistent' => false,
       ),
       'default' => 
@@ -441,10 +441,10 @@
     'convert_entities' => true,
     'options' => 
     array (
-      'font_dir' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\fonts',
-      'font_cache' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\fonts',
+      'font_dir' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\fonts',
+      'font_cache' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\fonts',
       'temp_dir' => 'C:\\Users\\M.M\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\Users\\M.M\\Downloads\\vercel',
+      'chroot' => 'E:\\Saad\\reincarnationcloud\\crm_portal',
       'allowed_protocols' => 
       array (
         'data://' => 
@@ -497,7 +497,7 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\app/private',
+        'root' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\app/private',
         'serve' => true,
         'throw' => false,
         'report' => false,
@@ -505,7 +505,7 @@
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\app/public',
+        'root' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\app/public',
         'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
@@ -527,7 +527,7 @@
     ),
     'links' => 
     array (
-      'C:\\Users\\M.M\\Downloads\\vercel\\public\\storage' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\app/public',
+      'E:\\Saad\\reincarnationcloud\\crm_portal\\public\\storage' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\app/public',
     ),
   ),
   'logging' => 
@@ -552,14 +552,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\logs/laravel.log',
+        'path' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\logs/laravel.log',
         'level' => 'debug',
         'replace_placeholders' => true,
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\logs/laravel.log',
+        'path' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 14,
         'replace_placeholders' => true,
@@ -624,7 +624,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\logs/laravel.log',
+        'path' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -695,14 +695,14 @@
     'from' => 
     array (
       'address' => 'hello@example.com',
-      'name' => 'CRM',
+      'name' => 'Laravel',
     ),
     'markdown' => 
     array (
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\Users\\M.M\\Downloads\\vercel\\resources\\views/vendor/mail',
+        0 => 'E:\\Saad\\reincarnationcloud\\crm_portal\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -776,7 +776,7 @@
         'host' => '0.0.0.0',
         'port' => 8080,
         'path' => '',
-        'hostname' => 'localhost',
+        'hostname' => NULL,
         'options' => 
         array (
           'tls' => 
@@ -810,15 +810,15 @@
       array (
         0 => 
         array (
-          'key' => 'vpbtlyw7whpsqcfbpmmi',
-          'secret' => 'ozylg8qfutr9mb0psbca',
-          'app_id' => '137003',
+          'key' => NULL,
+          'secret' => NULL,
+          'app_id' => NULL,
           'options' => 
           array (
-            'host' => 'localhost',
-            'port' => '8080',
-            'scheme' => 'http',
-            'useTLS' => false,
+            'host' => NULL,
+            'port' => 443,
+            'scheme' => 'https',
+            'useTLS' => true,
           ),
           'allowed_origins' => 
           array (
@@ -858,11 +858,11 @@
   ),
   'session' => 
   array (
-    'driver' => 'file',
+    'driver' => 'database',
     'lifetime' => 120,
     'expire_on_close' => true,
     'encrypt' => false,
-    'files' => 'C:\\Users\\M.M\\Downloads\\vercel\\storage\\framework/sessions',
+    'files' => 'E:\\Saad\\reincarnationcloud\\crm_portal\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -871,7 +871,7 @@
       0 => 2,
       1 => 100,
     ),
-    'cookie' => 'crm-session',
+    'cookie' => 'laravel-session',
     'path' => '/',
     'domain' => NULL,
     'secure' => NULL,

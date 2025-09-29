@@ -133,7 +133,7 @@
                     style="display:none">
                     <i class="fas fa-moon text-gray-700 dark:text-yellow-400"></i>
                 </button>
-                <a href="{{ route('rm.notifications') }}"
+                {{-- <a href="{{ route('rm.notifications') }}"
                     class="relative inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                     <i class="fas fa-bell text-gray-700 dark:text-gray-300"></i>
                     <span class="font-medium text-gray-700 dark:text-gray-300">Notifications</span>
@@ -142,7 +142,7 @@
                         class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         {{ $unread }}
                     </span>
-                </a>
+                </a> --}}
             </div>
         </div>
 

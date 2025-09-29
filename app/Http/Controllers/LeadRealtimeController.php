@@ -46,40 +46,82 @@ class LeadRealtimeController extends Controller
             $sinceAt = now()->subDay();
         }
 
+        // For report managers, include issues where they are the resolver
+        $isReportManager = $user->role === 'report_manager';
+
         // Determine the assignee column name used by the schema
         $assigneeColumn = Schema::hasColumn('leads', 'assigned_to')
             ? 'assigned_to'
             : (Schema::hasColumn('leads', 'assigned_id') ? 'assigned_id' : 'assigned_to');
 
-        // Build a strict query limited to the current user's assigned leads
-        $items = Lead::query()
-            ->where($assigneeColumn, $user->id)
-            ->where('updated_at', '>', $sinceAt)
-            ->orderBy('updated_at', 'asc')
-            ->limit(50)
-            ->get([
-                'id',
-                'first_name',
-                'surname',
-                'status',
-                // Return a consistent key in the payload for the client
+        // Build query for leads and issues
+        $query = Lead::query()
+            ->select(
+                'leads.id',
+                'leads.first_name',
+                'leads.surname',
+                'leads.status',
                 $assigneeColumn . ' as assigned_to',
-                'updated_at',
-            ]);
+                'leads.updated_at',
+                'lead_issues.id as issue_id',
+                'lead_issues.resolver_id',
+                'lead_issues.title as issue_title',
+                'lead_issues.status as issue_status',
+                'lead_issues.updated_at as issue_updated_at'
+            )
+            ->leftJoin('lead_issues', 'leads.id', '=', 'lead_issues.lead_id')
+            ->where(function($q) use ($user, $assigneeColumn, $isReportManager) {
+                $q->where($assigneeColumn, $user->id);
+                
+                // If user is report manager, also get leads with open issues assigned to them
+                if ($isReportManager) {
+                    $q->orWhere(function($query) use ($user) {
+                        $query->where('lead_issues.resolver_id', $user->id)
+                              ->where('lead_issues.status', 'open');
+                    });
+                }
+            })
+            ->where(function($q) use ($sinceAt) {
+                $q->where('leads.updated_at', '>', $sinceAt)
+                  ->orWhere('lead_issues.updated_at', '>', $sinceAt);
+            })
+            ->orderBy('leads.updated_at', 'desc')
+            ->limit(50);
+
+        $items = $query->get();
 
         // Map the response for the client dropdown / UI
         $payload = [
             'since'  => $sinceAt->toIso8601String(),
             'count'  => $items->count(),
-            'items'  => $items->map(function ($lead) {
-                return [
-                    'id'           => $lead->id,
-                    'first_name'   => $lead->first_name ?? null,
-                    'surname'      => $lead->surname ?? null,
-                    'status'       => $lead->status ?? null,
-                    'assigned_to'  => $lead->assigned_to, // normalized alias above
-                    'updated_at'   => optional($lead->updated_at)->toIso8601String(),
+            'items'  => $items->map(function ($item) {
+                $data = [
+                    'id'           => $item->id,
+                    'first_name'   => $item->first_name ?? null,
+                    'surname'      => $item->surname ?? null,
+                    'status'       => $item->status ?? null,
+                    'assigned_to'  => $item->assigned_to,
+                    'updated_at'   => optional($item->updated_at)->toIso8601String(),
                 ];
+
+                // Include issue information if present
+                if ($item->issue_id) {
+                    $data['issue'] = [
+                        'id' => $item->issue_id,
+                        'resolver_id' => $item->resolver_id,
+                        'title' => $item->issue_title,
+                        'status' => $item->issue_status,
+                        'updated_at' => $item->issue_updated_at,
+                        'url' => route('issues.show', ['issue' => $item->issue_id])
+                    ];
+                    
+                    // Add notification type and message
+                    $data['type'] = 'issue_update';
+                    $data['message'] = "Report request: {$item->issue_title}";
+                    $data['url'] = route('issues.show', ['issue' => $item->issue_id]);
+                }
+
+                return $data;
             })->all(),
         ];
 
