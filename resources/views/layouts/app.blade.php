@@ -421,6 +421,72 @@
                             Profile
                         </a>
 
+
+                        {{-- Maxout --}}
+                    @elseif ($role === 'max_out')
+                        @php
+                            $maxoutLeadsCount = \App\Models\Lead::query()
+                                ->where('status', 'Max Out')
+                                // ->where(function ($q) use ($user) {
+                                //     $q->where('assigned_to', $user->id)
+                                //         ->orWhere('super_agent_id', $user->id)
+                                //         ->orWhere('closer_id', $user->id);
+                                // });
+                                ->count();
+                        @endphp
+
+
+                        {{-- dashboard --}}
+                        <a href="{{ route('dashboard') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+            {{ request()->routeIs('dashboard')
+                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+
+                        <a href="{{ route('leads.maxout') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+            {{ request()->routeIs('leads.*')
+                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2
+                       c0-.656-.126-1.283-.356-1.857M7 20H2v-2
+                       a3 3 0 015.356-1.857M7 20v-2
+                       c0-.656.126-1.283.356-1.857
+                       m0 0a5.002 5.002 0 019.288 0
+                       M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+
+                            Maxout Leads
+
+                            {{-- @if ($maxoutLeadsCount > 0)
+                                <span class="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
+                                    {{ $maxoutLeadsCount }}
+                                </span>
+                            @endif --}}
+                        </a>
+
+                        <a href="{{ route('profile.edit') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+            {{ request()->routeIs('profile.*')
+                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Profile
+                        </a>
+
                         {{-- Regular (non-admin, non-RM) --}}
                     @else
                         <a href="{{ route('dashboard') }}"
@@ -500,10 +566,10 @@
                         <!-- Notifications Button & Dropdown (hidden for admins) -->
                         @if ($user->role == 'user' || $user->role == 'report_manager')
                             <div class="relative" x-data="{
-                                ...notificationsDropdown({ 
-                                    initialUnread: {{ $user->role == 'report_manager' ? 
-                                        auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count() : 
-                                        auth()->user()->unreadNotifications()->count() }},
+                                ...notificationsDropdown({
+                                    initialUnread: {{ $user->role == 'report_manager'
+                                        ? auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count()
+                                        : auth()->user()->unreadNotifications()->count() }},
                                     isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
                                     userId: {{ auth()->id() }},
                                     unreadRtCount: 0,
@@ -552,22 +618,24 @@
                                     <div class="max-h-96 overflow-y-auto">
                                         <!-- Realtime lead updates (injected via polling) -->
                                         <template x-if="rtItems.length > 0">
-                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500" 
-                                                 x-text="isReportManager ? 'Report Requests' : 'Recent Lead Updates'">
+                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500"
+                                                x-text="isReportManager ? 'Report Requests' : 'Recent Lead Updates'">
                                             </div>
                                         </template>
                                         <!-- We wrap the list in a container so we can count DOM items if needed -->
                                         <div x-ref="rtList">
                                             <template x-for="it in rtItems" :key="it.id + '-' + it.updated_at">
-                                                <div
-                                                    class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors"
+                                                <div class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors"
                                                     :class="{ 'bg-red-50 dark:bg-red-900/10': it.unread }">
-                                                    <a :href="getNotificationUrl(it)" class="block" @click="markAsRead(it)">
+                                                    <a :href="getNotificationUrl(it)" class="block"
+                                                        @click="markAsRead(it)">
                                                         <div class="flex items-start">
                                                             <div class="flex-shrink-0 mt-0.5">
                                                                 <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center"
-                                                                     :class="{ 'bg-red-100 dark:bg-red-900/30': it.unread }">
-                                                                    <svg class="h-5 w-5" :class="it.unread ? 'text-red-600 dark:text-red-400' : 'text-primary-600 dark:text-primary-400'"
+                                                                    :class="{ 'bg-red-100 dark:bg-red-900/30': it.unread }">
+                                                                    <svg class="h-5 w-5"
+                                                                        :class="it.unread ? 'text-red-600 dark:text-red-400' :
+                                                                            'text-primary-600 dark:text-primary-400'"
                                                                         fill="none" stroke="currentColor"
                                                                         viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round"
@@ -577,20 +645,24 @@
                                                                 </div>
                                                             </div>
                                                             <div class="ml-3 flex-1">
-                                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                    <span x-text="it.issue ? `Issue #${it.issue.id}` : `Lead #${it.id}`"></span>
-                                                                    <span x-show="it.unread" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">New</span>
+                                                                <p
+                                                                    class="text-sm font-medium text-gray-900 dark:text-white">
+                                                                    <span
+                                                                        x-text="it.issue ? `Issue #${it.issue.id}` : `Lead #${it.id}`"></span>
+                                                                    <span x-show="it.unread"
+                                                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">New</span>
                                                                 </p>
                                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
-                                                                   x-text="it.message || (it.issue ? it.issue.title : `${it.first_name || ''} ${it.surname || ''}`)"
+                                                                    x-text="it.message || (it.issue ? it.issue.title : `${it.first_name || ''} ${it.surname || ''}`)"
                                                                     <span class="inline-flex items-center gap-1">
-                                                                        <span
-                                                                            class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span>
-                                                                        <span x-text="it.status || 'updated'"></span>
+                                                                    <span
+                                                                        class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span>
+                                                                    <span x-text="it.status || 'updated'"></span>
                                                                     </span>
                                                                 </p>
                                                                 <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1"
-                                                                    x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)"></p>
+                                                                    x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)">
+                                                                </p>
                                                             </div>
                                                         </div>
                                                     </a>
@@ -600,7 +672,8 @@
 
                                         <!-- Divider if both types exist -->
                                         <template x-if="rtItems.length > 0 && hasDbNotifs">
-                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">System
+                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">
+                                                System
                                                 notifications</div>
                                         </template>
 
@@ -654,7 +727,8 @@
                                                             @endif
                                                         </div>
                                                         <div class="ml-3 flex-1">
-                                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            <p
+                                                                class="text-sm font-medium text-gray-900 dark:text-white">
                                                                 {{ $notification->data['title'] ?? 'Notification' }}
                                                             </p>
                                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -670,8 +744,9 @@
                                                                 <svg class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                                                     fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M5 13l4 4L19 7" />
                                                                 </svg>
                                                             </button>
                                                         @endif
@@ -682,10 +757,12 @@
                                             <div class="px-4 py-6 text-center">
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
                                                         d="M15 17h5l-5 5v-5zM4.83 19.07A11 11 0 015 12c0-6.075 4.925-11 11-11s11 4.925 11 11a11 11 0 01-1.07 7.07M4.83 19.07L9 15M4.83 19.07l-2.83 2.83" />
                                                 </svg>
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No notifications
+                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No
+                                                    notifications
                                                     yet</p>
                                             </div>
                                         @endif
@@ -914,8 +991,8 @@
                             return true; // Regular users see all notifications
                         }
                         // For report managers, only show open issues where they are the resolver
-                        if (item.issue && 
-                            item.issue.resolver_id === this._userId && 
+                        if (item.issue &&
+                            item.issue.resolver_id === this._userId &&
                             item.issue.status === 'open') {
                             return true;
                         }
@@ -933,9 +1010,9 @@
                         // Filter and count notifications based on role
                         if (this._isReportManager) {
                             // For report managers: only show open issues assigned to them
-                            this.rtItems = this.rtItems.filter(it => 
-                                it.issue && 
-                                it.issue.resolver_id === this._userId && 
+                            this.rtItems = this.rtItems.filter(it =>
+                                it.issue &&
+                                it.issue.resolver_id === this._userId &&
                                 it.issue.status === 'open'
                             );
                             this.unreadRtCount = this.rtItems.length;
@@ -943,7 +1020,7 @@
                             // For regular users: show all unread notifications
                             this.unreadRtCount = this.rtItems.filter(it => it.unread).length;
                         }
-                        
+
                         // Update total unread count
                         this.unreadTotal = this.unreadRtCount + this.unreadDbCount;
 
@@ -954,7 +1031,7 @@
                         if (this._isReportManager) {
                             this.unreadDbCount = document.querySelectorAll('.db-notif[data-issue-status="open"]').length;
                         }
-                        
+
                         // Update total unread count in UI
                         this.unreadTotal = this.unreadDbCount + this.unreadRtCount;
                     },
@@ -1010,7 +1087,7 @@
                     markAsRead(item) {
                         item.unread = false;
                         this._recomputeUnread();
-                        
+
                         // If it's an issue notification and we're a report manager, update the server
                         if (this._isReportManager && item.issue) {
                             fetch(`/notifications/${item.issue.id}/mark-as-read`, {
@@ -1054,7 +1131,7 @@
                                 for (const it of newest) {
                                     const key = `${it.id}-${it.updated_at}`;
                                     if (this._seen.has(key)) continue; // avoid duplicates
-                                    
+
                                     // Only add notification if it should be shown based on role
                                     if (this.shouldShowNotification(it)) {
                                         this._seen.add(key);

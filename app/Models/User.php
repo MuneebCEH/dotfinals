@@ -33,7 +33,8 @@ class User extends Authenticatable
         'super_agent',
         'admin',
         'report_manager',
-        'lead_manager'
+        'lead_manager',
+        'max_out',
     ];
 
     public function isAdmin(): bool

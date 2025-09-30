@@ -2,15 +2,24 @@
     // User role and permissions
     $currentUser = auth()->user();
 
-    // Treat lead_manager like admin (admin-equivalent)
+    // User role checks
     $isLeadManager = method_exists($currentUser, 'hasRole')
         ? $currentUser->hasRole('lead_manager')
         : ($currentUser->role ?? null) === 'lead_manager';
 
     $isAdmin = $currentUser->isAdmin() || $isLeadManager;
-
+    $isMaxOut = $currentUser->role === 'max_out';
     $isCloser = $currentUser->isCloser();
     $isSuperAgent = $currentUser->isSuperAgent();
+
+    // Initialize the base query
+    $query = \App\Models\Lead::query();
+
+    // Role-based query restrictions
+    if ($isMaxOut) {
+        // For max_out users, show ALL Max Out leads
+        $query->where('status', 'Max Out');
+    }
 
     // Data for admin functionality
     $users = $isAdmin ? \App\Models\User::all() : collect();
@@ -39,8 +48,16 @@
 
 @extends('layouts.app')
 
-@section('title', 'Leads Management')
-@section('page-title', 'Leads')
+@section('title', $isMaxOut ? 'Max Out Leads Management' : 'Leads Management')
+@section('page-title', $isMaxOut ? 'Max Out Leads' : 'Leads')
+
+@section('description')
+    @if ($isMaxOut)
+        Manage and process your assigned Max Out leads
+    @else
+        Manage and process your assigned leads
+    @endif
+@endsection
 
 @push('modals')
     <!-- Delete Confirmation Modal -->

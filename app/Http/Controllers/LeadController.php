@@ -67,6 +67,12 @@ class LeadController extends Controller
             || (($u->role ?? null) === 'closer');
     }
 
+
+    protected function isMaxOutUser(User $u): bool
+    {
+        return ($u->role ?? null) === 'max_out';
+    }
+
     /** Admin-like (admin OR lead_manager) */
     // protected function isElevated(): bool
     // {
@@ -76,10 +82,32 @@ class LeadController extends Controller
     // }
 
     /** View guard covering all roles */
+    // protected function canViewLead(?User $u, Lead $lead): bool
+    // {
+    //     if (!$u) return false;
+    //     if ($this->isElevated()) return true;
+
+    //     if ($this->isSuperAgentUser($u) && (int)$lead->super_agent_id === (int)$u->id) {
+    //         return true;
+    //     }
+
+    //     if ($this->isCloserUser($u) && ((int)$lead->closer_id === (int)$u->id || (int)$lead->assigned_to === (int)$u->id)) {
+    //         return true;
+    //     }
+
+    //     return (int)$lead->assigned_to === (int)$u->id;
+    // }
+
+
     protected function canViewLead(?User $u, Lead $lead): bool
     {
         if (!$u) return false;
         if ($this->isElevated()) return true;
+
+        // ✅ Max Out role: can view any lead with status Max Out
+        if ($this->isMaxOutUser($u) && strtolower($lead->status) === 'max out') {
+            return true;
+        }
 
         if ($this->isSuperAgentUser($u) && (int)$lead->super_agent_id === (int)$u->id) {
             return true;
@@ -92,12 +120,23 @@ class LeadController extends Controller
         return (int)$lead->assigned_to === (int)$u->id;
     }
 
-    /** Edit/update guard (same as view; adjust here if you want tighter edit rules) */
     protected function canEditLead(?User $u, Lead $lead): bool
     {
-        // For now, same as canViewLead
+        // ✅ Max Out role inherits same rule as view
+        if ($this->isMaxOutUser($u) && strtolower($lead->status) === 'max out') {
+            return true;
+        }
+
         return $this->canViewLead($u, $lead);
     }
+
+
+    /** Edit/update guard (same as view; adjust here if you want tighter edit rules) */
+    // protected function canEditLead(?User $u, Lead $lead): bool
+    // {
+    //     // For now, same as canViewLead
+    //     return $this->canViewLead($u, $lead);
+    // }
 
     /** Legacy helper used elsewhere */
     protected function ensureCanAccessLead(Lead $lead): void
@@ -163,7 +202,7 @@ class LeadController extends Controller
                         ->orWhere('zip_code', 'like', $term);
                 });
             })
-            // Status filter (defensive: only apply if value is in our allowed list)
+            // Status filter
             ->when(
                 $request->filled('status') && in_array($request->status, $statuses, true),
                 fn($q) => $q->where('status', $request->status)
@@ -173,7 +212,7 @@ class LeadController extends Controller
                 $request->filled('category') && ctype_digit((string) $request->category),
                 fn($q) => $q->where('category_id', $request->category)
             )
-            // ✅ Today-only filter (NEW)
+            // Today-only filter
             ->when($request->boolean('today'), fn($q) => $q->whereDate('created_at', $today))
             ->orderByDesc('id');
 
@@ -194,22 +233,36 @@ class LeadController extends Controller
                 ->values();
         }
 
+        // ✅ Maxout leads logic (only for maxout role)
+        $maxoutLeadsCount = 0;
+        if (auth()->check() && auth()->user()->role === 'maxout') {
+            $userId = auth()->id();
+            $maxoutLeadsCount = Lead::where('status', 'maxout')
+                ->where(function ($q) use ($userId) {
+                    $q->where('assigned_to', $userId)
+                        ->orWhere('super_agent_id', $userId)
+                        ->orWhere('closer_id', $userId);
+                })
+                ->count();
+        }
+
         return view('leads.index', [
-            'onlineUsers'  => $onlineUsers,
-            'leads'        => $leads,
-            'categories'   => $categories,
-            'statuses'     => $statuses,
-            'users'        => $users,
-            'statusCounts' => $statusCounts,
-            'filters'      => [
+            'onlineUsers'       => $onlineUsers,
+            'leads'             => $leads,
+            'categories'        => $categories,
+            'statuses'          => $statuses,
+            'users'             => $users,
+            'statusCounts'      => $statusCounts,
+            'maxoutLeadsCount'  => $maxoutLeadsCount, // ✅ passed to view
+            'filters'           => [
                 'q'        => $request->q ?? '',
                 'status'   => $request->status ?? '',
                 'category' => $request->category ?? '',
-                // optional but nice for symmetry with others:
                 'today'    => $request->boolean('today'),
             ],
         ]);
     }
+
 
 
     public function myLeads(Request $request)
@@ -1274,5 +1327,11 @@ class LeadController extends Controller
         }
 
         return back()->with('status', $msg);
+    }
+
+
+    public function maxOut()
+    {
+        return view('leads.maxout');
     }
 }
