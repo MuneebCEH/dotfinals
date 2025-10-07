@@ -214,7 +214,7 @@ class LeadController extends Controller
             )
             // Today-only filter
             ->when($request->boolean('today'), fn($q) => $q->whereDate('created_at', $today))
-            ->orderByDesc('id');
+            ->orderByDesc('updated_at'); // Changed from orderByDesc('id') to orderByDesc('updated_at')
 
         $this->applyCreatedDateFilter($query, $request, 'created_at');
 
@@ -233,7 +233,7 @@ class LeadController extends Controller
                 ->values();
         }
 
-        // ✅ Maxout leads logic (only for maxout role)
+        // Maxout leads logic (only for maxout role)
         $maxoutLeadsCount = 0;
         if (auth()->check() && auth()->user()->role === 'maxout') {
             $userId = auth()->id();
@@ -253,7 +253,7 @@ class LeadController extends Controller
             'statuses'          => $statuses,
             'users'             => $users,
             'statusCounts'      => $statusCounts,
-            'maxoutLeadsCount'  => $maxoutLeadsCount, // ✅ passed to view
+            'maxoutLeadsCount'  => $maxoutLeadsCount,
             'filters'           => [
                 'q'        => $request->q ?? '',
                 'status'   => $request->status ?? '',
@@ -448,7 +448,7 @@ class LeadController extends Controller
     public function update(UpdateLeadRequest $request, Lead $lead)
     {
         $user = Auth::user();
-        abort_unless($this->canEditLead($user, $lead), 403, 'Unauthorized action.');
+        abort_unless($user, 403, 'Unauthorized action.');
 
         try {
             DB::beginTransaction();
@@ -553,10 +553,11 @@ class LeadController extends Controller
             }
 
             DB::commit();
+            $lead->refresh();
 
             session()->flash('success', 'Lead updated successfully.');
 
-            if (Auth::user()->isAdmin()) {
+            if ($user->isAdmin()) {
                 $content  = $lead->generateTextReport();
                 $filename = $this->generateTextReportFilename($lead);
                 $headers  = [
@@ -566,6 +567,14 @@ class LeadController extends Controller
                 ];
                 session()->flash('redirect_to', route('leads.show', $lead));
                 return Response::make($content, 200, $headers);
+            }
+
+            if ($this->isMaxOutUser($user)) {
+                return redirect()->route('leads.maxout');
+            }
+
+            if (!$this->canViewLead($user, $lead)) {
+                return redirect()->route('leads.index');
             }
 
             return redirect()->route('leads.show', $lead);
