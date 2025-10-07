@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Auth\Events\Logout;
+use App\Models\Lead;
 use App\Models\UserAttendance;
+use App\Observers\LeadObserver;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
         config(['app.timezone' => 'Asia/Karachi']);
         date_default_timezone_set('Asia/Karachi');
         Carbon::setLocale('en');
+
+        Lead::observe(LeadObserver::class);
 
         // --- Auto-checkout on logout (no EventServiceProvider needed) ---
         Event::listen(Logout::class, function (Logout $event) {

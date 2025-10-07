@@ -101,35 +101,39 @@ class LeadController extends Controller
 
     protected function canViewLead(?User $u, Lead $lead): bool
     {
-        if (!$u) return false;
-        if ($this->isElevated()) return true;
+        if (!$u) {
+            return false;
+        }
 
-        // ✅ Max Out role: can view any lead with status Max Out
-        if ($this->isMaxOutUser($u) && strtolower($lead->status) === 'max out') {
+        if ($this->isElevated()) {
             return true;
         }
 
-        if ($this->isSuperAgentUser($u) && (int)$lead->super_agent_id === (int)$u->id) {
+        if ($this->isMaxOutUser($u)) {
+            if (strcasecmp((string) $lead->status, 'Max Out') === 0) {
+                return true;
+            }
+
+            if (method_exists($lead, 'hasMaxOutHistory') && $lead->hasMaxOutHistory()) {
+                return true;
+            }
+        }
+
+        if ($this->isSuperAgentUser($u) && (int) $lead->super_agent_id === (int) $u->id) {
             return true;
         }
 
-        if ($this->isCloserUser($u) && ((int)$lead->closer_id === (int)$u->id || (int)$lead->assigned_to === (int)$u->id)) {
+        if ($this->isCloserUser($u) && ((int) $lead->closer_id === (int) $u->id || (int) $lead->assigned_to === (int) $u->id)) {
             return true;
         }
 
-        return (int)$lead->assigned_to === (int)$u->id;
+        return (int) $lead->assigned_to === (int) $u->id;
     }
 
     protected function canEditLead(?User $u, Lead $lead): bool
     {
-        // ✅ Max Out role inherits same rule as view
-        if ($this->isMaxOutUser($u) && strtolower($lead->status) === 'max out') {
-            return true;
-        }
-
         return $this->canViewLead($u, $lead);
     }
-
 
     /** Edit/update guard (same as view; adjust here if you want tighter edit rules) */
     // protected function canEditLead(?User $u, Lead $lead): bool
@@ -276,7 +280,7 @@ class LeadController extends Controller
             (method_exists($user, 'hasRole') && $user->hasRole('super_agent')) ||
             (($user->role ?? null) === 'super_agent');
 
-        // ❌ Always hide submitted & deal from the UI filter options
+        // Γ¥î Always hide submitted & deal from the UI filter options
         $visibleStatuses = array_values(array_filter(
             $statuses,
             fn($s) => !in_array(mb_strtolower($s), ['submitted', 'deal'], true)
@@ -296,7 +300,7 @@ class LeadController extends Controller
                 $q->where('assigned_to', $user->id);
             });
 
-        // ❌ Always exclude submitted & deal leads regardless of role
+        // Γ¥î Always exclude submitted & deal leads regardless of role
         $query->where(function ($q) {
             $q->whereNull('status')
                 ->orWhereRaw('LOWER(status) NOT IN (?, ?)', ['submitted', 'deal']);
@@ -339,9 +343,9 @@ class LeadController extends Controller
         abort_unless($this->isElevated(), 403);
 
         $categories   = Category::orderBy('name')->get();
-        $tos          = User::where('role', 'user')->orderBy('name')->get();           // “Select TO”
-        $superAgents  = User::where('role', 'super_agent')->orderBy('name')->get();    // “Select Super Agent”
-        $closers      = User::where('role', 'closer')->orderBy('name')->get();         // “Select Closer”
+        $tos          = User::where('role', 'user')->orderBy('name')->get();           // ΓÇ£Select TOΓÇ¥
+        $superAgents  = User::where('role', 'super_agent')->orderBy('name')->get();    // ΓÇ£Select Super AgentΓÇ¥
+        $closers      = User::where('role', 'closer')->orderBy('name')->get();         // ΓÇ£Select CloserΓÇ¥
         $statuses     = self::STATUSES; // your hardcoded list
 
         return view('leads.create', compact('categories', 'tos', 'superAgents', 'closers', 'statuses'));
@@ -643,7 +647,7 @@ class LeadController extends Controller
                     })->values();
 
                     if ($validUsers->isEmpty()) {
-                        return back()->with('error', 'No eligible users after applying the "Exclude if assigned ≥" filter.');
+                        return back()->with('error', 'No eligible users after applying the "Exclude if assigned ΓëÑ" filter.');
                     }
                 }
 
@@ -702,7 +706,7 @@ class LeadController extends Controller
 
                 $parts = [];
                 foreach ($assignments as $name => $count) {
-                    $parts[] = "{$count} → {$name}";
+                    $parts[] = "{$count} ΓåÆ {$name}";
                 }
                 $summary = implode(', ', $parts);
 
@@ -839,7 +843,7 @@ class LeadController extends Controller
         $lines[] = $L('State', $lead->state_abbreviation);
         $lines[] = $L('Zip Code', $lead->zip_code);
 
-        // 🟢 All phone numbers FIRST
+        // ≡ƒƒó All phone numbers FIRST
         if (count($numbers)) {
             foreach ($numbers as $i => $num) {
                 $lines[] = $L('Number ' . ($i + 1), $num);
@@ -852,7 +856,7 @@ class LeadController extends Controller
         $lines[] = $L('SSN', $lead->ssn);
         $lines[] = '';
 
-        // 🟦 BANK DETAILS (cards only)
+        // ≡ƒƒª BANK DETAILS (cards only)
         $lines[] = 'BANK DETAILS:';
         if (count($cardNumbers)) {
             foreach ($cardNumbers as $i => $num) {
@@ -986,7 +990,7 @@ class LeadController extends Controller
 
                 $hash = hash('sha256', $bytes);
                 $manifest[] = "- Attachment/{$attachmentName} ({$mime}, {$size} bytes, sha256={$hash})";
-                $manifest[] = "  Stored at → disk: {$resolvedDisk}, path: {$resolvedPath}";
+                $manifest[] = "  Stored at ΓåÆ disk: {$resolvedDisk}, path: {$resolvedPath}";
             }
         }
 
@@ -1128,7 +1132,7 @@ class LeadController extends Controller
             // Store as JSON string or null
             $leadData['numbers'] = !empty($numbers) ? json_encode($numbers, JSON_UNESCAPED_UNICODE) : null;
 
-            // Drop helper columns if your table doesn’t have them
+            // Drop helper columns if your table doesnΓÇÖt have them
             unset(
                 $leadData['primary_number'],
                 $leadData['alt_number_1'],
@@ -1274,7 +1278,7 @@ class LeadController extends Controller
         ]);
     }
 
-    // Example filter helper – mirror your existing index() logic
+    // Example filter helper ΓÇô mirror your existing index() logic
     protected function applyLeadFilters($q, Request $r)
     {
         if ($r->filled('q')) {
@@ -1311,7 +1315,7 @@ class LeadController extends Controller
             'ids.*' => ['integer', 'exists:leads,id'],
         ])['ids'];
 
-        // Optional: Authorization – ensure user can delete each lead
+        // Optional: Authorization ΓÇô ensure user can delete each lead
         $leads = Lead::whereIn('id', $ids)->get();
 
         $deletable = [];

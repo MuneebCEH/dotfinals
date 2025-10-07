@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\LeadStatusTransition;
 use App\Models\Traits\GeneratesTextReport;
 use Illuminate\Database\Eloquent\Model;
 
@@ -213,5 +214,34 @@ class Lead extends Model
     {
         // assumes callbacks table has a `lead_id` FK to leads.id
         return $this->hasMany(Callback::class, 'lead_id');
+    }
+
+    public function statusTransitions()
+    {
+        return $this->hasMany(LeadStatusTransition::class);
+    }
+
+    public function lastMaxOutExit()
+    {
+        return $this->hasOne(LeadStatusTransition::class)
+            ->where('from_status', 'Max Out')
+            ->where('to_status', '!=', 'Max Out')
+            ->latestOfMany();
+    }
+
+    /**
+     * Determine if the lead was ever moved out of the Max Out status.
+     */
+    public function hasMaxOutHistory(): bool
+    {
+        if ($this->relationLoaded('statusTransitions')) {
+            return $this->statusTransitions->contains(
+                fn($transition) => strcasecmp($transition->from_status ?? '', 'Max Out') === 0
+            );
+        }
+
+        return $this->statusTransitions()
+            ->where('from_status', 'Max Out')
+            ->exists();
     }
 }
