@@ -42,7 +42,8 @@ class LeadController extends Controller
         'Not Qualified (NQ)',
         'Submitted',
         'New Lead',
-        'Super Lead', // Added Super Lead status
+        'Super Lead',
+        'That Submitted',
     ];
 
     protected function isLeadManagerUser(User $u): bool
@@ -71,6 +72,11 @@ class LeadController extends Controller
     protected function isMaxOutUser(User $u): bool
     {
         return ($u->role ?? null) === 'max_out';
+    }
+
+    protected function isThatSubmittedUser(User $u): bool
+    {
+        return ($u->role ?? null) === 'that_submitted';
     }
 
     /** Admin-like (admin OR lead_manager) */
@@ -107,6 +113,16 @@ class LeadController extends Controller
 
         if ($this->isElevated()) {
             return true;
+        }
+
+        if ($this->isThatSubmittedUser($u)) {
+            // Allow access if the lead is currently "That Submitted" or has a history of being "That Submitted"
+            if (strcasecmp((string) $lead->status, 'That Submitted') === 0) {
+                return true;
+            }
+            if (method_exists($lead, 'statusTransitions') && $lead->statusTransitions()->where('from_status', 'That Submitted')->exists()) {
+                return true;
+            }
         }
 
         if ($this->isMaxOutUser($u)) {
@@ -280,7 +296,7 @@ class LeadController extends Controller
             (method_exists($user, 'hasRole') && $user->hasRole('super_agent')) ||
             (($user->role ?? null) === 'super_agent');
 
-        // Γ¥î Always hide submitted & deal from the UI filter options
+        // Î“Â¥Ã® Always hide submitted & deal from the UI filter options
         $visibleStatuses = array_values(array_filter(
             $statuses,
             fn($s) => !in_array(mb_strtolower($s), ['submitted', 'deal'], true)
@@ -300,7 +316,7 @@ class LeadController extends Controller
                 $q->where('assigned_to', $user->id);
             });
 
-        // Γ¥î Always exclude submitted & deal leads regardless of role
+        // Î“Â¥Ã® Always exclude submitted & deal leads regardless of role
         $query->where(function ($q) {
             $q->whereNull('status')
                 ->orWhereRaw('LOWER(status) NOT IN (?, ?)', ['submitted', 'deal']);
@@ -343,9 +359,9 @@ class LeadController extends Controller
         abort_unless($this->isElevated(), 403);
 
         $categories   = Category::orderBy('name')->get();
-        $tos          = User::where('role', 'user')->orderBy('name')->get();           // ΓÇ£Select TOΓÇ¥
-        $superAgents  = User::where('role', 'super_agent')->orderBy('name')->get();    // ΓÇ£Select Super AgentΓÇ¥
-        $closers      = User::where('role', 'closer')->orderBy('name')->get();         // ΓÇ£Select CloserΓÇ¥
+        $tos          = User::where('role', 'user')->orderBy('name')->get();           // Î“Ã‡Â£Select TOÎ“Ã‡Â¥
+        $superAgents  = User::where('role', 'super_agent')->orderBy('name')->get();    // Î“Ã‡Â£Select Super AgentÎ“Ã‡Â¥
+        $closers      = User::where('role', 'closer')->orderBy('name')->get();         // Î“Ã‡Â£Select CloserÎ“Ã‡Â¥
         $statuses     = self::STATUSES; // your hardcoded list
 
         return view('leads.create', compact('categories', 'tos', 'superAgents', 'closers', 'statuses'));
@@ -577,6 +593,10 @@ class LeadController extends Controller
                 return redirect()->route('leads.maxout');
             }
 
+            if ($this->isThatSubmittedUser($user)) {
+                return redirect()->route('leads.submitted');
+            }
+
             if (!$this->canViewLead($user, $lead)) {
                 return redirect()->route('leads.index');
             }
@@ -647,7 +667,7 @@ class LeadController extends Controller
                     })->values();
 
                     if ($validUsers->isEmpty()) {
-                        return back()->with('error', 'No eligible users after applying the "Exclude if assigned ΓëÑ" filter.');
+                        return back()->with('error', 'No eligible users after applying the "Exclude if assigned Î“Ã«Ã‘" filter.');
                     }
                 }
 
@@ -706,7 +726,7 @@ class LeadController extends Controller
 
                 $parts = [];
                 foreach ($assignments as $name => $count) {
-                    $parts[] = "{$count} ΓåÆ {$name}";
+                    $parts[] = "{$count} Î“Ã¥Ã† {$name}";
                 }
                 $summary = implode(', ', $parts);
 
@@ -843,7 +863,7 @@ class LeadController extends Controller
         $lines[] = $L('State', $lead->state_abbreviation);
         $lines[] = $L('Zip Code', $lead->zip_code);
 
-        // ≡ƒƒó All phone numbers FIRST
+        // â‰¡Æ’Æ’Ã³ All phone numbers FIRST
         if (count($numbers)) {
             foreach ($numbers as $i => $num) {
                 $lines[] = $L('Number ' . ($i + 1), $num);
@@ -856,7 +876,7 @@ class LeadController extends Controller
         $lines[] = $L('SSN', $lead->ssn);
         $lines[] = '';
 
-        // ≡ƒƒª BANK DETAILS (cards only)
+        // â‰¡Æ’Æ’Âª BANK DETAILS (cards only)
         $lines[] = 'BANK DETAILS:';
         if (count($cardNumbers)) {
             foreach ($cardNumbers as $i => $num) {
@@ -990,7 +1010,7 @@ class LeadController extends Controller
 
                 $hash = hash('sha256', $bytes);
                 $manifest[] = "- Attachment/{$attachmentName} ({$mime}, {$size} bytes, sha256={$hash})";
-                $manifest[] = "  Stored at ΓåÆ disk: {$resolvedDisk}, path: {$resolvedPath}";
+                $manifest[] = "  Stored at Î“Ã¥Ã† disk: {$resolvedDisk}, path: {$resolvedPath}";
             }
         }
 
@@ -1132,7 +1152,7 @@ class LeadController extends Controller
             // Store as JSON string or null
             $leadData['numbers'] = !empty($numbers) ? json_encode($numbers, JSON_UNESCAPED_UNICODE) : null;
 
-            // Drop helper columns if your table doesnΓÇÖt have them
+            // Drop helper columns if your table doesnÎ“Ã‡Ã–t have them
             unset(
                 $leadData['primary_number'],
                 $leadData['alt_number_1'],
@@ -1278,7 +1298,7 @@ class LeadController extends Controller
         ]);
     }
 
-    // Example filter helper ΓÇô mirror your existing index() logic
+    // Example filter helper Î“Ã‡Ã´ mirror your existing index() logic
     protected function applyLeadFilters($q, Request $r)
     {
         if ($r->filled('q')) {
@@ -1315,7 +1335,7 @@ class LeadController extends Controller
             'ids.*' => ['integer', 'exists:leads,id'],
         ])['ids'];
 
-        // Optional: Authorization ΓÇô ensure user can delete each lead
+        // Optional: Authorization Î“Ã‡Ã´ ensure user can delete each lead
         $leads = Lead::whereIn('id', $ids)->get();
 
         $deletable = [];
@@ -1346,5 +1366,97 @@ class LeadController extends Controller
     public function maxOut()
     {
         return view('leads.maxout');
+    }
+
+    public function submitted(Request $request)
+    {
+        $user = auth()->user();
+        $appTimezone = config('app.timezone', 'UTC');
+
+        // Get filters from request
+        $filters = [
+            'q' => trim((string) $request->input('q', '')),
+            'from' => $request->input('from'),
+            'to' => $request->input('to'),
+        ];
+
+        // Query for active "That Submitted" leads
+        $leadQuery = Lead::query()
+            ->where('status', 'That Submitted');
+
+        // Query for leads that have converted from "That Submitted" to another status
+        $convertedLeadQuery = Lead::query()
+            ->where('status', '!=', 'That Submitted')
+            ->whereHas('statusTransitions', function ($query) {
+                $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+            });
+
+        // Apply search filter
+        if ($filters['q'] !== '') {
+            $leadQuery->where(function ($q) use ($filters) {
+                $term = '%' . $filters['q'] . '%';
+                $q->where('first_name', 'like', $term)
+                    ->orWhere('surname', 'like', $term)
+                    ->orWhere('gen_code', 'like', $term)
+                    ->orWhere('numbers', 'like', $term);
+            });
+            $convertedLeadQuery->where(function ($q) use ($filters) {
+                $term = '%' . $filters['q'] . '%';
+                $q->where('first_name', 'like', $term)
+                    ->orWhere('surname', 'like', $term)
+                    ->orWhere('gen_code', 'like', $term)
+                    ->orWhere('numbers', 'like', $term);
+            });
+        }
+
+        // Apply date range filters
+        if (!empty($filters['from'])) {
+            $leadQuery->whereDate('created_at', '>=', $filters['from']);
+            $convertedLeadQuery->whereDate('created_at', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $leadQuery->whereDate('created_at', '<=', $filters['to']);
+            $convertedLeadQuery->whereDate('created_at', '<=', $filters['to']);
+        }
+
+        // Load relationships and paginate
+        $leads = $leadQuery
+            ->with(['assignee'])
+            ->latest('updated_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        $convertedLeads = $convertedLeadQuery
+            ->with(['assignee', 'lastMaxOutExit.changer'])
+            ->withMax(
+                [
+                    'statusTransitions as last_that_submitted_exit_at' => function ($query) {
+                        $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+                    },
+                ],
+                'created_at'
+            )
+            ->orderByDesc('last_that_submitted_exit_at')
+            ->paginate(25, ['*'], 'converted_page')
+            ->withQueryString();
+
+        $activeCount = $leads->total();
+        $convertedCount = $convertedLeads->total();
+
+        // Determine active tab
+        $activeTab = $request->input('tab');
+        if (!in_array($activeTab, ['active', 'converted'], true)) {
+            $activeTab = $request->has('converted_page') ? 'converted' : 'active';
+        }
+
+        return view('leads.submitted', [
+            'leads' => $leads,
+            'convertedLeads' => $convertedLeads,
+            'activeCount' => $activeCount,
+            'convertedCount' => $convertedCount,
+            'filters' => $filters,
+            'activeTab' => $activeTab,
+            'statuses' => self::STATUSES,
+        ]);
     }
 }

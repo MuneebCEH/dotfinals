@@ -454,6 +454,7 @@
                                         'Paid Off',
                                         'Not Qualified (NQ)',
                                         'Submitted',
+                                        'That Submitted'
                                     ];
                                 @endphp
                                 @foreach ($statuses as $s)

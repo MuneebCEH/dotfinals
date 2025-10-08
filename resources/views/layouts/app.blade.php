@@ -351,7 +351,7 @@
 
                         <a href="{{ route('leads.index') }}"
                             class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('leads.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+               {{ request()->routeIs('leads.index') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
                             <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -403,7 +403,7 @@
 
                         <a href="{{ route('leads.index') }}"
                             class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('leads.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+               {{ request()->routeIs('leads.index') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
                             <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -486,6 +486,57 @@
                             </svg>
                             Profile
                         </a>
+
+                        {{-- That Submitted --}}
+                    @elseif ($role === 'that_submitted')
+                        @php
+                            $thatSubmittedLeadsCount = \App\Models\Lead::query()
+                                ->where('status', 'That Submitted')
+                                ->count();
+                        @endphp
+
+                        <a href="{{ route('dashboard') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                            {{ request()->routeIs('dashboard')
+                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+
+                        <a href="{{ route('leads.submitted') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                            {{ request()->routeIs('leads.submitted')
+                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            That Submitted Leads
+                            {{-- @if ($thatSubmittedLeadsCount > 0)
+                                <span class="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
+                                    {{ $thatSubmittedLeadsCount }}
+                                </span>
+                            @endif --}}
+                        </a>
+
+                        {{-- <a href="{{ route('profile.edit') }}"
+                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
+                            {{ request()->routeIs('profile.*')
+                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
+                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
+                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Profile
+                        </a> --}}
 
                         {{-- Regular (non-admin, non-RM) --}}
                     @else

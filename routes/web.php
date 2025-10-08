@@ -57,6 +57,7 @@ Route::post('/logout-cancel',  [LoginController::class, 'cancel'])->name('logout
 */
 Route::middleware('auth')->group(function () {
     Route::get('/leads/maxout', [LeadController::class, 'maxOut'])->name('leads.maxout');
+    Route::get('/leads/submitted', [LeadController::class, 'submitted'])->name('leads.submitted');
     // Dashboard & Profile (single definitions)
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 

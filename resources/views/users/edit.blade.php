@@ -57,6 +57,9 @@
                         <option value="closer" {{ (old('role', $user->role) === 'closer') ? 'selected' : '' }}>Closer</option>
                         <option value="super_agent" {{ (old('role', $user->role) === 'super_agent') ? 'selected' : '' }}>Super Agent</option>
                         <option value="report_manager" {{ (old('role', $user->role) === 'report_manager') ? 'selected' : '' }}>Report Manager</option>
+                        <option value="lead_manager" {{ (old('role', $user->role) === 'lead_manager') ? 'selected' : '' }}>Lead Manager</option>
+                        <option value="max_out" {{ (old('role', $user->role) === 'max_out') ? 'selected' : '' }}>Max Out</option>
+                        <option value="that_submitted" {{ (old('role', $user->role) === 'that_submitted') ? 'selected' : '' }}>That Submitted</option>
                         <option value="admin" {{ (old('role', $user->role) === 'admin') ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')

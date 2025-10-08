@@ -22,7 +22,8 @@ class Lead extends Model
         'Not Qualified (NQ)',
         'Submitted',
         'New Lead',
-        'Super Lead'
+        'Super Lead',
+        'That Submitted'
     ];
 
     protected $fillable = [

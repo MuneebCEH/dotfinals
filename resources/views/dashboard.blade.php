@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard_updated.blade.php --}}
 @extends('layouts.app')
 
 @push('head')
@@ -28,6 +27,7 @@
 
         $isRegularUser = $user->role === 'user';
         $isMaxOutUser = $user->role === 'max_out';
+        $isThatSubmittedUser = $user->role === 'that_submitted';
 
         // Pakistan timezone anchors
         $pakistanNow = now()->setTimezone('Asia/Karachi');
@@ -55,11 +55,14 @@ $isCheckedOut = $todayAttendance && $todayAttendance->status === 'out';
 $leadQuery = class_exists($LeadModel) ? $LeadModel::query() : null;
 
 if ($leadQuery) {
-    if ($isMaxOutUser) {
-        // ✅ All Max Out leads (no user assignment restriction)
+    if ($isThatSubmittedUser) {
+        // That Submitted users see only That Submitted leads
+        $leadQuery->where('status', 'That Submitted');
+    } elseif ($isMaxOutUser) {
+        // Max Out users see only Max Out leads
         $leadQuery->where('status', 'Max Out');
     } elseif ($isRegularUser) {
-        // Regular users see only their leads
+        // Regular users see only their assigned leads
         $leadQuery->where(function ($query) use ($userId) {
             $query
                 ->where('assigned_to', $userId)
@@ -67,7 +70,7 @@ if ($leadQuery) {
                 ->orWhere('closer_id', $userId);
         });
     }
-    // Admins/lead managers see all leads
+    // Admins/lead managers see all leads (no restrictions)
 }
 
 // Primary metrics
@@ -97,9 +100,9 @@ $withBalance = $leadQuery
     ? (int) $leadQuery->clone()->whereNotNull('balance')->where('balance', '>', 0)->count()
     : 0;
 
-// Status/category only for non-max_out users
+// Status/category only for non-max_out and non-that_submitted users
 $leadsByStatus =
-    !$isMaxOutUser && $leadQuery
+    !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery
         ? $leadQuery
             ->clone()
             ->select('status', DB::raw('COUNT(*) as count'))
@@ -109,7 +112,7 @@ $leadsByStatus =
         : collect();
 
 $topCategories =
-    !$isMaxOutUser && $leadQuery && class_exists($CategoryModel)
+    !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery && class_exists($CategoryModel)
         ? $leadQuery
             ->clone()
             ->select('category_id', DB::raw('COUNT(*) as count'))
@@ -135,9 +138,9 @@ $monthlyLeadCounts = $leadQuery
         ->get()
     : collect();
 
-// Owner performance (not for regular/max_out users)
+// Owner performance (not for regular/max_out/that_submitted users)
 $ownersPerformance =
-    !$isRegularUser && !$isMaxOutUser && $leadQuery
+    !$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery
         ? $leadQuery
             ->clone()
             ->select('assigned_to', DB::raw('COUNT(*) as count'))
@@ -160,13 +163,40 @@ $recentLeads = $leadQuery ? $leadQuery->clone()->latest()->limit(10)->get() : co
 // Cards
 $cards = [];
 
-if ($isMaxOutUser) {
+if ($isThatSubmittedUser) {
+    $thatSubmittedTodayCount = $LeadModel
+        ::where('status', 'That Submitted')
+        ->whereBetween('created_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])
+        ->count();
+
+    $cards = [
+        [
+            'label' => 'Active That Submitted Leads',
+            'value' => $totalLeads,
+            'icon' => 'fas fa-check-circle',
+            'color' => 'bg-green-100 text-green-800',
+            'visible' => true,
+        ],
+        [
+            'label' => 'New That Submitted Today',
+            'value' => $thatSubmittedTodayCount,
+            'icon' => 'fas fa-sun',
+            'color' => 'bg-amber-100 text-amber-800',
+            'visible' => true,
+        ],
+        [
+            'label' => 'That Submitted Leads',
+            'value' => $totalLeads,
+            'icon' => 'fas fa-check-circle',
+            'color' => 'bg-green-100 text-green-800',
+            'visible' => $totalLeads > 0,
+        ],
+    ];
+} elseif ($isMaxOutUser) {
     $maxOutTodayCount = $LeadModel
         ::where('status', 'Max Out')
         ->whereBetween('created_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])
         ->count();
-
-    $processedMaxOutLeads = $LeadModel::where('status', 'Submitted')->count();
 
     $cards = [
         [
@@ -183,13 +213,6 @@ if ($isMaxOutUser) {
             'color' => 'bg-amber-100 text-amber-800',
             'visible' => true,
         ],
-        // [
-        //     'label' => 'Submitted Leads',
-        //     'value' => $processedMaxOutLeads,
-        //     'icon' => 'fas fa-check-circle',
-        //     'color' => 'bg-green-100 text-green-800',
-        //     'visible' => true,
-        // ],
         [
             'label' => 'Max Out Leads',
             'value' => $totalLeads,
@@ -251,8 +274,10 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                         Welcome back, {{ $user->name }}! 👋
                     </h2>
                     <p class="text-gray-600 dark:text-gray-400 text-lg">
-                        @if ($isMaxOutUser)
-                            Here's an overview of all max out leads and their status.
+                        @if ($isThatSubmittedUser)
+                            Here's an overview of all That Submitted leads and their status.
+                        @elseif ($isMaxOutUser)
+                            Here's an overview of all Max Out leads and their status.
                         @elseif ($isRegularUser)
                             Here's an overview of your assigned leads.
                         @else
@@ -284,8 +309,8 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
             @endforeach
         </div>
 
-        {{-- Main Content Grid (hide status/category for max_out) --}}
-        @if (!$isMaxOutUser)
+        {{-- Main Content Grid (hide status/category for max_out and that_submitted) --}}
+        @if (!$isMaxOutUser && !$isThatSubmittedUser)
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {{-- Leads by Status --}}
                 <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border">
@@ -335,7 +360,9 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
         <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border">
             <div class="p-6 border-b">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @if ($isMaxOutUser)
+                    @if ($isThatSubmittedUser)
+                        That Submitted Leads Monthly Trends
+                    @elseif ($isMaxOutUser)
                         Max Out Leads Monthly Trends
                     @elseif ($isRegularUser)
                         Your Monthly Lead Trends
@@ -353,7 +380,9 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
         <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border overflow-hidden">
             <div class="p-6 border-b">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @if ($isMaxOutUser)
+                    @if ($isThatSubmittedUser)
+                        Recent That Submitted Leads
+                    @elseif ($isMaxOutUser)
                         Recent Max Out Leads
                     @elseif ($isRegularUser)
                         Your Recent Leads
@@ -372,11 +401,13 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Category
                             </th>
-                            @if (!$isRegularUser && !$isMaxOutUser)
+                            @if (!$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser)
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
                                     Assigned To</th>
                             @endif
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Created
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Actions
                             </th>
                         </tr>
                     </thead>
@@ -405,15 +436,27 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                                 <td class="px-6 py-4 text-sm">{{ $cityState ?: '—' }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $lead->status ?? '—' }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $categoryName ?? 'Uncategorized' }}</td>
-                                @if (!$isRegularUser && !$isMaxOutUser)
+                                @if (!$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser)
                                     <td class="px-6 py-4 text-sm">{{ $assignedName ?? 'Unassigned' }}</td>
                                 @endif
                                 <td class="px-6 py-4 text-sm">{{ optional($lead->created_at)->diffForHumans() ?? '—' }}
                                 </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <a href="{{ route('leads.show', $lead) }}"
+                                        class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 mr-2">
+                                        View
+                                    </a>
+                                    @if ($user->can('edit', $lead))
+                                        <a href="{{ route('leads.edit', $lead) }}"
+                                            class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                            Edit
+                                        </a>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $isRegularUser || $isMaxOutUser ? 4 : 5 }}"
+                                <td colspan="{{ $isRegularUser || $isMaxOutUser || $isThatSubmittedUser ? 5 : 6 }}"
                                     class="px-6 py-8 text-center text-sm text-gray-500">No recent leads found.</td>
                             </tr>
                         @endforelse
@@ -448,6 +491,7 @@ $cards = array_values(array_filter($cards, fn($c) => $c['visible']));
                             label: 'Leads',
                             data,
                             borderColor: 'rgba(79, 70, 229, 0.8)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
                             borderWidth: 2,
                             fill: true,
                             tension: 0.3
