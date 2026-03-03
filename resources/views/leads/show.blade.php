@@ -4,10 +4,9 @@
 
 @section('content')
     @php
-        $card =
-            'bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50';
-        $dt = 'text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400';
-        $dd = 'text-[15px] font-medium text-gray-900 dark:text-gray-100';
+        $card = 'card-premium rounded-2xl p-6 border border-gray-200/50 dark:border-gray-700/50';
+        $dt = 'text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1';
+        $dd = 'text-base font-semibold text-gray-900 dark:text-white';
         $hasCloserColumn = \Illuminate\Support\Facades\Schema::hasColumn('leads', 'closer_id');
     @endphp
 
@@ -20,9 +19,8 @@
                         {{ trim($lead->first_name . ' ' . $lead->surname) ?: '—' }}
                     </h1>
                     <div class="mt-2 flex items-center gap-2">
-                        <span
-                            class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
-                                bg-primary-600/15 text-primary-700 dark:text-primary-400">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                    bg-primary-600/15 text-primary-700 dark:text-primary-400">
                             {{ $lead->status ?: '—' }}
                         </span>
 
@@ -118,8 +116,8 @@
                         </dd>
                     </div>
                     <div>
-                        
-                        
+
+
                     </div>
                 </dl>
             </div>

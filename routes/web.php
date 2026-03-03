@@ -18,7 +18,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    return redirect('/login');
+});
 
 
 Route::get('/online-users', [AttendanceController::class, 'onlineUsersJson'])
@@ -46,9 +48,9 @@ Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
 Route::post('/attendance/ping', [AttendanceController::class, 'ping'])->name('attendance.ping');
 Route::post('/attendance/checkout-beacon', [AttendanceController::class, 'beaconCheckout'])->name('attendance.checkout');
-Route::post('/logout-beacon',  [LoginController::class, 'logoutBeacon'])->name('logout.beacon');
+Route::post('/logout-beacon', [LoginController::class, 'logoutBeacon'])->name('logout.beacon');
 Route::post('/logout-pending', [LoginController::class, 'pending'])->name('logout.pending');
-Route::post('/logout-cancel',  [LoginController::class, 'cancel'])->name('logout.cancel');
+Route::post('/logout-cancel', [LoginController::class, 'cancel'])->name('logout.cancel');
 
 /*
 |--------------------------------------------------------------------------

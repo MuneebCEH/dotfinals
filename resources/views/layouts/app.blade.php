@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 
 <head>
     <meta charset="utf-8">
@@ -12,8 +12,11 @@
     <script src="//unpkg.com/alpinejs" defer></script>
 
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet">
 
     <meta name="lead-realtime-url" content="{{ route('leads.realtime') }}">
 
@@ -21,6 +24,169 @@
     <x-auto-redirect />
 
     <!-- Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+        :root {
+            --primary: #00bf63;
+            --primary-hover: #009e52;
+            --bg-deep: #020617;
+            --sidebar-width: 280px;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(0, 191, 99, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 191, 99, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+        }
+
+        .floating-sidebar {
+            width: var(--sidebar-width);
+            height: calc(100vh - 40px);
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 50;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            margin-left: calc(var(--sidebar-width) + 40px);
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-nav {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 4px 12px;
+            border-radius: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), #059669);
+            box-shadow: 0 4px 15px rgba(0, 191, 99, 0.3);
+        }
+
+        .card-premium {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card-premium:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #00bf63, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Responsive Mobile Sidebar */
+        @media (max-width: 1024px) {
+            .floating-sidebar {
+                left: -300px;
+            }
+
+            .floating-sidebar.open {
+                left: 20px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Global Text Color Fixes */
+        .card-premium label, 
+        .card-premium p,
+        .card-premium h1, 
+        .card-premium h2, 
+        .card-premium h3, 
+        .card-premium h4 {
+            color: #f8fafc !important;
+        }
+
+        input:not([type="checkbox"]), select, textarea {
+            color: #f8fafc !important;
+            background-color: rgba(30, 41, 59, 0.5) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4) !important;
+        }
+    </style>
+
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
@@ -30,21 +196,21 @@
                 theme: {
                     extend: {
                         fontFamily: {
-                            'sans': ['Inter', 'system-ui', 'sans-serif']
+                            'sans': ['Plus Jakarta Sans', 'Outfit', 'system-ui', 'sans-serif']
                         },
                         colors: {
                             primary: {
-                                50: '#eff6ff',
-                                100: '#dbeafe',
-                                200: '#bfdbfe',
-                                300: '#93c5fd',
-                                400: '#60a5fa',
-                                500: '#3b82f6',
-                                600: '#2563eb',
-                                700: '#1d4ed8',
-                                800: '#1e40af',
-                                900: '#1e3a8a',
-                                950: '#172554'
+                                50: '#f0fdf4',
+                                100: '#dcfce7',
+                                200: '#bbf7d0',
+                                300: '#86efac',
+                                400: '#4ade80',
+                                500: '#22c55e',
+                                600: '#00bf63',
+                                700: '#15803d',
+                                800: '#166534',
+                                900: '#14532d',
+                                950: '#052e16'
                             },
                             success: {
                                 50: '#f0fdf4',
@@ -177,45 +343,75 @@
     @endif
 
     <!-- Additional Styles -->
-    <style>
+    {{-- <style>
         [x-cloak] {
             display: none !important;
         }
 
+        :root {
+            --primary-glow: conic-gradient(from 180deg at 50% 50%, #16abff33 0deg, #0885ff33 55deg, #54d6ff33 120deg, #0071ff33 160deg, transparent 360deg);
+            --secondary-glow: radial-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+        }
+
+        body {
+            background-attachment: fixed;
+            letter-spacing: -0.01em;
+        }
+
+        .premium-bg {
+            background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.05), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
+        }
+
+        .dark .premium-bg {
+            background: radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent 40%),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 40%);
+        }
+
         .sidebar-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-premium {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .dark .card-premium {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(55, 65, 81, 0.3);
         }
 
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, .15), 0 10px 20px -5px rgba(0, 0, 0, .1);
+        .card-premium:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(124, 58, 237, 0.2);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.1);
         }
 
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .dark .card-premium:hover {
+            background: rgba(17, 24, 39, 0.8);
+            border-color: rgba(124, 58, 237, 0.3);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .glass-effect {
-            background: rgba(255, 255, 255, .1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, .2);
+        .nav-link-active {
+            background: linear-gradient(90deg, rgba(124, 58, 237, 0.1) 0%, transparent 100%);
+            border-left: 3px solid #7c3aed;
         }
 
-        .glass-effect-dark {
-            background: rgba(17, 24, 39, .8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(55, 65, 81, .3);
+        .dark .nav-link-active {
+            background: linear-gradient(90deg, rgba(124, 58, 237, 0.2) 0%, transparent 100%);
         }
 
         .animate-float {
@@ -234,726 +430,399 @@
             }
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, .05) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, .2);
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .stat-card-dark {
-            background: linear-gradient(135deg, rgba(17, 24, 39, .8) 0%, rgba(31, 41, 55, .6) 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(55, 65, 81, .3);
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        /* Toast styles kept minimal; dropdown is primary UI */
-        .notification-container {
-            position: fixed;
-            top: 5rem;
-            right: 1rem;
-            z-index: 1000;
-            width: 24rem;
-            max-width: 90vw;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 10px;
         }
-    </style>
 
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(124, 58, 237, 0.3);
+        }
+
+        .sidebar-item {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-item::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%) translateX(-100%);
+            width: 4px;
+            height: 60%;
+            background: #7c3aed;
+            border-radius: 0 4px 4px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-item:hover::after,
+        .sidebar-item.active::after {
+            transform: translateY(-50%) translateX(0);
+        }
+    </style> --}}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     @stack('styles')
 </head>
 
 @php
     $user = auth()->user();
-    $isAdmin =
-        $user &&
-        ((method_exists($user, 'isAdmin') && $user->isAdmin()) ||
-            (method_exists($user, 'hasRole') && $user->hasRole('admin')) ||
-            ($user->role ?? null) === 'admin');
+    $isAdmin = $user && ((method_exists($user, 'isAdmin') && $user->isAdmin()) || (method_exists($user, 'hasRole') && $user->hasRole('admin')) || ($user->role ?? null) === 'admin');
+    $isSuperAgent = $user && ((method_exists($user, 'isSuperAgent') && $user->isSuperAgent()) || ($user->role ?? null) === 'super_agent');
+    $isSuperAgent1 = $user && ((method_exists($user, 'isSuperAgent1') && $user->isSuperAgent1()) || ($user->role ?? null) === 'super_agent_1');
+    $isMaxOutUser = $user && (($user->role ?? null) === 'max_out');
+    $isThatSubmittedUser = $user && (($user->role ?? null) === 'death_submitted');
+    $isRegularUser = $user && (($user->role ?? null) === 'user');
+    $isReportManager = $user && (($user->role ?? null) === 'report_manager');
 @endphp
 
-<body
-    class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 font-sans">
-    <div class="min-h-screen flex flex-col lg:flex-row">
+<body x-data="{ sidebarOpen: false }">
+    <div class="mesh-bg"></div>
 
-        <!-- Sidebar (fixed on desktop, drawer on mobile) -->
-        <div id="sidebar"
-            class="sidebar-transition fixed top-0 left-0 z-50 w-64 h-screen overflow-y-auto
-                    bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 dark:border-gray-700/50
-                    transform -translate-x-full
-                    lg:translate-x-0 lg:fixed lg:z-40">
-            <div
-                class="flex items-center justify-between h-16 px-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <span class="ml-3 text-xl font-bold gradient-text">Leads Portal</span>
+    {{-- Sidebar --}}
+    <aside class="floating-sidebar" :class="{ 'open': sidebarOpen }">
+        <div class="px-8 py-6 flex flex-col items-center justify-center">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
+                    <img src="/logo.png" alt="DOT Logo" class="w-10 h-10 object-contain"
+                        onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-dot-circle text-primary\'></i>'">
                 </div>
-                <button id="closeSidebar"
-                    class="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
+                <div class="flex flex-col">
+                    <span class="text-xl font-black text-white tracking-widest leading-none">DOT.</span>
+                </div>
+            </div>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center">Digital Operations Team
+            </p>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto mt-4 px-2">
+            @php $currentRoute = request()->route()->getName(); @endphp
+
+            <div class="px-6 mb-4 mt-6">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Core Navigation</p>
+            </div>
+
+            @if ($isSuperAgent || $isSuperAgent1 || $isAdmin)
+                <a href="{{ route('reports.index') }}"
+                    class="nav-item {{ $currentRoute === 'reports.index' ? 'active' : '' }}">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Intelligence Reports</span>
+                </a>
+            @endif
+
+            <a href="{{ route('profile.edit') }}"
+                class="nav-item {{ $currentRoute === 'profile.edit' ? 'active' : '' }}">
+                <i class="fas fa-user-circle w-5"></i>
+                <span>Profile</span>
+            </a>
+
+            @if ($isAdmin)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Administration</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
+                    <i class="fas fa-address-book w-5"></i>
+                    <span>Leads Vault</span>
+                </a>
+                <a href="{{ route('users.index') }}" class="nav-item {{ $currentRoute === 'users.index' ? 'active' : '' }}">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>Team Access</span>
+                </a>
+                <a href="{{ route('reports.index') }}"
+                    class="nav-item {{ $currentRoute === 'reports.index' ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice w-5"></i>
+                    <span>Global Reports</span>
+                </a>
+            @endif
+
+            @if ($isMaxOutUser)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Specialist</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ route('leads.maxout') }}"
+                    class="nav-item {{ $currentRoute === 'leads.maxout' ? 'active' : '' }}">
+                    <i class="fas fa-fire-alt w-5"></i>
+                    <span>Maxout Leads</span>
+                </a>
+            @endif
+
+            @if ($isThatSubmittedUser)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Submissions</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ route('leads.submitted') }}"
+                    class="nav-item {{ $currentRoute === 'leads.submitted' ? 'active' : '' }}">
+                    <i class="fas fa-skull-crossbones w-5"></i>
+                    <span>Death Leads</span>
+                </a>
+            @endif
+
+            @if ($isRegularUser)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Agent Zone</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="{{ route('leads.mine') }}" class="nav-item {{ $currentRoute === 'leads.mine' ? 'active' : '' }}">
+                    <i class="fas fa-list-ul w-5"></i>
+                    <span>My Workspace</span>
+                </a>
+                <a href="{{ route('leads.callbacks') }}"
+                    class="nav-item {{ $currentRoute === 'leads.callbacks' ? 'active' : '' }}">
+                    <i class="fas fa-phone-alt w-5"></i>
+                    <span>Followups</span>
+                </a>
+                <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
+                    <i class="fas fa-search w-5"></i>
+                    <span>Lead Search</span>
+                </a>
+            @endif
+        </nav>
+
+        <div class="p-6 mt-auto">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                    class="w-full flex items-center justify-center gap-2 py-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl font-bold transition-all duration-300">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    {{-- Main Content Window --}}
+    <main class="main-content">
+        {{-- Top Bar Island --}}
+        <header class="glass-nav px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4 lg:hidden">
+                <button @click="sidebarOpen = !sidebarOpen"
+                    class="w-10 h-10 flex items-center justify-center bg-white/5 rounded-lg">
+                    <i class="fas fa-bars text-white"></i>
                 </button>
             </div>
 
-            <nav class="mt-8 px-4 pb-6">
-                <div class="space-y-2">
-                    @php
-                        $user = auth()->user();
-                        $role = $user?->role;
-                    @endphp
+            <div>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-slate-500">Current View</h2>
+                <h1 class="text-xl font-extrabold text-white">@yield('page-title', 'Dashboard')</h1>
+            </div>
 
-                    {{-- Report Manager: ONLY Issues + Profile --}}
-                    @if ($role === 'report_manager')
-                        <a href="{{ route('issues.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('issues.*') ? 'bg-gray-900 text-white dark:bg-gray-700' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6M7 8h10M5 6a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2z" />
-                            </svg>
-                            User Reports
-                            @php $unread = $user->unreadNotifications()->count(); @endphp
-                            @if ($unread)
-                                <span
-                                    class="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">{{ $unread }}</span>
-                            @endif
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('profile.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a>
-
-                        {{-- Admin menu (unchanged) --}}
-                    @elseif ($user?->isAdmin())
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('dashboard') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                            </svg>
-                            Dashboard
-                        </a>
-
-                        <a href="{{ route('leads.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('leads.index') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Leads
-                        </a>
-
-                        <a href="{{ route('users.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('users.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                            </svg>
-                            Users
-                        </a>
-
-                        <a href="{{ route('reports.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('reports.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 01-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2z" />
-                            </svg>
-                            Reports
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('profile.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a>
-                    @elseif ($user?->isLeadManager())
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('dashboard') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                            </svg>
-                            Dashboard
-                        </a>
-
-                        <a href="{{ route('leads.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('leads.index') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Leads
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('profile.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a>
-
-
-                        {{-- Maxout --}}
-                    @elseif ($role === 'max_out')
-                        @php
-                            $maxoutLeadsCount = \App\Models\Lead::query()
-                                ->where('status', 'Max Out')
-                                // ->where(function ($q) use ($user) {
-                                //     $q->where('assigned_to', $user->id)
-                                //         ->orWhere('super_agent_id', $user->id)
-                                //         ->orWhere('closer_id', $user->id);
-                                // });
-                                ->count();
-                        @endphp
-
-
-                        {{-- dashboard --}}
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-            {{ request()->routeIs('dashboard')
-                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                            </svg>
-                            Dashboard
-                        </a>
-
-                        <a href="{{ route('leads.maxout') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-            {{ request()->routeIs('leads.*')
-                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2
-                       c0-.656-.126-1.283-.356-1.857M7 20H2v-2
-                       a3 3 0 015.356-1.857M7 20v-2
-                       c0-.656.126-1.283.356-1.857
-                       m0 0a5.002 5.002 0 019.288 0
-                       M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-
-                            Maxout Leads
-
-                            {{-- @if ($maxoutLeadsCount > 0)
-                                <span class="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
-                                    {{ $maxoutLeadsCount }}
-                                </span>
-                            @endif --}}
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-            {{ request()->routeIs('profile.*')
-                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a>
-
-                        {{-- That Submitted --}}
-                    @elseif ($role === 'that_submitted')
-                        @php
-                            $thatSubmittedLeadsCount = \App\Models\Lead::query()
-                                ->where('status', 'That Submitted')
-                                ->count();
-                        @endphp
-
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-                            {{ request()->routeIs('dashboard')
-                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                            </svg>
-                            Dashboard
-                        </a>
-
-                        <a href="{{ route('leads.submitted') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-                            {{ request()->routeIs('leads.submitted')
-                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            That Submitted Leads
-                            {{-- @if ($thatSubmittedLeadsCount > 0)
-                                <span class="ml-2 text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">
-                                    {{ $thatSubmittedLeadsCount }}
-                                </span>
-                            @endif --}}
-                        </a>
-
-                        {{-- <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-                            {{ request()->routeIs('profile.*')
-                                ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300'
-                                : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a> --}}
-
-                        {{-- Regular (non-admin, non-RM) --}}
-                    @else
-                        <a href="{{ route('dashboard') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('dashboard') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
-                            </svg>
-                            Dashboard
-                        </a>
-
-                        <a href="{{ route('leads.mine') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('leads.mine') || request()->routeIs('leads.assigned.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            My Leads
-                        </a>
-
-                        <a href="{{ route('callbacks.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('callbacks.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 5h6l2 3h10M4 15h8m-8 4h12M4 7v14" />
-                            </svg>
-                            Call Backs
-                        </a>
-
-                        <a href="{{ route('notes.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('notes.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 10h8M8 14h6M5 6h14a2 2 0 012 2v10l-4-3H5a2 2 0 01-2-2V8a2 2 0 012-2z" />
-                            </svg>
-                            Notes
-                        </a>
-
-                        <a href="{{ route('profile.edit') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
-               {{ request()->routeIs('profile.*') ? 'bg-primary-500 text-white shadow-lg border-l-4 border-primary-300' : 'text-gray-700 hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-gray-700/80' }}">
-                            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profile
-                        </a>
-                    @endif
-                </div>
-            </nav>
-        </div>
-
-        <!-- Main Content (offset for fixed sidebar on lg) -->
-        <div class="flex-1 flex flex-col lg:ml-64">
-            <!-- Top Navigation -->
-            <div
-                class="relative z-40 sticky top-0 bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center">
-                        <button id="openSidebar"
-                            class="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </button>
-                        <h1 class="ml-4 text-xl font-bold text-gray-900 dark:text-white">@yield('page-title', 'Dashboard')</h1>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <!-- Notifications Button & Dropdown (hidden for admins) -->
-                        @if ($user->role == 'user' || $user->role == 'report_manager')
+            <div class="flex items-center gap-6">
+                <!-- Notifications Button & Dropdown (hidden for admins) -->
+                @if ($user->role == 'user' || $user->role == 'report_manager')
                             <div class="relative" x-data="{
-                                ...notificationsDropdown({
-                                    initialUnread: {{ $user->role == 'report_manager'
-                                        ? auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count()
-                                        : auth()->user()->unreadNotifications()->count() }},
-                                    isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
-                                    userId: {{ auth()->id() }},
-                                    unreadRtCount: 0,
-                                    unreadDbCount: {{ auth()->user()->unreadNotifications()->count() }}
-                                }),
-                                getNotificationUrl(item) {
-                                    if (!this._isReportManager && item.id) {
-                                        return `/leads/${item.id}/edit`;
-                                    }
-                                    return item.url || '#';
-                                }
-                            }" x-init="init()">
+                                                                        ...notificationsDropdown({
+                                                                            initialUnread: {{ $user->role == 'report_manager'
+                    ? auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count()
+                    : auth()->user()->unreadNotifications()->count() }},
+                                                                            isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
+                                                                            userId: {{ auth()->id() }},
+                                                                            unreadRtCount: 0,
+                                                                            unreadDbCount: {{ auth()->user()->unreadNotifications()->count() }}
+                                                                        }),
+                                                                        getNotificationUrl(item) {
+                                                                            if (!this._isReportManager && item.id) {
+                                                                                return `/leads/${item.id}/edit`;
+                                                                            }
+                                                                            return item.url || '#';
+                                                                        }
+                                                                    }" x-init="init()">
                                 <button @click="toggle()"
-                                    class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 relative hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    class="p-2 text-gray-500 hover:text-white relative hover:bg-white/5 rounded-lg transition-colors"
                                     aria-label="Notifications">
-                                    <!-- bell -->
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M14.857 17.082A4.002 4.002 0 0 1 12 19a4.002 4.002 0 0 1-2.857-1.918M6.5 8a5.5 5.5 0 1 1 11 0c0 3.07.582 4.626 1.08 5.428.38.608.57.912.566 1.107a.75.75 0 0 1-.428.63c-.174.085-.526.085-1.23.085H6.512c-.704 0-1.056 0-1.23-.085a.75.75 0 0 1-.428-.63c-.004-.195.185-.499.566-1.107C5.918 12.626 6.5 11.07 6.5 8Z" />
                                     </svg>
-                                    <!-- badge with total unread (DB + realtime) -->
                                     <span x-show="unreadRtCount > 0 || unreadDbCount > 0"
-                                        class="absolute -top-1 -right-1 min-w-[1.1rem] h-5 px-1 grid place-items-center rounded-full bg-red-600 text-white text-[10px] font-semibold shadow animate-pulse"
+                                        class="absolute top-1 right-1 min-w-[1.1rem] h-4 px-1 grid place-items-center rounded-full bg-red-600 text-white text-[10px] font-bold shadow animate-pulse"
                                         x-text="unreadRtCount + unreadDbCount"></span>
                                 </button>
 
                                 <!-- Notifications Dropdown -->
-                                <div x-show="open" @click.away="open = false"
+                                <div x-show="open" @click.away="open = false" x-cloak
                                     x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 transform scale-95"
-                                    x-transition:enter-end="opacity-100 transform scale-100"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="opacity-100 transform scale-100"
-                                    x-transition:leave-end="opacity-0 transform scale-95"
-                                    class="absolute right-0 mt-2 w-80 sm:w-96 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl shadow-2xl py-2 z-50 border border-gray-200/50 dark:border-gray-700/50 hidden"
-                                    :class="{ 'hidden': !open }" style="display: none;">
-                                    <div
-                                        class="px-4 py-2 border-b border-gray-200/50 dark:border-gray-700/50 flex justify-between items-center">
-                                        <h3 class="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                                    x-transition:enter-start="opacity-0 translate-y-2"
+                                    x-transition:enter-end="opacity-100 translate-y-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 translate-y-0"
+                                    x-transition:leave-end="opacity-0 translate-y-2"
+                                    class="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 z-50">
+                                    <div class="px-5 py-4 border-b border-white/10 flex justify-between items-center">
+                                        <h3 class="font-bold text-white tracking-tight">Intelligence Stream</h3>
                                         <button @click="markAllRead()"
-                                            class="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 cursor-pointer">
-                                            Mark all as read
+                                            class="text-xs font-bold text-primary-400 hover:text-primary-300 cursor-pointer transition-colors">
+                                            Archive All
                                         </button>
                                     </div>
 
                                     <div class="max-h-96 overflow-y-auto">
-                                        <!-- Realtime lead updates (injected via polling) -->
                                         <template x-if="rtItems.length > 0">
-                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500"
-                                                x-text="isReportManager ? 'Report Requests' : 'Recent Lead Updates'">
+                                            <div class="px-5 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                                Active Protocol
                                             </div>
                                         </template>
-                                        <!-- We wrap the list in a container so we can count DOM items if needed -->
-                                        <div x-ref="rtList">
+                                        <div x-ref="rtList" class="divide-y divide-white/5">
                                             <template x-for="it in rtItems" :key="it.id + '-' + it.updated_at">
-                                                <div class="rt-lead px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors"
-                                                    :class="{ 'bg-red-50 dark:bg-red-900/10': it.unread }">
-                                                    <a :href="getNotificationUrl(it)" class="block"
-                                                        @click="markAsRead(it)">
-                                                        <div class="flex items-start">
-                                                            <div class="flex-shrink-0 mt-0.5">
-                                                                <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center"
-                                                                    :class="{ 'bg-red-100 dark:bg-red-900/30': it.unread }">
-                                                                    <svg class="h-5 w-5"
-                                                                        :class="it.unread ? 'text-red-600 dark:text-red-400' :
-                                                                            'text-primary-600 dark:text-primary-400'"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    </svg>
-                                                                </div>
+                                                <div class="px-5 py-4 hover:bg-white/5 transition-colors group"
+                                                    :class="{ 'bg-primary-500/5': it.unread }">
+                                                    <a :href="getNotificationUrl(it)" class="block" @click="markAsRead(it)">
+                                                        <div class="flex items-start gap-4">
+                                                            <div
+                                                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary-400 group-hover:scale-110 transition-transform">
+                                                                <i class="fas fa-satellite-dish"></i>
                                                             </div>
-                                                            <div class="ml-3 flex-1">
-                                                                <p
-                                                                    class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            <div class="flex-1 min-w-0">
+                                                                <p class="text-sm font-bold text-white flex items-center gap-2">
                                                                     <span
                                                                         x-text="it.issue ? `Issue #${it.issue.id}` : `Lead #${it.id}`"></span>
                                                                     <span x-show="it.unread"
-                                                                        class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">New</span>
+                                                                        class="h-1.5 w-1.5 rounded-full bg-red-500 shadow-lg shadow-red-500/40"></span>
                                                                 </p>
-                                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
-                                                                    x-text="it.message || (it.issue ? it.issue.title : `${it.first_name || ''} ${it.surname || ''}`)"
-                                                                    <span class="inline-flex items-center gap-1">
+                                                                <p class="text-xs text-slate-400 line-clamp-2 mt-0.5"
+                                                                    x-text="it.message || it.first_name + ' ' + it.surname"></p>
+                                                                <div class="flex items-center gap-3 mt-2">
                                                                     <span
-                                                                        class="inline-block h-2 w-2 rounded-full bg-indigo-500"></span>
-                                                                    <span x-text="it.status || 'updated'"></span>
-                                                                    </span>
-                                                                </p>
-                                                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1"
-                                                                    x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)">
-                                                                </p>
+                                                                        class="text-[10px] font-black uppercase text-slate-500 tracking-tighter"
+                                                                        x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)"></span>
+                                                                    <span
+                                                                        class="px-2 py-0.5 rounded-md bg-primary-500/10 text-primary-400 text-[9px] font-black uppercase tracking-wider"
+                                                                        x-text="it.status || 'Active'"></span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </a>
                                                 </div>
                                             </template>
                                         </div>
-
-                                        <!-- Divider if both types exist -->
-                                        <template x-if="rtItems.length > 0 && hasDbNotifs">
-                                            <div class="px-4 py-2 text-[11px] tracking-wide uppercase text-gray-500">
-                                                System
-                                                notifications</div>
-                                        </template>
-
-                                        <!-- Server-rendered DB notifications (initial) - only unread and open issues -->
-                                        @if (auth()->user()->unreadNotifications()->count() > 0)
-                                            @foreach (auth()->user()->unreadNotifications()->take(10) as $notification)
-                                                @php
-                                                    $issueStatus = $notification->data['issue_status'] ?? '';
-                                                    if ($user->role === 'report_manager' && $issueStatus !== 'open') {
-                                                        continue;
-                                                    }
-                                                @endphp
-                                                <div class="px-4 py-3 border-b border-gray-100/50 dark:border-gray-700/50 last:border-b-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition-colors db-notif"
-                                                    data-notif-id="{{ $notification->id }}"
-                                                    data-issue-status="{{ $issueStatus }}">
-                                                    <div class="flex items-start">
-                                                        <div class="flex-shrink-0 mt-0.5">
-                                                            @if ($notification->type === 'App\Notifications\LeadAssigned')
-                                                                <div
-                                                                    class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                                                                    <svg class="h-5 w-5 text-primary-600 dark:text-primary-400"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                    </svg>
-                                                                </div>
-                                                            @elseif($notification->type === 'App\Notifications\IssueReported')
-                                                                <div
-                                                                    class="h-8 w-8 rounded-full bg-warning-100 dark:bg-warning-900/30 flex items-center justify-center">
-                                                                    <svg class="h-5 w-5 text-warning-600 dark:text-warning-400"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                                                    </svg>
-                                                                </div>
-                                                            @else
-                                                                <div
-                                                                    class="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                                                    <svg class="h-5 w-5 text-gray-600 dark:text-gray-400"
-                                                                        fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="ml-3 flex-1">
-                                                            <p
-                                                                class="text-sm font-medium text-gray-900 dark:text-white">
-                                                                {{ $notification->data['title'] ?? 'Notification' }}
-                                                            </p>
-                                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                                {{ $notification->data['message'] ?? '' }}
-                                                            </p>
-                                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                                                {{ $notification->created_at->diffForHumans() }}
-                                                            </p>
-                                                        </div>
-                                                        @if ($notification->unread())
-                                                            <button onclick="markAsRead('{{ $notification->id }}')"
-                                                                class="ml-2 flex-shrink-0" title="Mark as read">
-                                                                <svg class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                                                    fill="none" stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M5 13l4 4L19 7" />
-                                                                </svg>
-                                                            </button>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            <div class="px-4 py-6 text-center">
-                                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15 17h5l-5 5v-5zM4.83 19.07A11 11 0 015 12c0-6.075 4.925-11 11-11s11 4.925 11 11a11 11 0 01-1.07 7.07M4.83 19.07L9 15M4.83 19.07l-2.83 2.83" />
-                                                </svg>
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No
-                                                    notifications
-                                                    yet</p>
-                                            </div>
-                                        @endif
                                     </div>
-
-                                    <template x-if="hasDbNotifs">
-                                        <div class="px-4 py-2 border-t border-gray-200/50 dark:border-gray-700/50">
-                                            <a href="{{ route('rm.notifications') }}"
-                                                class="block text-center text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
-                                                View all notifications
-                                            </a>
-                                        </div>
-                                    </template>
                                 </div>
                             </div>
-                        @endif
+                @endif
 
-                        <div class="relative">
-                            <button id="userMenuButton"
-                                class="flex items-center text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                <img class="h-8 w-8 rounded-full ring-2 ring-primary-200 dark:ring-primary-700"
-                                    src="https://ui-avatars.com/api/?name={{ auth()->user()->name ?? 'User' }}&color=0ea5e9&background=f0f9ff"
-                                    alt="{{ auth()->user()->name ?? 'User' }}">
-                                <span
-                                    class="ml-2 text-gray-700 dark:text-gray-300 font-medium">{{ auth()->user()->name ?? 'User' }}</span>
-                                <svg class="ml-1 h-4 w-4 text-gray-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-
-                            <div id="userMenu"
-                                class="hidden absolute right-0 mt-2 w-48 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-xl shadow-2xl py-1 z-50 border border-gray-200/50 dark:border-gray-700/50">
-                                <a href="{{ route('profile.edit') }}"
-                                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">Profile</a>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">Sign
-                                        out</button>
-                                </form>
-                            </div>
+                <!-- User Profile Menu -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" id="userMenuButton"
+                        class="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5 group">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xs shadow-lg">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
                         </div>
+                        <div class="hidden md:block text-left">
+                            <p class="text-xs font-extrabold text-white leading-none">{{ $user->name }}</p>
+                            <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-tighter">
+                                {{ $user->role }}
+                            </p>
+                        </div>
+                        <i
+                            class="fas fa-chevron-down text-[10px] text-slate-500 group-hover:text-white transition-colors"></i>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" x-cloak
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-2"
+                        class="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 py-2 z-50 overflow-hidden"
+                        id="userMenu">
+                        <div class="px-5 py-3 border-b border-gray-100 dark:border-white/5">
+                            <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $user->email }}</p>
+                        </div>
+                        <a href="{{ route('profile.edit') }}"
+                            class="flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-500 dark:text-slate-400 hover:text-primary-500 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Profile Protocol</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="w-full flex items-center gap-3 px-5 py-3 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all">
+                                <i class="fas fa-power-off"></i>
+                                <span>Deactivate Session</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
+        </header>
 
-            <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto">
-                <div class="py-6">
-                    <div class="mx-auto px-4 sm:px-6 lg:px-8">
-                        @if (session('success'))
-                            <div
-                                class="mb-6 bg-success-50 border border-success-200 text-success-800 px-4 py-3 rounded-xl shadow-sm animate-slide-down">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    {{ session('success') }}
-                                </div>
-                            </div>
+        {{-- Page Content Container --}}
+        <div class="px-8 pb-10">
+            @if (session('error'))
+                <div
+                    class="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-6 py-4 rounded-2xl shadow-xl animate-slide-down flex items-center gap-4">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p class="font-bold text-sm">{{ session('error') }}</p>
+                </div>
+            @endif
+
+            @if (session('status'))
+                <div
+                    class="mb-6 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-6 py-4 rounded-2xl shadow-xl animate-slide-down flex items-center gap-4">
+                    <i class="fas fa-check-circle"></i>
+                    <p class="font-bold text-sm">
+                        @if (session('status') === 'profile-updated') Protocol: Profile updated successfully!
+                        @elseif(session('status') === 'password-updated') Protocol: Access credentials secure!
+                        @else {{ session('status') }}
                         @endif
+                    </p>
+                </div>
+            @endif
 
-                        @if (session('error'))
-                            <div
-                                class="mb-6 bg-danger-50 border border-danger-200 text-danger-800 px-4 py-3 rounded-xl shadow-sm animate-slide-down">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
-                                        </path>
-                                    </svg>
-                                    {{ session('error') }}
-                                </div>
-                            </div>
-                        @endif
-
-                        @if (session('status'))
-                            @if (session('status') === 'profile-updated')
-                                <div
-                                    class="mb-6 bg-success-50 border border-success-200 text-success-800 px-4 py-3 rounded-xl shadow-sm animate-slide-down">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        Profile updated successfully!
-                                    </div>
-                                </div>
-                            @elseif(session('status') === 'password-updated')
-                                <div
-                                    class="mb-6 bg-success-50 border border-success-200 text-success-800 px-4 py-3 rounded-xl shadow-sm animate-slide-down">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        Password updated successfully!
-                                    </div>
-                                </div>
-                            @endif
-                        @endif
-
-                        @if ($errors->any())
-                            <div
-                                class="mb-6 bg-danger-50 border border-danger-200 text-danger-800 px-4 py-3 rounded-xl shadow-sm animate-slide-down">
-                                <div class="flex items-start">
-                                    <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
-                                        </path>
-                                    </svg>
-                                    <ul class="list-disc list-inside">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-
-                        @yield('content')
+            @if ($errors->any())
+                <div
+                    class="mb-6 bg-amber-500/10 border border-amber-500/20 text-amber-400 px-6 py-4 rounded-2xl shadow-xl animate-slide-down">
+                    <div class="flex items-start gap-4">
+                        <i class="fas fa-shield-alt mt-1"></i>
+                        <ul class="list-none font-bold text-sm space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
-            </main>
+            @endif
+
+            <div class="min-h-[calc(100vh-200px)]">
+                @yield('content')
+            </div>
         </div>
+    </main>
+    </div>
     </div>
 
     <!-- Overlay for mobile sidebar -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-gray-600/75 backdrop-blur-sm z-40 lg:hidden hidden"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const sidebar = document.getElementById('sidebar');
             const openSidebarBtn = document.getElementById('openSidebar');
             const closeSidebarBtn = document.getElementById('closeSidebar');
@@ -963,19 +832,19 @@
 
             // --- Mobile drawer toggle ---
             if (openSidebarBtn) {
-                openSidebarBtn.addEventListener('click', function() {
+                openSidebarBtn.addEventListener('click', function () {
                     sidebar.classList.remove('-translate-x-full'); // show
                     sidebarOverlay.classList.remove('hidden');
                 });
             }
             if (closeSidebarBtn) {
-                closeSidebarBtn.addEventListener('click', function() {
+                closeSidebarBtn.addEventListener('click', function () {
                     sidebar.classList.add('-translate-x-full'); // hide
                     sidebarOverlay.classList.add('hidden');
                 });
             }
             if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', function() {
+                sidebarOverlay.addEventListener('click', function () {
                     sidebar.classList.add('-translate-x-full');
                     sidebarOverlay.classList.add('hidden');
                 });
@@ -983,10 +852,10 @@
 
             // --- User menu toggle ---
             if (userMenuButton && userMenu) {
-                userMenuButton.addEventListener('click', function() {
+                userMenuButton.addEventListener('click', function () {
                     userMenu.classList.toggle('hidden');
                 });
-                document.addEventListener('click', function(event) {
+                document.addEventListener('click', function (event) {
                     if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
                         userMenu.classList.add('hidden');
                     }
@@ -1167,11 +1036,11 @@
                             // For general polling, use localStorage lastSeen
                             const res = await fetch(
                                 `${this._url}?since=${encodeURIComponent(this._sinceISO)}&last_seen=${lastSeen}`, {
-                                    credentials: 'same-origin',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    },
-                                });
+                                credentials: 'same-origin',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                            });
                             if (!res.ok) throw new Error('network');
                             const data = await res.json();
 
@@ -1221,16 +1090,6 @@
                         return lastSeen ? (new Date(iso) > new Date(lastSeen)) : true;
                     },
 
-                    _recomputeUnread() {
-                        let count = 0;
-                        const lastSeen = getLastSeen();
-                        this.rtItems.forEach(it => {
-                            it.unread = lastSeen ? (new Date(it.updated_at) > new Date(lastSeen)) : true;
-                            if (it.unread) count++;
-                        });
-                        this.unreadRtCount = count;
-                    },
-
                     timeAgo(iso) {
                         const d = new Date(iso);
                         const sec = Math.floor((Date.now() - d.getTime()) / 1000);
@@ -1239,62 +1098,7 @@
                         if (m < 60) return `${m}m ago`;
                         const h = Math.floor(m / 60);
                         if (h < 24) return `${h}h ago`;
-                        return `${Math.floor(h/24)}d ago`;
-                    },
-
-                    // Single authoritative "Mark all as read"
-                    async markAllRead() {
-                        // 1) Tell server to mark DB notifications as read
-                        try {
-                            const response = await fetch('/notifications/mark-all-as-read', {
-                                credentials: 'same-origin',
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                }
-                            });
-
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-
-                            const result = await response.json();
-                            console.log('Notifications marked as read:', result);
-                        } catch (e) {
-                            console.error('Error marking all notifications as read:', e);
-                            // Show user-friendly error message
-                            alert('Failed to mark notifications as read. Please try again.');
-                            return;
-                        }
-
-                        // 2) Mark realtime as read (advance last-seen)
-                        setLastSeen(nowIso());
-
-                        // 3) Clear all realtime notifications from UI
-                        this.rtItems = [];
-                        this.unreadRtCount = 0;
-
-                        // 4) Clear DB unread count + visually remove DB items
-                        document.querySelectorAll('.db-notif').forEach(n => n.remove());
-                        this.unreadDbCount = 0;
-
-                        // 5) Update the hasDbNotifs flag since all DB notifications are now read
-                        this.hasDbNotifs = false;
-
-                        // 6) Notify any listeners
-                        window.dispatchEvent(new CustomEvent('db:read-all'));
-
-                        // 7) Close the dropdown to show the effect
-                        this.open = false;
-
-                        // 8) Force refresh of realtime data to respect new server-side timestamp
-                        if (this._url) {
-                            setTimeout(() => this._tick(), 100);
-                        }
-
-                        console.log('All notifications removed from UI');
+                        return `${Math.floor(h / 24)}d ago`;
                     }
                 }
             }
@@ -1305,13 +1109,13 @@
     <script>
         function markAsRead(notificationId) {
             fetch(`/notifications/${notificationId}/mark-as-read`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                })
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
                 .then(r => r.json()).then(data => {
                     if (data.success) {
                         const el = document.querySelector(`.db-notif[data-notif-id="${notificationId}"]`);
@@ -1333,7 +1137,7 @@
 </body>
 
 <script>
-    (function() {
+    (function () {
         if (window.__sessBound) return;
         window.__sessBound = true;
 
@@ -1350,7 +1154,7 @@
                     'X-CSRF-TOKEN': CSRF,
                     'Accept': 'application/json'
                 }
-            }).catch(() => {});
+            }).catch(() => { });
         }
         let hb = setInterval(ping, 60000);
         document.addEventListener('visibilitychange', () => {

@@ -43,7 +43,7 @@ class LeadController extends Controller
         'Submitted',
         'New Lead',
         'Super Lead',
-        'That Submitted',
+        'Death Submitted',
     ];
 
     protected function isLeadManagerUser(User $u): bool
@@ -76,7 +76,7 @@ class LeadController extends Controller
 
     protected function isThatSubmittedUser(User $u): bool
     {
-        return ($u->role ?? null) === 'that_submitted';
+        return ($u->role ?? null) === 'death_submitted';
     }
 
     /** Admin-like (admin OR lead_manager) */
@@ -116,11 +116,11 @@ class LeadController extends Controller
         }
 
         if ($this->isThatSubmittedUser($u)) {
-            // Allow access if the lead is currently "That Submitted" or has a history of being "That Submitted"
-            if (strcasecmp((string) $lead->status, 'That Submitted') === 0) {
+            // Allow access if the lead is currently "Death Submitted" or has a history of being "Death Submitted"
+            if (strcasecmp((string) $lead->status, 'Death Submitted') === 0) {
                 return true;
             }
-            if (method_exists($lead, 'statusTransitions') && $lead->statusTransitions()->where('from_status', 'That Submitted')->exists()) {
+            if (method_exists($lead, 'statusTransitions') && $lead->statusTransitions()->where('from_status', 'Death Submitted')->exists()) {
                 return true;
             }
         }
@@ -172,7 +172,8 @@ class LeadController extends Controller
     protected function isElevated(): bool
     {
         $u = auth()->user();
-        if (!$u) return false;
+        if (!$u)
+            return false;
 
         $isLeadManager = method_exists($u, 'hasRole')
             ? $u->hasRole('lead_manager')
@@ -183,9 +184,10 @@ class LeadController extends Controller
 
     public function index(Request $request)
     {
-        $statuses   = self::STATUSES;
+        $statuses = self::STATUSES;
         $categories = Category::orderBy('name')->get();
-        $users      = User::where('role', 'user')->orderBy('name')->get();
+        $tos = User::where('role', 'user')->orderBy('name')->get();
+        $users = $tos; // for compatibility if needed elsewhere
 
         // Reuse today's date consistently (app timezone)
         $today = now()->toDateString();
@@ -267,18 +269,19 @@ class LeadController extends Controller
         }
 
         return view('leads.index', [
-            'onlineUsers'       => $onlineUsers,
-            'leads'             => $leads,
-            'categories'        => $categories,
-            'statuses'          => $statuses,
-            'users'             => $users,
-            'statusCounts'      => $statusCounts,
-            'maxoutLeadsCount'  => $maxoutLeadsCount,
-            'filters'           => [
-                'q'        => $request->q ?? '',
-                'status'   => $request->status ?? '',
+            'onlineUsers' => $onlineUsers,
+            'leads' => $leads,
+            'categories' => $categories,
+            'statuses' => $statuses,
+            'users' => $users,
+            'tos' => $tos,
+            'statusCounts' => $statusCounts,
+            'maxoutLeadsCount' => $maxoutLeadsCount,
+            'filters' => [
+                'q' => $request->q ?? '',
+                'status' => $request->status ?? '',
                 'category' => $request->category ?? '',
-                'today'    => $request->boolean('today'),
+                'today' => $request->boolean('today'),
             ],
         ]);
     }
@@ -287,7 +290,7 @@ class LeadController extends Controller
 
     public function myLeads(Request $request)
     {
-        $user     = $request->user();
+        $user = $request->user();
         $statuses = self::STATUSES;
 
         // robust super_agent detection
@@ -303,7 +306,7 @@ class LeadController extends Controller
         ));
 
         $filters = [
-            'q'      => trim((string) $request->input('q', '')),
+            'q' => trim((string) $request->input('q', '')),
             'status' => (string) $request->input('status', ''),
         ];
 
@@ -340,14 +343,17 @@ class LeadController extends Controller
 
         $leads = $query->latest()->paginate(15)->withQueryString();
 
+        $tos = User::where('role', 'user')->orderBy('name')->get();
+
         return view('leads.index', [
-            'leads'        => $leads,
-            'statuses'     => $visibleStatuses, // hide Submitted + Deal from UI
-            'filters'      => $filters,
-            'categories'   => collect(),
-            'users'        => collect(),
+            'leads' => $leads,
+            'statuses' => $visibleStatuses, // hide Submitted + Deal from UI
+            'filters' => $filters,
+            'categories' => collect(),
+            'users' => $tos,
+            'tos' => $tos,
             'statusCounts' => [],
-            'onlineUsers'  => collect(),
+            'onlineUsers' => collect(),
         ]);
     }
 
@@ -358,11 +364,11 @@ class LeadController extends Controller
     {
         abort_unless($this->isElevated(), 403);
 
-        $categories   = Category::orderBy('name')->get();
-        $tos          = User::where('role', 'user')->orderBy('name')->get();           // Î“Ã‡Â£Select TOÎ“Ã‡Â¥
-        $superAgents  = User::where('role', 'super_agent')->orderBy('name')->get();    // Î“Ã‡Â£Select Super AgentÎ“Ã‡Â¥
-        $closers      = User::where('role', 'closer')->orderBy('name')->get();         // Î“Ã‡Â£Select CloserÎ“Ã‡Â¥
-        $statuses     = self::STATUSES; // your hardcoded list
+        $categories = Category::orderBy('name')->get();
+        $tos = User::where('role', 'user')->orderBy('name')->get();           // Î“Ã‡Â£Select TOÎ“Ã‡Â¥
+        $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();    // Î“Ã‡Â£Select Super AgentÎ“Ã‡Â¥
+        $closers = User::where('role', 'closer')->orderBy('name')->get();         // Î“Ã‡Â£Select CloserÎ“Ã‡Â¥
+        $statuses = self::STATUSES; // your hardcoded list
 
         return view('leads.create', compact('categories', 'tos', 'superAgents', 'closers', 'statuses'));
     }
@@ -400,12 +406,12 @@ class LeadController extends Controller
 
             // Save to lead_user table
             DB::table('lead_user')->insert([
-                'lead_id'     => $lead->id,
-                'user_id'     => $data['assigned_to'] ?? Auth::id(),
+                'lead_id' => $lead->id,
+                'user_id' => $data['assigned_to'] ?? Auth::id(),
                 'assigned_by' => Auth::id(),
-                'is_primary'  => true,
-                'created_at'  => now(),
-                'updated_at'  => now(),
+                'is_primary' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             $this->storeTextReport($lead);
@@ -415,12 +421,12 @@ class LeadController extends Controller
             session()->flash('success', 'Lead created successfully.');
 
             if (Auth::user()->isAdmin()) {
-                $content  = $lead->generateTextReport();
+                $content = $lead->generateTextReport();
                 $filename = $this->generateTextReportFilename($lead);
-                $headers  = [
-                    'Content-Type'        => 'text/plain',
+                $headers = [
+                    'Content-Type' => 'text/plain',
                     'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                    'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 ];
                 session()->flash('redirect_to', route('leads.show', $lead));
                 return Response::make($content, 200, $headers);
@@ -453,13 +459,13 @@ class LeadController extends Controller
     {
         abort_unless($this->canEditLead(Auth::user(), $lead), 403);
 
-        $categories  = Category::orderBy('name')->get();
-        $statuses    = self::STATUSES;
+        $categories = Category::orderBy('name')->get();
+        $statuses = self::STATUSES;
 
         // for elevated: fill selects; others will see read-only or limited fields in Blade as you prefer
-        $tos         = User::where('role', 'user')->orderBy('name')->get();
+        $tos = User::where('role', 'user')->orderBy('name')->get();
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();
-        $closers     = User::where('role', 'closer')->orderBy('name')->get();
+        $closers = User::where('role', 'closer')->orderBy('name')->get();
 
         return view('leads.edit', compact('lead', 'categories', 'statuses', 'tos', 'superAgents', 'closers'));
     }
@@ -475,7 +481,7 @@ class LeadController extends Controller
 
             $data = $request->validated();
 
-            $data['numbers']    = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
+            $data['numbers'] = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
             $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
 
             // Non-elevated users can't change assignment fields
@@ -509,7 +515,7 @@ class LeadController extends Controller
                  *    When a non-elevated user who IS the current assignee updates the lead,
                  *    refresh assigned_time to "now" to reflect latest activity.
                  */
-                if (!$this->isElevated() && (int)$lead->assigned_to === (int)$user->id) {
+                if (!$this->isElevated() && (int) $lead->assigned_to === (int) $user->id) {
                     $data['assigned_time'] = now();
                 }
             }
@@ -535,9 +541,9 @@ class LeadController extends Controller
                         DB::table('lead_user')
                             ->where('id', $existingRow->id)
                             ->update([
-                                'is_primary'  => true,
+                                'is_primary' => true,
                                 'assigned_by' => Auth::id(),
-                                'updated_at'  => now()
+                                'updated_at' => now()
                             ]);
 
                         DB::table('lead_user')
@@ -554,18 +560,18 @@ class LeadController extends Controller
                             DB::table('lead_user')
                                 ->where('id', $primaryRow->id)
                                 ->update([
-                                    'user_id'     => $newUserId,
+                                    'user_id' => $newUserId,
                                     'assigned_by' => Auth::id(),
-                                    'updated_at'  => now()
+                                    'updated_at' => now()
                                 ]);
                         } else {
                             DB::table('lead_user')->insert([
-                                'lead_id'     => $lead->id,
-                                'user_id'     => $newUserId,
+                                'lead_id' => $lead->id,
+                                'user_id' => $newUserId,
                                 'assigned_by' => Auth::id(),
-                                'is_primary'  => true,
-                                'created_at'  => now(),
-                                'updated_at'  => now()
+                                'is_primary' => true,
+                                'created_at' => now(),
+                                'updated_at' => now()
                             ]);
                         }
                     }
@@ -578,12 +584,12 @@ class LeadController extends Controller
             session()->flash('success', 'Lead updated successfully.');
 
             if ($user->isAdmin()) {
-                $content  = $lead->generateTextReport();
+                $content = $lead->generateTextReport();
                 $filename = $this->generateTextReportFilename($lead);
-                $headers  = [
-                    'Content-Type'        => 'text/plain',
+                $headers = [
+                    'Content-Type' => 'text/plain',
                     'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                    'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 ];
                 session()->flash('redirect_to', route('leads.show', $lead));
                 return Response::make($content, 200, $headers);
@@ -632,14 +638,14 @@ class LeadController extends Controller
         abort_unless($this->isElevated(), 403);
 
         $data = $request->validate([
-            'status'         => 'required|in:New Lead,Super Lead',
-            'assignee_ids'   => 'required|array|min:1',
+            'status' => 'required|in:New Lead,Super Lead',
+            'assignee_ids' => 'required|array|min:1',
             'assignee_ids.*' => 'integer|exists:users,id',
-            'leads_count'    => 'required|integer|min:1|max:1000',
+            'leads_count' => 'required|integer|min:1|max:1000',
             'busy_threshold' => 'nullable|integer|min:0',
         ]);
 
-        $perUser       = (int) $data['leads_count'];
+        $perUser = (int) $data['leads_count'];
         $busyThreshold = $data['busy_threshold'] ?? null;
 
         try {
@@ -647,7 +653,8 @@ class LeadController extends Controller
                 $users = User::whereIn('id', $data['assignee_ids'])->get();
 
                 $validUsers = $users->filter(function ($u) {
-                    if (method_exists($u, 'hasRole')) return $u->hasRole('user');
+                    if (method_exists($u, 'hasRole'))
+                        return $u->hasRole('user');
                     return ($u->role ?? null) === 'user';
                 })->values();
 
@@ -694,14 +701,15 @@ class LeadController extends Controller
 
                 foreach ($validUsers as $user) {
                     $remaining = max(0, $leads->count() - $cursor);
-                    if ($remaining <= 0) break;
+                    if ($remaining <= 0)
+                        break;
 
                     $take = min($perUser, $remaining);
                     $chunk = $leads->slice($cursor, $take);
                     $cursor += $chunk->count();
 
                     foreach ($chunk as $lead) {
-                        $lead->assigned_to   = $user->id;
+                        $lead->assigned_to = $user->id;
                         $lead->assigned_time = now(); // <-- stamp time
                         $lead->save();
 
@@ -709,9 +717,9 @@ class LeadController extends Controller
                             ['lead_id' => $lead->id, 'user_id' => $user->id],
                             [
                                 'assigned_by' => Auth::id(),
-                                'is_primary'  => true,
-                                'created_at'  => now(),
-                                'updated_at'  => now(),
+                                'is_primary' => true,
+                                'created_at' => now(),
+                                'updated_at' => now(),
                             ]
                         );
                     }
@@ -757,7 +765,7 @@ class LeadController extends Controller
         abort_unless($this->isElevated(), 403);
 
         $data = $request->validate([
-            'assigned_to'    => ['nullable', 'exists:users,id'],
+            'assigned_to' => ['nullable', 'exists:users,id'],
             'super_agent_id' => ['nullable', 'exists:users,id'],
         ]);
 
@@ -801,9 +809,9 @@ class LeadController extends Controller
         $file = Storage::disk('public')->get($path);
 
         return Response::make($file, 200, [
-            'Content-Type'        => 'application/pdf',
+            'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
         ]);
     }
 
@@ -818,7 +826,7 @@ class LeadController extends Controller
             ? $lead->numbers
             : (json_decode($lead->numbers ?? '[]', true) ?? []);
         $numbers = array_values(array_filter(array_map(
-            fn($n) => trim((string)$n),
+            fn($n) => trim((string) $n),
             is_array($numbers) ? $numbers : []
         ), fn($n) => $n !== ''));
 
@@ -831,29 +839,31 @@ class LeadController extends Controller
         foreach ($rawCards as $c) {
             if (is_string($c)) {
                 $val = trim($c);
-                if ($val !== '') $cardNumbers[] = $val;
+                if ($val !== '')
+                    $cardNumbers[] = $val;
             } elseif (is_array($c)) {
                 // Just in case someone saved a structure: pick the most likely number string
                 $candidate = $c['cc'] ?? $c['card'] ?? $c['number'] ?? '';
                 if (!$candidate) {
                     $candidate = implode(' ', array_filter(array_map(
-                        fn($v) => is_scalar($v) ? trim((string)$v) : '',
+                        fn($v) => is_scalar($v) ? trim((string) $v) : '',
                         $c
                     )));
                 }
                 $candidate = trim($candidate);
-                if ($candidate !== '') $cardNumbers[] = $candidate;
+                if ($candidate !== '')
+                    $cardNumbers[] = $candidate;
             }
         }
 
         // Helper
-        $L = fn(string $label, $value = '') => $label . ': ' . (isset($value) ? (string)$value : '');
+        $L = fn(string $label, $value = '') => $label . ': ' . (isset($value) ? (string) $value : '');
 
         $fullName = trim(implode(' ', array_filter([
             $lead->first_name,
             $lead->middle_initial,
             $lead->surname,
-        ], fn($v) => (string)$v !== '')));
+        ], fn($v) => (string) $v !== '')));
 
         // ---------- Build TXT content ----------
         $lines = [];
@@ -889,35 +899,35 @@ class LeadController extends Controller
 
         // Notes
         $lines[] = 'NOTES:';
-        $notes = trim((string)($lead->notes ?? ''));
+        $notes = trim((string) ($lead->notes ?? ''));
         $lines[] = $notes !== '' ? $notes : '';
         $lines[] = '';
 
         // Totals
         $lines[] = $L('TOTAL DEBT', $lead->balance);                 // maps to your Balance field
-        $lines[] = $L('TOTAL CARDS', (string)count($cardNumbers));
+        $lines[] = $L('TOTAL CARDS', (string) count($cardNumbers));
         // $lines[] = $L('TOTAL CHARGE', '');                           // no field provided
 
-        $content     = implode(PHP_EOL, $lines);
-        $baseName    = str_replace(' ', '_', $fullName ?: 'Lead') . '_Details';
+        $content = implode(PHP_EOL, $lines);
+        $baseName = str_replace(' ', '_', $fullName ?: 'Lead') . '_Details';
         $txtFilename = $baseName . '.txt';
 
         // ---------- ZIP / attachment packaging (unchanged) ----------
         $latestIssue = LeadIssue::where('lead_id', $lead->id)->orderByDesc('created_at')->first();
         if (!$latestIssue) {
             return response($content, 200, [
-                'Content-Type'        => 'text/plain',
+                'Content-Type' => 'text/plain',
                 'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
-                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ]);
         }
 
         $latestAttachment = IssueAttachment::where('lead_issue_id', $latestIssue->id)->orderByDesc('created_at')->first();
         if (!$latestAttachment) {
             return response($content, 200, [
-                'Content-Type'        => 'text/plain',
+                'Content-Type' => 'text/plain',
                 'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
-                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ]);
         }
 
@@ -931,9 +941,9 @@ class LeadController extends Controller
         $zip = new \ZipArchive();
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             return response($content, 200, [
-                'Content-Type'        => 'text/plain',
+                'Content-Type' => 'text/plain',
                 'Content-Disposition' => 'attachment; filename="' . $txtFilename . '"',
-                'Cache-Control'       => 'no-store, no-cache, must-revalidate, max-age=0',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
             ]);
         }
 
@@ -973,9 +983,9 @@ class LeadController extends Controller
             $zip->addFromString(
                 'Attachment/READ_ERROR.txt',
                 "Could not locate attachment on any tried disk/path.\n" .
-                    "Original path: {$origPath}\n" .
-                    "Tried disks: " . implode(', ', $disksToTry) . "\n" .
-                    "Tried paths: " . implode(', ', $pathsToTry) . "\n"
+                "Original path: {$origPath}\n" .
+                "Tried disks: " . implode(', ', $disksToTry) . "\n" .
+                "Tried paths: " . implode(', ', $pathsToTry) . "\n"
             );
             $manifest[] = "- Attachment/{$attachmentName} (READ_ERROR: file not found on tried disks/paths)";
         } else {
@@ -998,13 +1008,15 @@ class LeadController extends Controller
                 $mime = 'application/octet-stream';
                 try {
                     $tmpMime = Storage::disk($resolvedDisk)->mimeType($resolvedPath);
-                    if ($tmpMime) $mime = $tmpMime;
+                    if ($tmpMime)
+                        $mime = $tmpMime;
                 } catch (\Throwable $e) {
                 }
                 $size = strlen($bytes);
                 try {
                     $tmpSize = Storage::disk($resolvedDisk)->size($resolvedPath);
-                    if (is_numeric($tmpSize)) $size = (int)$tmpSize;
+                    if (is_numeric($tmpSize))
+                        $size = (int) $tmpSize;
                 } catch (\Throwable $e) {
                 }
 
@@ -1018,7 +1030,7 @@ class LeadController extends Controller
         $zip->close();
 
         return response()->download($zipPath, $zipDownloadName, [
-            'Content-Type'  => 'application/zip',
+            'Content-Type' => 'application/zip',
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
         ])->deleteFileAfterSend(true);
     }
@@ -1078,7 +1090,7 @@ class LeadController extends Controller
         unset($rows[0]);
 
         $inserted = 0;
-        $skipped  = 0;
+        $skipped = 0;
 
         foreach ($rows as $row) {
             // Normalize row shape
@@ -1133,7 +1145,8 @@ class LeadController extends Controller
             if (!empty($primary)) {
                 $numbers[] = $primary;
                 foreach ($alts as $a) {
-                    if (!empty($a)) $numbers[] = $a;
+                    if (!empty($a))
+                        $numbers[] = $a;
                 }
             } elseif (!empty($leadData['numbers'])) {
                 // Fallback: existing numbers column (JSON or delimited)
@@ -1144,7 +1157,7 @@ class LeadController extends Controller
                         $numbers = array_values(array_filter(array_map('trim', $decoded)));
                     }
                 } else {
-                    $parts = preg_split('/[;,\/|]+/', (string)$leadData['numbers']);
+                    $parts = preg_split('/[;,\/|]+/', (string) $leadData['numbers']);
                     $numbers = array_values(array_filter(array_map('trim', $parts ?? [])));
                 }
             }
@@ -1170,35 +1183,35 @@ class LeadController extends Controller
             $leadData['created_by'] = Auth::id();
 
             // --- Safe numeric casting ("" -> null) ---
-            $leadData['age']   = isset($leadData['age'])   && $leadData['age']   !== null && $leadData['age']   !== '' ? (int)$leadData['age'] : null;
-            $leadData['fico']  = isset($leadData['fico'])  && $leadData['fico']  !== null && $leadData['fico']  !== '' ? (int)$leadData['fico'] : null;
-            $leadData['balance'] = isset($leadData['balance']) && $leadData['balance'] !== null && $leadData['balance'] !== '' ? (float)$leadData['balance'] : null;
-            $leadData['credits'] = isset($leadData['credits']) && $leadData['credits'] !== null && $leadData['credits'] !== '' ? (float)$leadData['credits'] : null;
+            $leadData['age'] = isset($leadData['age']) && $leadData['age'] !== null && $leadData['age'] !== '' ? (int) $leadData['age'] : null;
+            $leadData['fico'] = isset($leadData['fico']) && $leadData['fico'] !== null && $leadData['fico'] !== '' ? (int) $leadData['fico'] : null;
+            $leadData['balance'] = isset($leadData['balance']) && $leadData['balance'] !== null && $leadData['balance'] !== '' ? (float) $leadData['balance'] : null;
+            $leadData['credits'] = isset($leadData['credits']) && $leadData['credits'] !== null && $leadData['credits'] !== '' ? (float) $leadData['credits'] : null;
 
             // --- Validation: everything nullable (skip nothing because of missing fields) ---
             $validator = Validator::make($leadData, [
-                'first_name'         => 'nullable|string|max:255',
-                'surname'            => 'nullable|string|max:255',
-                'middle_initial'     => 'nullable|string|max:5',
-                'gen_code'           => 'nullable|string|max:255',
-                'age'                => 'nullable|integer',
-                'ssn'                => 'nullable|string',
-                'street'             => 'nullable|string|max:255',
-                'city'               => 'nullable|string|max:255',
+                'first_name' => 'nullable|string|max:255',
+                'surname' => 'nullable|string|max:255',
+                'middle_initial' => 'nullable|string|max:5',
+                'gen_code' => 'nullable|string|max:255',
+                'age' => 'nullable|integer',
+                'ssn' => 'nullable|string',
+                'street' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
                 'state_abbreviation' => 'nullable|string|max:5',
-                'zip_code'           => 'nullable|string|max:20',
-                'fico'               => 'nullable|integer',
-                'balance'            => 'nullable|numeric',
-                'credits'            => 'nullable|numeric',
-                'notes'              => 'nullable|string',
-                'status'             => 'nullable|string',
-                'xfc06'              => 'nullable|string|max:255',
-                'xfc07'              => 'nullable|string|max:255',
-                'demo7'              => 'nullable|string|max:255',
-                'demo9'              => 'nullable|string|max:255',
-                'numbers'            => 'nullable|string',   // JSON string or null
-                'cards_json'         => 'nullable|string',   // JSON string or null
-                'created_by'         => 'required|integer',
+                'zip_code' => 'nullable|string|max:20',
+                'fico' => 'nullable|integer',
+                'balance' => 'nullable|numeric',
+                'credits' => 'nullable|numeric',
+                'notes' => 'nullable|string',
+                'status' => 'nullable|string',
+                'xfc06' => 'nullable|string|max:255',
+                'xfc07' => 'nullable|string|max:255',
+                'demo7' => 'nullable|string|max:255',
+                'demo9' => 'nullable|string|max:255',
+                'numbers' => 'nullable|string',   // JSON string or null
+                'cards_json' => 'nullable|string',   // JSON string or null
+                'created_by' => 'required|integer',
             ]);
 
             if ($validator->fails()) {
@@ -1237,16 +1250,19 @@ class LeadController extends Controller
         return (json_last_error() === JSON_ERROR_NONE) ? $jsonString : null;
     }
 
-    private function applyCreatedDateFilter(Builder
-    $query, Request $request, string $field = 'created_at'): void
-    {
+    private function applyCreatedDateFilter(
+        Builder
+        $query,
+        Request $request,
+        string $field = 'created_at'
+    ): void {
         // App runs in Asia/Karachi; DB timestamps typically stored in UTC.
         $tz = config('app.timezone', 'Asia/Karachi');
 
         // Highest specificity wins: date > range > today > days
         if ($request->filled('date')) {
             $start = Carbon::parse($request->input('date'), $tz)->startOfDay()->utc();
-            $end   = Carbon::parse($request->input('date'), $tz)->endOfDay()->utc();
+            $end = Carbon::parse($request->input('date'), $tz)->endOfDay()->utc();
             $query->whereBetween($field, [$start, $end]);
             return;
         }
@@ -1264,7 +1280,7 @@ class LeadController extends Controller
 
         if ($request->boolean('today')) {
             $start = Carbon::now($tz)->startOfDay()->utc();
-            $end   = Carbon::now($tz)->endOfDay()->utc();
+            $end = Carbon::now($tz)->endOfDay()->utc();
             $query->whereBetween($field, [$start, $end]);
             return;
         }
@@ -1272,7 +1288,7 @@ class LeadController extends Controller
         if ($request->filled('days')) {
             $days = max(1, min((int) $request->input('days'), 365));
             $start = Carbon::now($tz)->subDays($days - 1)->startOfDay()->utc();
-            $end   = Carbon::now($tz)->endOfDay()->utc();
+            $end = Carbon::now($tz)->endOfDay()->utc();
             $query->whereBetween($field, [$start, $end]);
             return;
         }
@@ -1293,7 +1309,7 @@ class LeadController extends Controller
 
         // Only return ids + total count
         return response()->json([
-            'ids'   => $query->pluck('id'),
+            'ids' => $query->pluck('id'),
             'count' => $query->count(),
         ]);
     }
@@ -1311,19 +1327,23 @@ class LeadController extends Controller
             });
         }
 
-        if ($r->filled('status'))     $q->where('status', $r->status);
-        if ($r->filled('category'))   $q->where('category_id', $r->category);
+        if ($r->filled('status'))
+            $q->where('status', $r->status);
+        if ($r->filled('category'))
+            $q->where('category_id', $r->category);
 
         // Created filters (today / days / date / range)
         if ($r->boolean('today')) {
             $q->whereDate('created_at', now()->toDateString());
         } elseif ($r->filled('days')) {
-            $q->where('created_at', '>=', now()->subDays((int)$r->days));
+            $q->where('created_at', '>=', now()->subDays((int) $r->days));
         } elseif ($r->filled('date')) {
             $q->whereDate('created_at', $r->date);
         } else {
-            if ($r->filled('from')) $q->whereDate('created_at', '>=', $r->from);
-            if ($r->filled('to'))   $q->whereDate('created_at', '<=', $r->to);
+            if ($r->filled('from'))
+                $q->whereDate('created_at', '>=', $r->from);
+            if ($r->filled('to'))
+                $q->whereDate('created_at', '<=', $r->to);
         }
     }
 
@@ -1331,7 +1351,7 @@ class LeadController extends Controller
     public function bulkDestroy(Request $request)
     {
         $ids = $request->validate([
-            'ids'   => ['required', 'array', 'min:1'],
+            'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['integer', 'exists:leads,id'],
         ])['ids'];
 
@@ -1380,15 +1400,15 @@ class LeadController extends Controller
             'to' => $request->input('to'),
         ];
 
-        // Query for active "That Submitted" leads
+        // Query for active "Death Submitted" leads
         $leadQuery = Lead::query()
-            ->where('status', 'That Submitted');
+            ->where('status', 'Death Submitted');
 
-        // Query for leads that have converted from "That Submitted" to another status
+        // Query for leads that have converted from "Death Submitted" to another status
         $convertedLeadQuery = Lead::query()
-            ->where('status', '!=', 'That Submitted')
+            ->where('status', '!=', 'Death Submitted')
             ->whereHas('statusTransitions', function ($query) {
-                $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+                $query->where('from_status', 'Death Submitted')->where('to_status', '!=', 'Death Submitted');
             });
 
         // Apply search filter
@@ -1430,13 +1450,13 @@ class LeadController extends Controller
             ->with(['assignee', 'lastMaxOutExit.changer'])
             ->withMax(
                 [
-                    'statusTransitions as last_that_submitted_exit_at' => function ($query) {
-                        $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+                    'statusTransitions as last_death_submitted_exit_at' => function ($query) {
+                        $query->where('from_status', 'Death Submitted')->where('to_status', '!=', 'Death Submitted');
                     },
                 ],
                 'created_at'
             )
-            ->orderByDesc('last_that_submitted_exit_at')
+            ->orderByDesc('last_death_submitted_exit_at')
             ->paginate(25, ['*'], 'converted_page')
             ->withQueryString();
 

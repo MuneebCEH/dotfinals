@@ -27,7 +27,7 @@
 
         $isRegularUser = $user->role === 'user';
         $isMaxOutUser = $user->role === 'max_out';
-        $isThatSubmittedUser = $user->role === 'that_submitted';
+        $isThatSubmittedUser = $user->role === 'death_submitted';
 
         // Pakistan timezone anchors
         $pakistanNow = now()->setTimezone('Asia/Karachi');
@@ -35,471 +35,353 @@
         $todayEndLocal = $pakistanNow->copy()->endOfDay();
         $monthStartLocal = $pakistanNow->copy()->startOfMonth();
 
-        // Convert to UTC (if timestamps are stored in UTC)
+        // Convert to UTC
         $todayStartUtc = $todayStartLocal->copy()->setTimezone('UTC');
         $todayEndUtc = $todayEndLocal->copy()->setTimezone('UTC');
         $monthStartUtc = $monthStartLocal->copy()->setTimezone('UTC');
 
-        // Today's attendance for regular users
-$todayAttendance = $isRegularUser
-    ? UserAttendance::where('user_id', $user->id)
-        ->whereBetween('check_in', [$todayStartUtc, $todayEndUtc])
-        ->latest('check_in')
-        ->first()
-    : null;
+        // Attendance logic
+        $todayAttendance = UserAttendance::where('user_id', $user->id)
+            ->whereBetween('check_in', [$todayStartUtc, $todayEndUtc])
+            ->latest('check_in')
+            ->first();
 
-$isCheckedIn = $todayAttendance && $todayAttendance->status === 'in';
-$isCheckedOut = $todayAttendance && $todayAttendance->status === 'out';
+        $isCheckedIn = $todayAttendance && $todayAttendance->status === 'in';
+        $isCheckedOut = $todayAttendance && $todayAttendance->status === 'out';
 
-// Base query
-$leadQuery = class_exists($LeadModel) ? $LeadModel::query() : null;
+        // Base query
+        $leadQuery = class_exists($LeadModel) ? $LeadModel::query() : null;
 
-if ($leadQuery) {
-    if ($isThatSubmittedUser) {
-        // That Submitted users see only That Submitted leads
-        $leadQuery->where('status', 'That Submitted');
-    } elseif ($isMaxOutUser) {
-        // Max Out users see only Max Out leads
-        $leadQuery->where('status', 'Max Out');
-    } elseif ($isRegularUser) {
-        // Regular users see only their assigned leads
-        $leadQuery->where(function ($query) use ($userId) {
-            $query
-                ->where('assigned_to', $userId)
-                ->orWhere('super_agent_id', $userId)
-                ->orWhere('closer_id', $userId);
-        });
-    }
-    // Admins/lead managers see all leads (no restrictions)
-}
+        if ($leadQuery) {
+            if ($isThatSubmittedUser) {
+                $leadQuery->where('status', 'Death Submitted');
+            } elseif ($isMaxOutUser) {
+                $leadQuery->where('status', 'Max Out');
+            } elseif ($isRegularUser) {
+                $leadQuery->where(function ($query) use ($userId) {
+                    $query->where('assigned_to', $userId)
+                        ->orWhere('super_agent_id', $userId)
+                        ->orWhere('closer_id', $userId);
+                });
+            }
+        }
 
-// Primary metrics
-$totalLeads = $leadQuery ? $leadQuery->clone()->count() : 0;
-$newLeadsToday = $leadQuery
-    ? $leadQuery
-        ->clone()
-        ->whereBetween('created_at', [$todayStartUtc, $todayEndUtc])
-        ->count()
-    : 0;
-$thisMonthLeads = $leadQuery ? $leadQuery->clone()->where('created_at', '>=', $monthStartUtc)->count() : 0;
+        // Metrics
+        $totalLeads = $leadQuery ? $leadQuery->clone()->count() : 0;
+        $newLeadsToday = $leadQuery
+            ? $leadQuery->clone()->whereBetween('created_at', [$todayStartUtc, $todayEndUtc])->count()
+            : 0;
+        $thisMonthLeads = $leadQuery ? $leadQuery->clone()->where('created_at', '>=', $monthStartUtc)->count() : 0;
 
-$unassignedLeads = $leadQuery
-    ? $leadQuery
-        ->clone()
-        ->whereNull('assigned_to')
-        ->whereNull('super_agent_id')
-        ->whereNull('closer_id')
-        ->count()
-    : 0;
+        $successfullySubmitted = $leadQuery
+            ? $leadQuery->clone()->whereIn('status', ['Submitted', 'Deal', 'Paid Off'])->count()
+            : 0;
 
-$withCards = $leadQuery
-    ? $leadQuery->clone()->whereNotNull('cards_json')->whereRaw('JSON_LENGTH(cards_json) > 0')->count()
-    : 0;
+        $callbacksCount = \App\Models\Callback::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->count();
 
-$withBalance = $leadQuery
-    ? (int) $leadQuery->clone()->whereNotNull('balance')->where('balance', '>', 0)->count()
-    : 0;
-
-// Status/category only for non-max_out and non-that_submitted users
-$leadsByStatus =
-    !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery
-        ? $leadQuery
-            ->clone()
-            ->select('status', DB::raw('COUNT(*) as count'))
-            ->groupBy('status')
-            ->orderByDesc('count')
-            ->get()
-        : collect();
-
-$topCategories =
-    !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery && class_exists($CategoryModel)
-        ? $leadQuery
-            ->clone()
-            ->select('category_id', DB::raw('COUNT(*) as count'))
-            ->groupBy('category_id')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get()
-            ->map(function ($row) use ($CategoryModel) {
-                $row->category_name =
-                    optional($CategoryModel::find($row->category_id))->name ?? 'Uncategorized';
-                return $row;
+        $openIssuesCount = \App\Models\LeadIssue::where('status', 'open')
+            ->when($isRegularUser, function ($q) use ($userId) {
+                return $q->where('reporter_id', $userId);
             })
-        : collect();
+            ->count();
 
-// Monthly trend
-$monthlyLeadCounts = $leadQuery
-    ? $leadQuery
-        ->clone()
-        ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as ym"), DB::raw('COUNT(*) as count'))
-        ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
-        ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
-        ->orderBy('ym')
-        ->get()
-    : collect();
+        // Monthly trend for chart
+        $monthlyLeadCounts = $leadQuery
+            ? $leadQuery->clone()
+                ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as ym"), DB::raw('COUNT(*) as count'))
+                ->where('created_at', '>=', now()->subMonths(11)->startOfMonth())
+                ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
+                ->orderBy('ym')
+                ->get()
+            : collect();
 
-// Owner performance (not for regular/max_out/that_submitted users)
-$ownersPerformance =
-    !$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser && $leadQuery
-        ? $leadQuery
-            ->clone()
-            ->select('assigned_to', DB::raw('COUNT(*) as count'))
-            ->whereNotNull('assigned_to')
-            ->groupBy('assigned_to')
-            ->orderByDesc('count')
-            ->limit(5)
-            ->get()
-            ->map(function ($row) use ($UserModel) {
-                $row->owner = class_exists($UserModel)
-                    ? optional($UserModel::find($row->assigned_to))->name ?? 'Unknown'
-                    : 'Unknown';
-                return $row;
-            })
-        : collect();
+        // Status distribution for chart
+        $leadsByStatus = ($leadQuery ? $leadQuery->clone()->select('status', DB::raw('COUNT(*) as count'))->groupBy('status')->get() : collect());
 
-// Recent leads
-$recentLeads = $leadQuery ? $leadQuery->clone()->latest()->limit(10)->get() : collect();
-
-// Cards
-$cards = [];
-
-if ($isThatSubmittedUser) {
-    $thatSubmittedTodayCount = $LeadModel
-        ::where('status', 'That Submitted')
-        ->whereBetween('created_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])
-        ->count();
-
-    $cards = [
-        [
-            'label' => 'Active That Submitted Leads',
-            'value' => $totalLeads,
-            'icon' => 'fas fa-check-circle',
-            'color' => 'bg-green-100 text-green-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'New That Submitted Today',
-            'value' => $thatSubmittedTodayCount,
-            'icon' => 'fas fa-sun',
-            'color' => 'bg-amber-100 text-amber-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'That Submitted Leads',
-            'value' => $totalLeads,
-            'icon' => 'fas fa-check-circle',
-            'color' => 'bg-green-100 text-green-800',
-            'visible' => $totalLeads > 0,
-        ],
-    ];
-} elseif ($isMaxOutUser) {
-    $maxOutTodayCount = $LeadModel
-        ::where('status', 'Max Out')
-        ->whereBetween('created_at', [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()])
-        ->count();
-
-    $cards = [
-        [
-            'label' => 'Active Max Out Leads',
-            'value' => $totalLeads,
-            'icon' => 'fas fa-bolt',
-            'color' => 'bg-red-100 text-red-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'New Max Out Today',
-            'value' => $maxOutTodayCount,
-            'icon' => 'fas fa-sun',
-            'color' => 'bg-amber-100 text-amber-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'Max Out Leads',
-            'value' => $totalLeads,
-            'icon' => 'fas fa-bolt',
-            'color' => 'bg-red-100 text-red-800',
-            'visible' => $totalLeads > 0,
-        ],
-    ];
-} else {
-    $cards = [
-        [
-            'label' => 'Total Leads',
-            'value' => $totalLeads,
-            'icon' => 'fas fa-users',
-            'color' => 'bg-indigo-100 text-indigo-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'New Today',
-            'value' => $newLeadsToday,
-            'icon' => 'fas fa-sun',
-            'color' => 'bg-emerald-100 text-emerald-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'This Month',
-            'value' => $thisMonthLeads,
-            'icon' => 'fas fa-calendar',
-            'color' => 'bg-amber-100 text-amber-800',
-            'visible' => true,
-        ],
-        [
-            'label' => 'Unassigned',
-            'value' => $unassignedLeads,
-            'icon' => 'fas fa-exclamation-triangle',
-            'color' => 'bg-rose-100 text-rose-800',
-            'visible' => $unassignedLeads > 0 && !$isRegularUser,
-        ],
-        [
-            'label' => 'With Credit Cards',
-            'value' => $withCards,
-            'icon' => 'fas fa-credit-card',
-            'color' => 'bg-cyan-100 text-cyan-800',
-            'visible' => $withCards > 0,
-        ],
-    ];
-}
-
-$cards = array_values(array_filter($cards, fn($c) => $c['visible']));
+        // Recent leads
+        $recentLeads = $leadQuery ? $leadQuery->clone()->latest()->limit(8)->get() : collect();
     @endphp
 
-    <div class="space-y-8 animate-on-load">
-        {{-- Header --}}
-        <div
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Welcome back, {{ $user->name }}! 👋
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-400 text-lg">
-                        @if ($isThatSubmittedUser)
-                            Here's an overview of all That Submitted leads and their status.
-                        @elseif ($isMaxOutUser)
-                            Here's an overview of all Max Out leads and their status.
-                        @elseif ($isRegularUser)
-                            Here's an overview of your assigned leads.
-                        @else
-                            Here's what's happening with all leads today.
+        <div class="space-y-6 animate-on-load">
+            {{-- Welcome Island --}}
+            <div class="card-premium p-8 relative overflow-hidden">
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
+                            Welcome back, <span class="gradient-text">{{ $user->name }}</span>
+                        </h1>
+                        <p class="text-slate-400 text-lg font-medium">
+                            @if ($isThatSubmittedUser) Monitoring all Death Submitted leads.
+                            @elseif ($isMaxOutUser) Global overview of Max Out leads.
+                            @else Here's a snapshot of your leads ecosystem today. @endif
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        @if($isRegularUser)
+                            <div class="flex items-center gap-3 bg-white/5 p-2 rounded-2xl border border-white/5">
+                                <form action="{{ route('attendance.checkIn') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" @disabled($isCheckedIn) class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ $isCheckedIn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5' }}">
+                                        <i class="fas fa-sign-in-alt mr-1"></i> Check In
+                                    </button>
+                                </form>
+                                <form action="{{ route('attendance.checkout.beacon') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" @disabled(!$isCheckedIn) class="px-4 py-2 rounded-xl text-xs font-bold transition-all {{ $isCheckedOut ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20' : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5' }}">
+                                        <i class="fas fa-sign-out-alt mr-1"></i> Check Out
+                                    </button>
+                                </form>
+                            </div>
                         @endif
-                    </p>
+                        <a href="{{ route('leads.index') }}" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
+                            Launch Workspace
+                        </a>
+                    </div>
+                </div>
+                <div class="absolute top-[-10%] right-[-10%] w-[40%] h-[120%] bg-indigo-500/10 blur-[100px] rounded-full"></div>
+            </div>
+
+            {{-- Bento Grid Metrics --}}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="card-premium p-6 flex flex-col justify-between group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-users text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Reach</span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-black text-white mb-1">{{ number_format($totalLeads) }}</h3>
+                        <p class="text-xs text-indigo-400 font-bold flex items-center gap-1">
+                            <i class="fas fa-arrow-up"></i> +{{ $newLeadsToday }} new targets today
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-premium p-6 flex flex-col justify-between group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-check-double text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Successful Deals</span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-black text-white mb-1">{{ number_format($successfullySubmitted) }}</h3>
+                        <p class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                            <i class="fas fa-chart-line"></i> Optimized conversion
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-premium p-6 flex flex-col justify-between group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-clock text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Callbacks</span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-black text-white mb-1">{{ number_format($callbacksCount) }}</h3>
+                        <p class="text-xs text-amber-400 font-bold">Protocol action required</p>
+                    </div>
+                </div>
+
+                <div class="card-premium p-6 flex flex-col justify-between group">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-rose-500/20 rounded-2xl flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Open Reports</span>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-black text-white mb-1">{{ number_format($openIssuesCount) }}</h3>
+                        <p class="text-xs text-rose-400 font-bold">Critical review pending</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Cards --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach ($cards as $card)
-                <div
-                    class="rounded-2xl p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl">
-                    <div class="flex items-center justify-between">
+            {{-- Intelligence Stream & Visual Analytics --}}
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {{-- Activity List --}}
+                <div class="col-span-12 md:col-span-8 card-premium overflow-hidden">
+                    <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $card['label'] }}</p>
-                            <p class="text-3xl font-bold text-gray-900 dark:text-white">
-                                {{ is_numeric($card['value']) ? number_format((float) $card['value']) : $card['value'] }}
-                            </p>
+                            <h3 class="text-xl font-bold text-white">Intelligence Stream</h3>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest mt-1">Recent Lead Dynamics</p>
                         </div>
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
-                            <i class="{{ $card['icon'] }} text-white text-2xl"></i>
+                        <a href="{{ route('leads.index') }}" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-2 transition-all group">
+                            View Ecosystem <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-black/20 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                    <th class="px-8 py-4">Lead Information</th>
+                                    <th class="px-8 py-4">Current Status</th>
+                                    <th class="px-8 py-4">Assignment</th>
+                                    <th class="px-8 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                @forelse($recentLeads as $lead)
+                                    <tr class="hover:bg-white/[0.03] transition-all group">
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center font-bold text-indigo-400 border border-indigo-500/20">
+                                                    {{ strtoupper(substr($lead->first_name, 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">
+                                                        {{ $lead->first_name }} {{ $lead->surname }}
+                                                    </p>
+                                                    <p class="text-[10px] text-slate-500 capitalize">{{ $lead->street }}, {{ $lead->city }}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            @php
+                                                $statusColors = [
+                                                    'submitted' => 'emerald',
+                                                    'call back' => 'amber',
+                                                    'new lead' => 'indigo',
+                                                    'death submitted' => 'rose',
+                                                    'max out' => 'orange',
+                                                    'deal' => 'emerald',
+                                                ];
+                                                $color = $statusColors[strtolower($lead->status ?? '')] ?? 'slate';
+                                            @endphp
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-{{ $color }}-500/10 text-{{ $color }}-400 border border-{{ $color }}-500/20">
+                                                {{ $lead->status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-user-circle text-slate-600 text-sm"></i>
+                                                <span class="text-[11px] font-bold text-slate-400">{{ $lead->assignee?->name ?? 'Unassigned' }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-8 py-5 text-right">
+                                            <a href="{{ route('leads.show', $lead) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-white font-black uppercase tracking-widest transition-all">
+                                                <i class="fas fa-external-link-alt text-indigo-400"></i> Open
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="px-8 py-20 text-center">
+                                            <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">No Recent Dynamics Detected</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- Analytics Islands --}}
+                <div class="col-span-12 md:col-span-4 space-y-6">
+                    {{-- Status Distribution --}}
+                    <div class="card-premium p-8 h-[350px] flex flex-col">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold text-white">Status Distribution</h3>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest mt-1">Magnitude breakdown</p>
+                        </div>
+                        <div class="flex-1 min-h-0 flex items-center justify-center">
+                            <canvas id="leadsByStatusChart"></canvas>
+                        </div>
+                    </div>
+
+                    {{-- Performance Trends --}}
+                    <div class="card-premium p-8 h-[350px] flex flex-col">
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold text-white">Engagement Trends</h3>
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-widest mt-1">Annual activity scale</p>
+                        </div>
+                        <div class="flex-1 min-h-0">
+                            <canvas id="monthlyTrendsChart"></canvas>
                         </div>
                     </div>
                 </div>
-            @endforeach
-        </div>
-
-        {{-- Main Content Grid (hide status/category for max_out and that_submitted) --}}
-        @if (!$isMaxOutUser && !$isThatSubmittedUser)
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {{-- Leads by Status --}}
-                <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border">
-                    <div class="p-6 border-b">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Leads by Status</h3>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-4">
-                            @forelse ($leadsByStatus as $row)
-                                <li class="flex items-center justify-between py-2">
-                                    <span
-                                        class="capitalize text-gray-700 dark:text-gray-300">{{ $row->status ?? 'Unknown' }}</span>
-                                    <span
-                                        class="font-medium text-gray-900 dark:text-white">{{ number_format((int) $row->count) }}</span>
-                                </li>
-                            @empty
-                                <li class="text-gray-500 dark:text-gray-400 py-4 text-center">No status data available</li>
-                            @endforelse
-                        </ul>
-                    </div>
-                </div>
-
-                {{-- Top Categories --}}
-                <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border">
-                    <div class="p-6 border-b">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Top Categories</h3>
-                    </div>
-                    <div class="p-6">
-                        <ul class="space-y-4">
-                            @forelse ($topCategories as $category)
-                                <li class="flex items-center justify-between py-2">
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $category->category_name }}</span>
-                                    <span
-                                        class="font-medium text-gray-900 dark:text-white">{{ number_format((int) $category->count) }}</span>
-                                </li>
-                            @empty
-                                <li class="text-gray-500 dark:text-gray-400 py-4 text-center">No category data available
-                                </li>
-                            @endforelse
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- Chart --}}
-        <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border">
-            <div class="p-6 border-b">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @if ($isThatSubmittedUser)
-                        That Submitted Leads Monthly Trends
-                    @elseif ($isMaxOutUser)
-                        Max Out Leads Monthly Trends
-                    @elseif ($isRegularUser)
-                        Your Monthly Lead Trends
-                    @else
-                        Monthly Lead Trends
-                    @endif
-                </h3>
-            </div>
-            <div class="p-6">
-                <canvas id="leadsPerMonthChart" height="100"></canvas>
             </div>
         </div>
-
-        {{-- Recent Leads --}}
-        <div class="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-2xl border overflow-hidden">
-            <div class="p-6 border-b">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    @if ($isThatSubmittedUser)
-                        Recent That Submitted Leads
-                    @elseif ($isMaxOutUser)
-                        Recent Max Out Leads
-                    @elseif ($isRegularUser)
-                        Your Recent Leads
-                    @else
-                        Recent Leads
-                    @endif
-                </h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50/50 dark:bg-gray-800/50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Location
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Category
-                            </th>
-                            @if (!$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser)
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    Assigned To</th>
-                            @endif
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Created
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white/50 dark:bg-gray-900/50 divide-y">
-                        @forelse ($recentLeads as $lead)
-                            @php
-                                $fullName = trim(
-                                    collect([$lead->first_name, $lead->surname, $lead->gen_code])
-                                        ->filter()
-                                        ->implode(' '),
-                                );
-                                $assignedName = class_exists($UserModel)
-                                    ? optional($UserModel::find($lead->assigned_to))->name
-                                    : null;
-                                $categoryName = class_exists($CategoryModel)
-                                    ? optional($CategoryModel::find($lead->category_id))->name
-                                    : null;
-                                $cityState = trim(
-                                    collect([$lead->city, $lead->state_abbreviation])
-                                        ->filter()
-                                        ->implode(', '),
-                                );
-                            @endphp
-                            <tr>
-                                <td class="px-6 py-4 text-sm">{{ $fullName ?: '—' }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $cityState ?: '—' }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $lead->status ?? '—' }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $categoryName ?? 'Uncategorized' }}</td>
-                                @if (!$isRegularUser && !$isMaxOutUser && !$isThatSubmittedUser)
-                                    <td class="px-6 py-4 text-sm">{{ $assignedName ?? 'Unassigned' }}</td>
-                                @endif
-                                <td class="px-6 py-4 text-sm">{{ optional($lead->created_at)->diffForHumans() ?? '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-sm">
-                                    <a href="{{ route('leads.show', $lead) }}"
-                                        class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 mr-2">
-                                        View
-                                    </a>
-                                    @if ($user->can('edit', $lead))
-                                        <a href="{{ route('leads.edit', $lead) }}"
-                                            class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                            Edit
-                                        </a>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ $isRegularUser || $isMaxOutUser || $isThatSubmittedUser ? 5 : 6 }}"
-                                    class="px-6 py-8 text-center text-sm text-gray-500">No recent leads found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            // Trend Chart
             const monthlyRaw = @json($monthlyLeadCounts);
-            const labels = (monthlyRaw || []).map(r => {
-                const [year, month] = r.ym.split('-');
-                return new Date(year, month - 1).toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric'
-                });
-            });
-            const data = (monthlyRaw || []).map(r => Number(r.count || 0));
-
-            const ctx = document.getElementById('leadsPerMonthChart');
-            if (ctx) {
-                new Chart(ctx, {
+            const trendCtx = document.getElementById('monthlyTrendsChart');
+            if (trendCtx) {
+                new Chart(trendCtx, {
                     type: 'line',
                     data: {
-                        labels,
+                        labels: monthlyRaw.map(r => {
+                            const [y, m] = r.ym.split('-');
+                            return new Date(y, m-1).toLocaleDateString('en-US', {month: 'short'});
+                        }),
                         datasets: [{
-                            label: 'Leads',
-                            data,
-                            borderColor: 'rgba(79, 70, 229, 0.8)',
-                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                            borderWidth: 2,
+                            label: 'Magnitude',
+                            data: monthlyRaw.map(r => r.count),
+                            borderColor: '#818cf8',
+                            backgroundColor: 'rgba(129, 140, 248, 0.1)',
+                            borderWidth: 3,
                             fill: true,
-                            tension: 0.3
+                            tension: 0.4,
+                            pointRadius: 0
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { display: false },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Status Pie Chart
+            const statusRaw = @json($leadsByStatus);
+            const statusCtx = document.getElementById('leadsByStatusChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusRaw.map(r => r.status),
+                        datasets: [{
+                            data: statusRaw.map(r => r.count),
+                            backgroundColor: [
+                                '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '80%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#94a3b8',
+                                    padding: 20,
+                                    font: { size: 10, weight: 'bold' },
+                                    usePointStyle: true
+                                }
+                            }
+                        }
                     }
                 });
             }

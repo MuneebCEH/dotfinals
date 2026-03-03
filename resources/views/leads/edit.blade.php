@@ -83,15 +83,14 @@
 
         <!-- Header -->
         <div
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
+            class="card-premium rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Edit Lead</h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400">Update the client's details as accurately as
-                        possible.</p>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Edit Lead</h2>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-400">Refine and update lead intelligence data.</p>
                 </div>
                 <a href="{{ route('leads.index') }}"
-                   class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                   class="inline-flex items-center px-6 py-3 border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl font-bold rounded-xl hover:shadow-lg transition-all duration-300">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -104,7 +103,7 @@
         {{-- Uploaded PDF (preview, if present) --}}
         @if ($lead->lead_pdf_path)
             <div
-                class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                class="card-premium rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                 <div
                     class="px-8 py-6 flex items-center justify-between border-b border-gray-200/50 dark:border-gray-700/50">
                     <div class="flex items-center gap-3">
@@ -141,7 +140,7 @@
 
         <!-- Form Card -->
         <div
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+            class="card-premium rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
 
             <!-- Card Header -->
             <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
@@ -601,17 +600,14 @@
 
                     <div class="flex items-center space-x-4">
                         <a href="{{ route('leads.index') }}"
-                           class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                           class="inline-flex items-center px-6 py-3 border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl font-bold rounded-xl transition-all duration-300">
                             Cancel
                         </a>
                         <button type="submit"
-                                class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="inline-flex items-center px-8 py-3 bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold rounded-xl shadow-lg hover:shadow-primary-500/25 transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                 :disabled="isSubmitting" :class="{ 'btn-loading': isSubmitting }">
-                            <span class="btn-text flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M5 13l4 4L19 7" />
-                                </svg>
+                            <span class="btn-text flex items-center gap-2">
+                                <i class="fas fa-save"></i>
                                 Save Changes
                             </span>
                         </button>

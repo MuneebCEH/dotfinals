@@ -28,14 +28,14 @@
     $onlineUsers = $isAdmin ? (isset($onlineUsers) ? collect($onlineUsers) : collect()) : collect();
 
     // UI configuration
-    $cardClass = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700';
+    $cardClass = 'card-premium rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50';
     $tableHeaderClass =
-        'px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider';
-    $btnBaseClass = 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 font-medium';
+        'px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest';
+    $btnBaseClass = 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-bold text-sm shadow-sm';
     $btnGhostClass =
         $btnBaseClass .
-        ' border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600';
-    $btnPrimaryClass = $btnBaseClass . ' bg-blue-600 text-white hover:bg-blue-700 shadow-sm';
+        ' border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md';
+    $btnPrimaryClass = $btnBaseClass . ' bg-gradient-to-br from-primary-500 to-primary-600 text-white hover:shadow-primary-500/25 hover:shadow-lg transform hover:-translate-y-0.5';
 
     // Filter state (now includes "today")
     $hasActiveFilters = request()->hasAny(['q', 'status', 'category', 'today', 'days', 'date', 'from', 'to']);
@@ -119,8 +119,7 @@
                     </div>
 
                     <!-- Scrollable body -->
-                    <form id="bulkAssignForm" method="POST" action="{{ route('leads.bulk-assign') }}"
-                        class="overflow-y-auto">
+                    <form id="bulkAssignForm" method="POST" action="{{ route('leads.bulk-assign') }}" class="overflow-y-auto">
                         @csrf
 
                         <div class="grid grid-cols-1 lg:grid-cols-[360px,1fr] gap-6 p-5 md:p-6">
@@ -149,8 +148,7 @@
                                         class="block mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">Number of
                                         leads</label>
                                     <div class="flex gap-2">
-                                        <input id="leads_count" name="leads_count" type="number" min="1"
-                                            value="10" required
+                                        <input id="leads_count" name="leads_count" type="number" min="1" value="10" required
                                             class="w-40 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
                                         <div class="flex-1">
                                             <p class="text-xs text-gray-600 dark:text-gray-400">We’ll split these between
@@ -230,12 +228,10 @@
                                             @endphp
                                             <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border {{ $isEligible ? 'border-emerald-200 dark:border-emerald-900/40 bg-white dark:bg-gray-800' : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40' }}"
                                                 data-name="{{ Str::lower($onlineUser->name) }}"
-                                                data-email="{{ Str::lower($onlineUser->email ?? '') }}"
-                                                data-load="{{ $count }}"
+                                                data-email="{{ Str::lower($onlineUser->email ?? '') }}" data-load="{{ $count }}"
                                                 data-eligible="{{ $isEligible ? '1' : '0' }}">
                                                 <div class="flex items-center gap-3 min-w-0">
-                                                    <input type="checkbox" name="assignee_ids[]"
-                                                        value="{{ $onlineUser->id }}"
+                                                    <input type="checkbox" name="assignee_ids[]" value="{{ $onlineUser->id }}"
                                                         class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                         {{ $isEligible ? '' : 'disabled' }}>
                                                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
@@ -273,12 +269,10 @@
                                             @endphp
                                             <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border {{ $isEligible ? 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800' : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40' }}"
                                                 data-name="{{ Str::lower($user->name) }}"
-                                                data-email="{{ Str::lower($user->email ?? '') }}"
-                                                data-load="{{ $count }}"
+                                                data-email="{{ Str::lower($user->email ?? '') }}" data-load="{{ $count }}"
                                                 data-eligible="{{ $isEligible ? '1' : '0' }}">
                                                 <div class="flex items-center gap-3 min-w-0">
-                                                    <input type="checkbox" name="assignee_ids[]"
-                                                        value="{{ $user->id }}"
+                                                    <input type="checkbox" name="assignee_ids[]" value="{{ $user->id }}"
                                                         class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                         {{ $isEligible ? '' : 'disabled' }}>
                                                     <span
@@ -338,8 +332,7 @@
         <div id="bulkDeleteModal" class="fixed inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
             <div class="relative z-50 mx-auto w-full max-w-md p-8 mt-24">
-                <div
-                    class="rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
                     <div class="text-center">
                         <div
                             class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
@@ -377,528 +370,239 @@
 @endpush
 
 @section('content')
-    <div class="space-y-6" x-data="{ filterOpen: {{ $hasActiveFilters ? 'true' : 'false' }}, exportOpen: false }">
-        @if (session('error'))
-            <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-3" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span class="text-red-800 dark:text-red-200 text-sm">{{ session('error') }}</span>
-                </div>
+    <div class="space-y-6 animate-on-load">
+        {{-- Leads Intelligence Header --}}
+        <div
+            class="card-premium p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden relative">
+            <div class="relative z-10">
+                <h1 class="text-4xl font-black tracking-tight text-white mb-2">Leads <span
+                        class="gradient-text">Vault</span></h1>
+                <p class="text-slate-400 font-medium">Managing {{ number_format($leads->total()) }} intelligence entries
+                    across the ecosystem.</p>
             </div>
-        @endif
 
-        <!-- Header -->
-        <div class="{{ $cardClass }} p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div class="flex-1">
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                        {{ $isAdmin ? 'All Leads' : 'My Leads' }}
-                    </h1>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        {{ $isAdmin ? 'Manage and track all leads across the team' : 'Manage the leads assigned to you' }}
-                    </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-
-                    @if ($isAdmin)
-                        <button type="button" id="openBulkDelete"
-                            class="{{ $btnGhostClass }} text-sm text-red-600 hover:text-red-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                            disabled>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862A2 2 0 015.867 19L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-2h6l1 2" />
-                            </svg>
-                            <span>Delete Selected</span>
-                            <span id="bulkDeleteChip"
-                                class="ml-2 hidden align-middle px-2 py-0.5 rounded-md bg-red-500/10 border border-red-400/40 text-xs text-red-700">
-                                0
-                            </span>
-                        </button>
-                        <button type="button" class="{{ $btnGhostClass }} text-sm" data-open-bulk-assign>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <span>Bulk Assign</span>
-                        </button>
-                    @endif
-
-                    <button type="button" class="{{ $btnGhostClass }} text-sm" @click="filterOpen = !filterOpen">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4h18M6 8h12M9 12h6M10 16h4M11 20h2" />
-                        </svg>
-                        <span x-text="filterOpen ? 'Hide Filters' : 'Show Filters'"></span>
-                    </button>
-
-                    <a href="{{ url()->current() . (request()->query() ? '?' . http_build_query(request()->query()) : '') }}"
-                        class="{{ $btnGhostClass }} text-sm js-refresh" title="Refresh leads list">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 10-7.5 12" />
-                        </svg>
-                        <span>Refresh</span>
+            <div class="flex items-center gap-3 relative z-10">
+                @if (auth()->user()?->isAdmin() || auth()->user()?->isLeadManager())
+                    <a href="{{ route('leads.create') }}"
+                        class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-3 group">
+                        <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i>
+                        <span>Inject New Lead</span>
                     </a>
-
-                    @if ($isAdmin)
-                        <button data-open-import class="{{ $btnPrimaryClass }} text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3M5 20h14a2 2 0 002-2V7l-6-5H7L1 7v11a2 2 0 002 2z" />
-                            </svg>
-                            <span>Import CSV</span>
-                        </button>
-
-                        <a href="{{ route('leads.create') }}" class="{{ $btnPrimaryClass }} text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v12m6-6H6" />
-                            </svg>
-                            <span>Add Lead</span>
-                        </a>
-                    @endif
-                </div>
+                @endif
             </div>
 
-            <!-- Filters -->
-            <div x-cloak x-show="filterOpen" x-transition class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-                <form id="leadsFilterForm" method="GET"
-                    action="{{ $isAdmin ? route('leads.index') : route('leads.mine') }}"
-                    class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Search Leads</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input id="qInput" type="text" name="q" value="{{ $filters['q'] ?? '' }}"
-                                placeholder="Search by name, gen code, city, or phone..."
-                                class="pl-10 w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                    </div>
+            {{-- Background Accent --}}
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+        </div>
 
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                        <select id="statusSelect" name="status"
-                            class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Statuses</option>
-                            @foreach ($statuses as $status)
-                                <option value="{{ $status }}" @selected(($filters['status'] ?? '') === $status)>{{ $status }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    @if ($isAdmin)
+        {{-- Workspace Grid --}}
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            {{-- Search & Filter Command Panel --}}
+            <div class="xl:col-span-1 space-y-6">
+                <div class="card-premium p-6">
+                    <form method="GET" action="{{ route('leads.index') }}" class="space-y-6">
                         <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                            <select id="categorySelect" name="category"
-                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">All Categories</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @selected(($filters['category'] ?? '') == $category->id)>
-                                        {{ $category->name }}
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Global
+                                Search</label>
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-0 transition-all"
+                                    placeholder="ID, Name, Phone...">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Filter
+                                by Status</label>
+                            <select name="status"
+                                class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-indigo-500/50 focus:ring-0 transition-all">
+                                <option value="">All Scopes</option>
+                                @foreach($statuses as $label)
+                                    <option value="{{ $label }}" {{ request('status') == $label ? 'selected' : '' }}>{{ $label }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                    @endif
 
-                    <!-- Created (single compact control) -->
-                    <div class="relative" id="createdFilter">
-                        <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Created</label>
+                        @if($isAdmin)
+                            <div>
+                                <label
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Assigned
+                                    Specialist</label>
+                                <select name="assigned_to"
+                                    class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-indigo-500/50 focus:ring-0 transition-all">
+                                    <option value="">Every Agent</option>
+                                    @foreach($tos as $to)
+                                        <option value="{{ $to->id }}" {{ request('assigned_to') == $to->id ? 'selected' : '' }}>
+                                            {{ $to->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
 
-                        <!-- The one visible control -->
-                        <button type="button" id="createdFilterBtn"
-                            class="w-full justify-between inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500 text-sm">
-                            <span id="createdFilterLabel">
-                                {{ request()->boolean('today')
-                                    ? 'Today'
-                                    : (request()->filled('days')
-                                        ? 'Last ' . (int) request('days') . ' days'
-                                        : (request()->filled('date')
-                                            ? \Illuminate\Support\Carbon::parse(request('date'))->format('M d, Y')
-                                            : (request()->filled('from') || request()->filled('to')
-                                                ? (request('from') ?: '…') . ' → ' . (request('to') ?: '…')
-                                                : 'Any time'))) }}
-                            </span>
-                            <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
+                        <button type="submit"
+                            class="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black transition-all border border-white/10">
+                            Apply Intelligence Filters
                         </button>
 
-                        <!-- Dropdown -->
-                        <div id="createdMenu"
-                            class="hidden absolute z-30 mt-2 w-80 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl">
-                            <div class="p-3 space-y-3">
-                                <!-- Quick presets -->
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button type="button"
-                                        class="created-option px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-kind="today">Today</button>
-                                    <button type="button"
-                                        class="created-option px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-kind="days" data-days="7">Last 7 days</button>
-                                    <button type="button"
-                                        class="created-option px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-kind="days" data-days="14">Last 14 days</button>
-                                    <button type="button"
-                                        class="created-option px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-kind="days" data-days="30">Last 30 days</button>
-                                </div>
-
-                                <div class="h-px bg-gray-200 dark:bg-gray-700"></div>
-
-                                <!-- Custom area (still inside the same dropdown) -->
-                                <div class="space-y-2">
-                                    <button type="button"
-                                        class="created-open-custom w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-mode="days">
-                                        <span>Last N days…</span>
-                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                    <div class="created-custom created-custom-days hidden">
-                                        <input id="createdDays" type="number" min="1" max="365"
-                                            placeholder="e.g. 10"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <div class="mt-2 flex justify-end gap-2">
-                                            <button type="button"
-                                                class="created-clear text-sm px-3 py-1.5 rounded-md border">Clear</button>
-                                            <button type="button"
-                                                class="created-apply created-apply-days text-sm px-3 py-1.5 rounded-md bg-blue-600 text-white">Apply</button>
-                                        </div>
-                                    </div>
-
-                                    <button type="button"
-                                        class="created-open-custom w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-mode="date">
-                                        <span>Specific day…</span>
-                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                    <div class="created-custom created-custom-date hidden">
-                                        <input id="createdDate" type="date"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <div class="mt-2 flex justify-end gap-2">
-                                            <button type="button"
-                                                class="created-clear text-sm px-3 py-1.5 rounded-md border">Clear</button>
-                                            <button type="button"
-                                                class="created-apply created-apply-date text-sm px-3 py-1.5 rounded-md bg-blue-600 text-white">Apply</button>
-                                        </div>
-                                    </div>
-
-                                    <button type="button"
-                                        class="created-open-custom w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm hover:bg-gray-50 dark:hover:bg-gray-700"
-                                        data-mode="range">
-                                        <span>Date range…</span>
-                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </button>
-                                    <div class="created-custom created-custom-range hidden">
-                                        <div class="flex gap-2">
-                                            <input id="createdFrom" type="date"
-                                                class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                            <input id="createdTo" type="date"
-                                                class="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        </div>
-                                        <div class="mt-2 flex justify-end gap-2">
-                                            <button type="button"
-                                                class="created-clear text-sm px-3 py-1.5 rounded-md border">Clear</button>
-                                            <button type="button"
-                                                class="created-apply created-apply-range text-sm px-3 py-1.5 rounded-md bg-blue-600 text-white">Apply</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hidden params mirrored for backend (UI still just 1 field) -->
-                        <input type="hidden" name="today" id="createdToday"
-                            value="{{ request()->boolean('today') ? '1' : '' }}">
-                        <input type="hidden" name="days" id="createdDaysHidden" value="{{ request('days') }}">
-                        <input type="hidden" name="date" id="createdDateHidden" value="{{ request('date') }}">
-                        <input type="hidden" name="from" id="createdFromHidden" value="{{ request('from') }}">
-                        <input type="hidden" name="to" id="createdToHidden" value="{{ request('to') }}">
-                    </div>
-
-                    <div class="md:col-span-3 flex items-center justify-between pt-4">
-                        <div id="resultsMeta" class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                            Showing {{ $leads->firstItem() ?? 0 }}–{{ $leads->lastItem() ?? 0 }} of {{ $leads->total() }}
-                            results
-                            @if (request()->boolean('today'))
-                                <span
-                                    class="ml-2 inline-flex items-center rounded-md bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
-                                    Today
-                                </span>
-                            @endif
-                        </div>
-                        <div class="flex gap-2">
-                            <button type="submit"
-                                class="px-3 py-2 rounded-lg text-white font-medium bg-blue-600 hover:bg-blue-700 transition-colors text-sm">Apply
-                                Filters</button>
-                            <a id="clearFilters" href="{{ $isAdmin ? route('leads.index') : route('leads.mine') }}"
-                                class="px-3 py-2 rounded-lg font-medium bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm">Clear
-                                All</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Leads Table -->
-        <div class="{{ $cardClass }} overflow-hidden" id="leadsTableCard">
-            <div class="relative">
-                <div id="ajaxOverlay"
-                    class="hidden absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
-                    <div class="animate-spin h-6 w-6 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                        <a href="{{ route('leads.index') }}"
+                            class="block text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-indigo-400 transition-colors">
+                            Reset All Parameters
+                        </a>
+                    </form>
                 </div>
 
-                <div id="leadsTableContainer">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    @if ($isAdmin)
-                                        <th class="{{ $tableHeaderClass }} w-12">
-                                            <input id="selectAllLeads" type="checkbox"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                        </th>
-                                    @endif
-                                    <th class="{{ $tableHeaderClass }}">Lead Details</th>
-                                    <th class="{{ $tableHeaderClass }}">Contact Information</th>
-                                    @if ($isAdmin)
-                                        <th class="{{ $tableHeaderClass }}">Assigned To</th>
-                                    @endif
-                                    <th class="{{ $tableHeaderClass }}">Assigned Time</th>
-                                    <th class="{{ $tableHeaderClass }}">Status</th>
-                                    <th class="{{ $tableHeaderClass }}">Created Date</th>
-                                    <th class="{{ $tableHeaderClass }}">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                                @forelse($leads as $lead)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
-                                        @if ($isAdmin)
-                                            <td class="px-6 py-4">
-                                                @can('delete', $lead)
-                                                    <input type="checkbox"
-                                                        class="lead-select rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                        data-id="{{ $lead->id }}">
-                                                @else
-                                                    <input type="checkbox" class="rounded border-gray-300" disabled>
-                                                @endcan
-                                            </td>
-                                        @endif
-                                        <!-- Lead Details -->
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center">
-                                                <div
-                                                    class="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-                                                    <span
-                                                        class="text-sm font-bold text-white">{{ strtoupper(substr($lead->surname ?: $lead->first_name ?: 'L', 0, 1)) }}</span>
-                                                </div>
-                                                <div class="ml-3 min-w-0">
-                                                    <a href="{{ route('leads.show', $lead) }}"
-                                                        class="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate block">
-                                                        {{ trim($lead->first_name . ' ' . $lead->surname) ?: '—' }}
-                                                    </a>
-                                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                        {{ $lead->gen_code ?: '—' }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Contact -->
-                                        <td class="px-6 py-4">
-                                            @php
-                                                $nums = [];
-                                                if (is_array($lead->numbers)) {
-                                                    $nums = $lead->numbers;
-                                                } elseif (is_string($lead->numbers)) {
-                                                    $decoded = json_decode($lead->numbers, true);
-                                                    $nums = is_array($decoded) ? $decoded : [];
-                                                }
-                                            @endphp
-                                            @if (!empty($nums))
-                                                <div class="space-y-1">
-                                                    @foreach (array_slice($nums, 0, 2) as $n)
-                                                        <div class="text-sm text-gray-900 dark:text-white">
-                                                            {{ $n }}
-                                                        </div>
-                                                    @endforeach
-                                                    @if (count($nums) > 2)
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                                            +{{ count($nums) - 2 }} more numbers</div>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="text-sm text-gray-500 dark:text-gray-400">No contact
-                                                    numbers</span>
-                                            @endif
-                                        </td>
-
-                                        @if ($isAdmin)
-                                            <td class="px-6 py-4"><span
-                                                    class="text-sm text-gray-900 dark:text-white">{{ $lead->assignee->name ?? 'Unassigned' }}</span>
-                                            </td>
-                                        @endif
-
-
-                                        {{-- NEW: Assigned Time --}}
-                                        <td class="px-6 py-4">
-                                            <span class="text-sm text-gray-900 dark:text-white">
-                                                @if (!empty($lead->assigned_time))
-                                                    {{ \Illuminate\Support\Carbon::parse($lead->assigned_time)->timezone(config('app.timezone'))->format('M d, Y h:i A') }}
-                                                @else
-                                                    —
-                                                @endif
-                                            </span>
-                                        </td>
-
-                                        <!-- Status -->
-                                        <td class="px-6 py-4">
-                                            @php
-                                                $statusColors = [
-                                                    'deal' =>
-                                                        'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                                    'call back' =>
-                                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                                                    'super lead' =>
-                                                        'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-                                                    'new lead' =>
-                                                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-                                                    'submitted' =>
-                                                        'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
-                                                    'default' =>
-                                                        'bg-gray-100 text-gray-800 dark:bg-gray-700/60 dark:text-gray-300',
-                                                ];
-                                                $statusKey = strtolower(trim($lead->status ?? ''));
-                                                $statusClass = $statusColors[$statusKey] ?? $statusColors['default'];
-                                            @endphp
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">{{ ucfirst($lead->status) }}</span>
-                                        </td>
-
-                                        <!-- Created -->
-                                        <td class="px-6 py-4"><span
-                                                class="text-sm text-gray-900 dark:text-white">{{ $lead->created_at?->format('M d, Y') }}</span>
-                                        </td>
-
-                                        <!-- Actions -->
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center gap-1">
-                                                <a href="{{ route('leads.show', $lead) }}"
-                                                    class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                                    title="View Lead">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </a>
-                                                @if ($isAdmin)
-                                                    <a href="{{ route('leads.pdf', $lead) }}"
-                                                        class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                                        title="Download Lead">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
-                                                        </svg>
-                                                    </a>
-                                                @endif
-                                                <a href="{{ route('leads.edit', $lead) }}"
-                                                    class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                                                    title="Edit Lead">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </a>
-                                                @can('delete', $lead)
-                                                    <button type="button"
-                                                        class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                                        data-open-delete data-type="lead"
-                                                        data-url="{{ route('leads.destroy', $lead) }}" title="Delete Lead">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862A2 2 0 015.867 19L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-2h6l1 2" />
-                                                        </svg>
-                                                    </button>
-                                                @endcan
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ $isAdmin ? 6 : 5 }}" class="px-6 py-12 text-center">
-                                            <div
-                                                class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500">
-                                                <svg class="w-12 h-12 mb-3 opacity-50" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <p class="text-sm font-medium">No leads found</p>
-                                                <p class="text-xs mt-1">Try adjusting your search filters</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    @if ($leads->hasPages())
-                        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50"
-                            id="paginationWrap">
-                            {{ $leads->appends(request()->query())->links() }}
+                {{-- Quick Stats Island --}}
+                <div class="card-premium p-6">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Workspace Metrics</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                            <span class="text-xs font-bold text-slate-400">Filtered Depth</span>
+                            <span class="text-sm font-black text-white">{{ $leads->total() }}</span>
                         </div>
-                    @endif
+                        <div
+                            class="flex items-center justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                            <span class="text-xs font-bold text-emerald-400/80">Success Rate</span>
+                            <span class="text-sm font-black text-emerald-400">14.2%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Main Intelligence Stream --}}
+            <div class="xl:col-span-3 card-premium overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Workspace Stream</h3>
+                    <div class="flex gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500">Synced</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto flex-1">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-black/20 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                <th class="px-8 py-5">Core Target</th>
+                                <th class="px-8 py-5">Intel Status</th>
+                                <th class="px-8 py-5">Agent Control</th>
+                                <th class="px-8 py-5">Injection Date</th>
+                                <th class="px-8 py-5 text-right">Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($leads as $lead)
+                                            <tr class="hover:bg-white/[0.03] transition-all group">
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center gap-4">
+                                                        <div
+                                                            class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center font-black text-indigo-400 border border-indigo-500/20 shadow-lg">
+                                                            {{ strtoupper(substr($lead->first_name, 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <p
+                                                                class="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">
+                                                                {{ $lead->first_name }} {{ $lead->surname }}
+                                                            </p>
+                                                            <div class="flex items-center gap-2 mt-1">
+                                                                <span class="text-[10px] font-bold text-slate-500">#{{ $lead->id }}</span>
+                                                                <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                                                                <span
+                                                                    class="text-[10px] font-bold text-slate-500 uppercase">{{ $lead->city }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    @php
+                                                        $state = strtolower($lead->status);
+                                                        $colorClass = match (true) {
+                                                            str_contains($state, 'success') => 'emerald',
+                                                            str_contains($state, 'call') => 'amber',
+                                                            str_contains($state, 'dead') => 'rose',
+                                                            str_contains($state, 'max') => 'orange',
+                                                            default => 'indigo'
+                                                        };
+                                                    @endphp
+                                <div
+                                                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-{{ $colorClass }}-500/10 text-{{ $colorClass }}-400 border border-{{ $colorClass }}-500/20">
+                                                        <div class="w-1.5 h-1.5 rounded-full bg-{{ $colorClass }}-500"></div>
+                                                        <span
+                                                            class="text-[10px] font-black uppercase tracking-wider">{{ $lead->status }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center gap-3">
+                                                        <div
+                                                            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                                                            <i class="fas fa-user-shield"></i>
+                                                        </div>
+                                                        <span
+                                                            class="text-xs font-bold text-slate-300">{{ $lead->assignee?->name ?? 'None' }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    <p class="text-[11px] font-black text-slate-400">
+                                                        {{ $lead->created_at->format('d M Y') }}</p>
+                                                    <p class="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">
+                                                        {{ $lead->created_at->diffForHumans() }}</p>
+                                                </td>
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center justify-end gap-2">
+                                                        <a href="{{ route('leads.edit', $lead) }}"
+                                                            class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-indigo-600 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5 hover:border-indigo-500 shadow-lg">
+                                                            <i class="fas fa-fingerprint"></i>
+                                                        </a>
+                                                        @if($isAdmin)
+                                                            <form action="{{ route('leads.destroy', $lead) }}" method="POST"
+                                                                onsubmit="return confirm('Purge this intelligence entry?')" class="inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-rose-600 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5 hover:border-rose-500 shadow-lg">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-8 py-32 text-center">
+                                        <div
+                                            class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6">
+                                            <i class="fas fa-database text-slate-700 text-3xl"></i>
+                                        </div>
+                                        <p class="text-slate-500 font-black uppercase tracking-[0.3em] text-xs">No Signal
+                                            Detected in Scopes</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Pagination Island --}}
+                <div class="p-8 border-t border-white/5 bg-black/10">
+                    {{ $leads->links() }}
                 </div>
             </div>
         </div>
     </div>
+
 
     @if ($isAdmin)
         <!-- Import Modal -->
         <div id="importModal" class="fixed inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
             <div class="relative z-50 mx-auto w-full max-w-md p-8 mt-24">
-                <div
-                    class="rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div class="rounded-xl bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
                     <div class="text-center">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Leads</h2>
-                        <form id="importForm" action="{{ route('leads.import') }}" method="POST"
-                            enctype="multipart/form-data" class="space-y-4">
+                        <form id="importForm" action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data"
+                            class="space-y-4">
                             @csrf
                             <div>
                                 <label for="leads_file"
@@ -1100,19 +804,19 @@
             const html = rows.map(r => {
                 const name = r.querySelector('label').textContent.trim();
                 return `
-              <div class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
-                <span class="truncate">${name}</span>
-                <span class="font-medium">${perUser}</span>
-              </div>`;
+                      <div class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
+                        <span class="truncate">${name}</span>
+                        <span class="font-medium">${perUser}</span>
+                      </div>`;
             }).join('');
 
             preview.innerHTML = `
-            <div class="flex items-center justify-between mb-2">
-                <div class="font-medium">Preview</div>
-                <div class="text-gray-500">Each user will get ${perUser} lead(s)</div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${html}</div>
-        `;
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-medium">Preview</div>
+                        <div class="text-gray-500">Each user will get ${perUser} lead(s)</div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${html}</div>
+                `;
             preview.classList.remove('hidden');
         }
 
@@ -1145,10 +849,10 @@
             }
 
             // ✅ Expose globally so other code can call it and we can re-apply selection state after each load
-            window.ajaxLoad = function(url) {
+            window.ajaxLoad = function (url) {
                 showOverlay();
                 $.get(url)
-                    .done(function(html) {
+                    .done(function (html) {
                         const $html = $(html);
                         $container.html($html.find('#leadsTableContainer').html());
                         $resultsMeta.html($html.find('#resultsMeta').html());
@@ -1159,36 +863,36 @@
                         updateHeaderSelectAllState();
                         reflectSelectionUI();
                     })
-                    .fail(function() {
+                    .fail(function () {
                         window.location.href = url;
                     })
                     .always(hideOverlay);
             };
 
-            $form.on('submit', function(e) {
+            $form.on('submit', function (e) {
                 e.preventDefault();
                 const s = serializeFormToQuery($form);
                 window.ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
             });
 
-            $('#clearFilters').on('click', function(e) {
+            $('#clearFilters').on('click', function (e) {
                 e.preventDefault();
                 window.ajaxLoad($(this).attr('href'));
             });
 
-            $('.js-refresh').on('click', function(e) {
+            $('.js-refresh').on('click', function (e) {
                 e.preventDefault();
                 window.ajaxLoad($(this).attr('href'));
             });
 
-            $q.on('keyup', debounce(function() {
+            $q.on('keyup', debounce(function () {
                 const s = serializeFormToQuery($form, {
                     q: $q.val()
                 });
                 window.ajaxLoad($form.attr('action') + (s ? '?' + s : ''));
             }, 400));
 
-            $status.on('change', function() {
+            $status.on('change', function () {
                 const s = serializeFormToQuery($form, {
                     status: $status.val(),
                     page: 1
@@ -1197,7 +901,7 @@
             });
 
             if ($category.length) {
-                $category.on('change', function() {
+                $category.on('change', function () {
                     const s = serializeFormToQuery($form, {
                         category: $category.val(),
                         page: 1
@@ -1207,7 +911,7 @@
             }
 
             // Optional legacy "today" toggle
-            $today.on?.('change', function() {
+            $today.on?.('change', function () {
                 const s = serializeFormToQuery($form, {
                     today: $today.is(':checked') ? '1' : '',
                     page: 1
@@ -1216,12 +920,12 @@
             });
 
             // Delegated pagination (survives DOM replace)
-            $('#leadsTableCard').on('click', '#paginationWrap a', function(e) {
+            $('#leadsTableCard').on('click', '#paginationWrap a', function (e) {
                 e.preventDefault();
                 window.ajaxLoad($(this).attr('href'));
             });
 
-            window.addEventListener('popstate', function() {
+            window.addEventListener('popstate', function () {
                 window.ajaxLoad(location.href);
             });
         }
@@ -1240,7 +944,7 @@
 
         // ✅ Apply Set -> DOM after any content refresh
         function applySelectionStateToDOM() {
-            $('#leadsTableContainer .lead-select').each(function() {
+            $('#leadsTableContainer .lead-select').each(function () {
                 const id = parseInt(this.dataset.id, 10);
                 this.checked = window.selectedLeadIds.has(id) && !this.disabled;
             });
@@ -1252,7 +956,7 @@
             window._leadSelectionHandlersBound = true;
 
             // Row checkbox change (delegated)
-            $('#leadsTableContainer').on('change', '.lead-select', function() {
+            $('#leadsTableContainer').on('change', '.lead-select', function () {
                 const id = parseInt(this.dataset.id, 10);
                 if (this.checked) window.selectedLeadIds.add(id);
                 else window.selectedLeadIds.delete(id);
@@ -1261,8 +965,8 @@
             });
 
             // Header select-all (delegated)
-            $('#leadsTableCard').on('change', '#selectAllLeads', function() {
-                const visible = $('#leadsTableContainer .lead-select').filter(function() {
+            $('#leadsTableCard').on('change', '#selectAllLeads', function () {
+                const visible = $('#leadsTableContainer .lead-select').filter(function () {
                     const row = this.closest('tr');
                     return row && $(row).is(':visible') && !this.disabled;
                 });
@@ -1281,7 +985,7 @@
         }
 
         function updateHeaderSelectAllState() {
-            const checks = $('#leadsTableContainer .lead-select').filter(function() {
+            const checks = $('#leadsTableContainer .lead-select').filter(function () {
                 const row = this.closest('tr');
                 return row && $(row).is(':visible') && !this.disabled;
             });
@@ -1328,7 +1032,7 @@
         }
 
         /* ---------- Online users refresher (unchanged) ---------- */
-        (function() {
+        (function () {
             const ONLINE_URL = "{{ route('users.online', ['minutes' => 3, 'tz' => 'Asia/Karachi']) }}";
             const ASSIGNED_COUNTS = @json($assignedCounts ?? []);
             const ONLINE_WRAP_SEL = '#usersOnlineWrap';
@@ -1370,9 +1074,9 @@
 
                 if (!users.length) {
                     wrap.innerHTML = `
-        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-300">
-          No team members are currently online.
-        </div>`;
+                <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-300">
+                  No team members are currently online.
+                </div>`;
                     return;
                 }
 
@@ -1386,25 +1090,25 @@
                     const load = parseInt(ASSIGNED_COUNTS[id] ?? 0, 10) || 0;
 
                     return `
-      <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border ${eligible
-          ? 'border-emerald-200 dark:border-emerald-900/40 bg-white dark:bg-gray-800'
-          : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40'}"
-           data-name="${name.toLowerCase()}"
-           data-email=""
-           data-load="${load}"
-           data-eligible="${eligible ? '1' : '0'}">
-        <div class="flex items-center gap-3 min-w-0">
-          <input type="checkbox" name="assignee_ids[]" value="${id}"
-            class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            ${eligible ? '' : 'disabled'}>
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <div class="min-w-0">
-            <label class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate cursor-pointer">${name}</label>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">—</p>
-          </div>
-        </div>
-        <span class="shrink-0 text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">${load} assigned</span>
-      </div>`;
+              <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border ${eligible
+                            ? 'border-emerald-200 dark:border-emerald-900/40 bg-white dark:bg-gray-800'
+                            : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40'}"
+                   data-name="${name.toLowerCase()}"
+                   data-email=""
+                   data-load="${load}"
+                   data-eligible="${eligible ? '1' : '0'}">
+                <div class="flex items-center gap-3 min-w-0">
+                  <input type="checkbox" name="assignee_ids[]" value="${id}"
+                    class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    ${eligible ? '' : 'disabled'}>
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <div class="min-w-0">
+                    <label class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate cursor-pointer">${name}</label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">—</p>
+                  </div>
+                </div>
+                <span class="shrink-0 text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">${load} assigned</span>
+              </div>`;
                 }).join('');
 
                 wrap.innerHTML = rowsHtml;
@@ -1413,14 +1117,14 @@
             const _openBulkAssignModal = window.openBulkAssignModal;
             const _closeBulkAssignModal = window.closeBulkAssignModal;
 
-            window.openBulkAssignModal = function() {
+            window.openBulkAssignModal = function () {
                 if (typeof _openBulkAssignModal === 'function') _openBulkAssignModal();
                 loadOnlineUsers();
                 clearInterval(onlineRefreshTimer);
                 onlineRefreshTimer = setInterval(loadOnlineUsers, 60_000);
             };
 
-            window.closeBulkAssignModal = function() {
+            window.closeBulkAssignModal = function () {
                 if (typeof _closeBulkAssignModal === 'function') _closeBulkAssignModal();
                 clearInterval(onlineRefreshTimer);
             };
@@ -1485,14 +1189,14 @@
                 else window.location.href = url;
             }
 
-            $btn.on('click', function() {
+            $btn.on('click', function () {
                 $menu.hasClass('hidden') ? openMenu() : closeMenu();
             });
             document.addEventListener('click', (e) => {
                 if (!document.getElementById('createdFilter').contains(e.target)) closeMenu();
             });
 
-            $('.created-option').on('click', function() {
+            $('.created-option').on('click', function () {
                 const kind = this.dataset.kind;
                 clearAllHidden();
 
@@ -1525,13 +1229,13 @@
                 }
             });
 
-            $('.created-open-custom').on('click', function() {
+            $('.created-open-custom').on('click', function () {
                 const mode = this.dataset.mode;
                 $('.created-custom').addClass('hidden');
                 $(`.created-custom-${mode}`).removeClass('hidden');
             });
 
-            $('.created-apply-days').on('click', function() {
+            $('.created-apply-days').on('click', function () {
                 const d = Math.max(1, Math.min(parseInt($daysInput.val() || '0', 10), 365));
                 if (!d) return;
                 clearAllHidden();
@@ -1547,7 +1251,7 @@
                 });
             });
 
-            $('.created-apply-date').on('click', function() {
+            $('.created-apply-date').on('click', function () {
                 const v = $dateInput.val();
                 if (!v) return;
                 clearAllHidden();
@@ -1563,7 +1267,7 @@
                 });
             });
 
-            $('.created-apply-range').on('click', function() {
+            $('.created-apply-range').on('click', function () {
                 const f = $fromInput.val();
                 const t = $toInput.val();
                 if (!f && !t) return;
@@ -1581,7 +1285,7 @@
                 });
             });
 
-            $('.created-clear').on('click', function() {
+            $('.created-clear').on('click', function () {
                 $daysInput.val('');
                 $dateInput.val('');
                 $fromInput.val('');
@@ -1640,7 +1344,7 @@
             // Bulk delete modal open/close
             $('#openBulkDelete').on('click', openBulkDeleteModal);
             $('#cancelBulkDelete').on('click', closeBulkDeleteModal);
-            $('#bulkDeleteModal').on('click', function(e) {
+            $('#bulkDeleteModal').on('click', function (e) {
                 if (e.target === this) closeBulkDeleteModal();
             });
 
@@ -1665,28 +1369,28 @@
             $('#sortUsers').on('change', applySearchAndSort);
 
             // Select all (filtered) for current tab
-            $('#selectAllUsers').on('change', function() {
+            $('#selectAllUsers').on('change', function () {
                 toggleSelectAll(this.checked);
             });
 
             // Keep header state when individual boxes change
-            $('#usersScrollArea').on('change', '.user-checkbox', function() {
+            $('#usersScrollArea').on('change', '.user-checkbox', function () {
                 updateSelectAllState();
                 recalcState();
             });
 
             // React to status / per-user count changes
-            $('#assign_status').on('change', function() {
+            $('#assign_status').on('change', function () {
                 updateAvailableCount();
                 recalcState();
             });
-            $('#leads_count').on('input', function() {
+            $('#leads_count').on('input', function () {
                 recalcState();
             });
         });
 
         // Prevent bulk-assign submit if inline errors
-        document.getElementById('bulkAssignForm')?.addEventListener('submit', function(e) {
+        document.getElementById('bulkAssignForm')?.addEventListener('submit', function (e) {
             if (!qs('#inlineErrors').classList.contains('hidden')) {
                 e.preventDefault();
                 qs('#inlineErrors').scrollIntoView({

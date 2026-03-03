@@ -46,33 +46,33 @@
 
 @section('content')
     <div class="space-y-8 animate-on-load" x-data="{
-        isSubmitting: false,
-        handleSubmit(event) {
-            if (this.isSubmitting) {
-                event.preventDefault();
-                return false;
+            isSubmitting: false,
+            handleSubmit(event) {
+                if (this.isSubmitting) {
+                    event.preventDefault();
+                    return false;
+                }
+                this.isSubmitting = true;
+
+                // Add reload after 2 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+
+                return true;
             }
-            this.isSubmitting = true;
-    
-            // Add reload after 2 seconds
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-    
-            return true;
-        }
-    }">
+        }">
         <!-- Header -->
-        <div
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
+        <div class="card-premium rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Create a New Lead</h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400">Enter the client's details as accurately as possible.
+                    <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Create New Lead
+                    </h2>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-400">Add a new entry to your leads ecosystem.
                     </p>
                 </div>
                 <a href="{{ route('leads.index') }}"
-                    class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                    class="inline-flex items-center px-6 py-3 border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl font-bold rounded-xl hover:shadow-lg transition-all duration-300">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -83,8 +83,7 @@
         </div>
 
         <!-- Form Card -->
-        <div
-            class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+        <div class="card-premium rounded-2xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
 
             <!-- Card Header -->
             <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
@@ -375,8 +374,7 @@
 
                         {{-- Balance --}}
                         <div>
-                            <label
-                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Balance</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Balance</label>
                             <input name="balance" value="{{ old('balance') }}" type="number" step="0.01"
                                 class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             @error('balance')
@@ -388,8 +386,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {{-- Credits --}}
                         <div>
-                            <label
-                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Credits</label>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Credits</label>
                             <input name="credits" value="{{ old('credits') }}" type="number" step="0.01"
                                 class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             @error('credits')
@@ -454,7 +451,7 @@
                                         'Paid Off',
                                         'Not Qualified (NQ)',
                                         'Submitted',
-                                        'That Submitted'
+                                        'Death Submitted'
                                     ];
                                 @endphp
                                 @foreach ($statuses as $s)
@@ -476,8 +473,7 @@
                                     class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     <option value="">Select TO</option>
                                     @foreach ($tos ?? [] as $to)
-                                        <option value="{{ $to->id }}"
-                                            {{ old('assigned_to') == $to->id ? 'selected' : '' }}>
+                                        <option value="{{ $to->id }}" {{ old('assigned_to') == $to->id ? 'selected' : '' }}>
                                             {{ $to->name }}
                                         </option>
                                     @endforeach
@@ -494,8 +490,7 @@
                                     class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     <option value="">Select Super Agent</option>
                                     @foreach ($superAgents ?? [] as $agent)
-                                        <option value="{{ $agent->id }}"
-                                            {{ old('super_agent_id') == $agent->id ? 'selected' : '' }}>
+                                        <option value="{{ $agent->id }}" {{ old('super_agent_id') == $agent->id ? 'selected' : '' }}>
                                             {{ $agent->name }}
                                         </option>
                                     @endforeach
@@ -512,8 +507,7 @@
                                     class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     <option value="">Select Closer</option>
                                     @foreach ($closers ?? [] as $closer)
-                                        <option value="{{ $closer->id }}"
-                                            {{ old('closer_id') == $closer->id ? 'selected' : '' }}>
+                                        <option value="{{ $closer->id }}" {{ old('closer_id') == $closer->id ? 'selected' : '' }}>
                                             {{ $closer->name }}
                                         </option>
                                     @endforeach
@@ -532,17 +526,14 @@
                 <div
                     class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200/50 dark:border-gray-700/50">
                     <a href="{{ route('leads.index') }}"
-                        class="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                        class="inline-flex items-center px-6 py-3 border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl font-bold rounded-xl transition-all duration-300">
                         Cancel
                     </a>
                     <button type="submit"
-                        class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="inline-flex items-center px-8 py-3 bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold rounded-xl shadow-lg hover:shadow-primary-500/25 transform hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="isSubmitting" :class="{ 'btn-loading': isSubmitting }">
-                        <span class="btn-text flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
+                        <span class="btn-text flex items-center gap-2">
+                            <i class="fas fa-plus"></i>
                             Create Lead
                         </span>
                     </button>
@@ -561,13 +552,13 @@
                 const row = document.createElement('div');
                 row.className = 'flex gap-2';
                 row.innerHTML = `
-                    <input name="numbers[]" value=""
-                        class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="(###) ###-####">
-                    <button type="button"
-                        class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onclick="removeNumberRow(this)" title="Remove">&times;</button>
-                `;
+                            <input name="numbers[]" value=""
+                                class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                placeholder="(###) ###-####">
+                            <button type="button"
+                                class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onclick="removeNumberRow(this)" title="Remove">&times;</button>
+                        `;
                 numbersRepeater.appendChild(row);
             });
 
@@ -588,13 +579,13 @@
                 const row = document.createElement('div');
                 row.className = 'flex gap-2';
                 row.innerHTML = `
-                    <input name="cards_json[]" value=""
-                        class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="e.g., Visa / Amex / Mastercard">
-                    <button type="button"
-                        class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        onclick="removeCardRow(this)" title="Remove">&times;</button>
-                `;
+                            <input name="cards_json[]" value=""
+                                class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                placeholder="e.g., Visa / Amex / Mastercard">
+                            <button type="button"
+                                class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onclick="removeCardRow(this)" title="Remove">&times;</button>
+                        `;
                 cardsRepeater.appendChild(row);
             });
 

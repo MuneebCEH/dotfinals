@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'That Submitted Leads')
-@section('page-title', 'That Submitted Leads')
+@section('title', 'Death Submitted Leads')
+@section('page-title', 'Death Submitted Leads')
 
 @section('description')
-    A focused workspace for your That Submitted pipeline.
+    A focused workspace for your Death Submitted pipeline.
 @endsection
 
 @php
@@ -26,11 +26,11 @@
         'to' => request('to'),
     ];
 
-    $leadQuery = Lead::query()->where('status', 'That Submitted');
+    $leadQuery = Lead::query()->where('status', 'Death Submitted');
     $convertedLeadQuery = Lead::query()
-        ->where('status', '!=', 'That Submitted')
+        ->where('status', '!=', 'Death Submitted')
         ->whereHas('statusTransitions', function ($query) {
-            $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+            $query->where('from_status', 'Death Submitted')->where('to_status', '!=', 'Death Submitted');
         });
 
     if ($filters['q'] !== '') {
@@ -58,13 +58,13 @@
         ->with(['assignee', 'lastMaxOutExit.changer'])
         ->withMax(
             [
-                'statusTransitions as last_that_submitted_exit_at' => function ($query) {
-                    $query->where('from_status', 'That Submitted')->where('to_status', '!=', 'That Submitted');
+                'statusTransitions as last_death_submitted_exit_at' => function ($query) {
+                    $query->where('from_status', 'Death Submitted')->where('to_status', '!=', 'Death Submitted');
                 },
             ],
             'created_at',
         )
-        ->orderByDesc('last_that_submitted_exit_at')
+        ->orderByDesc('last_death_submitted_exit_at')
         ->paginate(25, ['*'], 'converted_page')
         ->withQueryString();
 
@@ -118,7 +118,7 @@
         'super lead' => 'bg-purple-400/10 text-purple-200 border border-purple-400/30',
         'new lead' => 'bg-blue-500/10 text-blue-200 border border-blue-500/30',
         'submitted' => 'bg-indigo-400/10 text-indigo-200 border border-indigo-400/30',
-        'that submitted' => 'bg-green-500/10 text-green-200 border border-green-500/30',
+        'Death Submitted' => 'bg-green-500/10 text-green-200 border border-green-500/30',
         'max out' => 'bg-sky-500/10 text-sky-200 border border-sky-500/30',
         'paid off' => 'bg-lime-400/10 text-lime-200 border border-lime-400/30',
         'not qualified (nq)' => 'bg-rose-400/10 text-rose-200 border border-rose-400/30',
@@ -130,15 +130,15 @@
     <div class="space-y-8 text-slate-100">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h1 class="text-2xl font-semibold text-white">That Submitted Leads</h1>
+                <h1 class="text-2xl font-semibold text-white">Death Submitted Leads</h1>
                 <p class="mt-1 text-sm text-slate-400">
-                    Review and manage leads marked as "That Submitted" with focused tracking and management tools.
+                    Review and manage leads marked as "Death Submitted" with focused tracking and management tools.
                 </p>
             </div>
             <div class="text-sm text-slate-400 sm:text-right">
-                <div>Active That Submitted: {{ number_format($activeCount) }}
+                <div>Active Death Submitted: {{ number_format($activeCount) }}
                     lead{{ $activeCount === 1 ? '' : 's' }}</div>
-                <div>Converted After That Submitted: {{ number_format($convertedCount) }}
+                <div>Converted After Death Submitted: {{ number_format($convertedCount) }}
                     lead{{ $convertedCount === 1 ? '' : 's' }}</div>
             </div>
         </div>
@@ -185,8 +185,8 @@
 
         @php
             $tabDefinitions = [
-                'active' => ['label' => 'Active That Submitted', 'count' => $activeCount],
-                'converted' => ['label' => 'Converted After That Submitted', 'count' => $convertedCount],
+                'active' => ['label' => 'Active Death Submitted', 'count' => $activeCount],
+                'converted' => ['label' => 'Converted After Death Submitted', 'count' => $convertedCount],
             ];
         @endphp
         <div class="rounded-2xl border border-slate-700 bg-slate-900/40 shadow-lg shadow-slate-900/30 backdrop-blur">
@@ -217,7 +217,7 @@
                 class="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/50 p-6 shadow-xl shadow-slate-900/30">
                 <header class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-white">Active That Submitted Leads</h2>
+                        <h2 class="text-lg font-semibold text-white">Active Death Submitted Leads</h2>
                         <p class="text-sm text-slate-400">
                             Leads are sorted by latest activity so the most relevant leads stay on top.
                         </p>
@@ -232,9 +232,9 @@
 
                 @if ($leads->isEmpty())
                     <div class="rounded-2xl border border-slate-700 bg-slate-900/50 p-10 text-center">
-                        <h3 class="text-lg font-semibold text-white">No That Submitted leads match your filters</h3>
+                        <h3 class="text-lg font-semibold text-white">No Death Submitted leads match your filters</h3>
                         <p class="mt-2 text-sm text-slate-400">
-                            Adjust your search criteria or reset filters to see all That Submitted leads.
+                            Adjust your search criteria or reset filters to see all Death Submitted leads.
                         </p>
                     </div>
                 @else
@@ -352,9 +352,9 @@
                 class="space-y-6 rounded-3xl border border-slate-800 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
                 <header class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 class="text-lg font-semibold text-white">Converted After That Submitted</h2>
+                        <h2 class="text-lg font-semibold text-white">Converted After Death Submitted</h2>
                         <p class="text-sm text-slate-400">
-                            Leads that have progressed after being That Submitted. Track outcomes and recent conversions.
+                            Leads that have progressed after being Death Submitted. Track outcomes and recent conversions.
                         </p>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-slate-400">
@@ -369,7 +369,7 @@
                     <div class="rounded-2xl border border-slate-700 bg-slate-900/50 p-10 text-center">
                         <h3 class="text-lg font-semibold text-white">No converted leads right now</h3>
                         <p class="mt-2 text-sm text-slate-400">
-                            As soon as a That Submitted lead is moved to another status, it will appear in this tracker.
+                            As soon as a Death Submitted lead is moved to another status, it will appear in this tracker.
                         </p>
                     </div>
                 @else
@@ -419,9 +419,9 @@
                                             $statusColors[$convertedBadgeKey] ?? $statusColors['default'];
                                         $statusKey = strtolower(trim($lead->status ?? ''));
                                         $statusClass = $statusColors[$statusKey] ?? $statusColors['default'];
-                                        $convertedAt = $lead->last_that_submitted_exit_at
+                                        $convertedAt = $lead->last_death_submitted_exit_at
                                             ? \Illuminate\Support\Carbon::parse(
-                                                $lead->last_that_submitted_exit_at,
+                                                $lead->last_death_submitted_exit_at,
                                             )->timezone($appTimezone)
                                             : optional(optional($lead->lastMaxOutExit)->created_at)->timezone(
                                                 $appTimezone,

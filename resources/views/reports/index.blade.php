@@ -1,342 +1,268 @@
+{{-- resources/views/reports/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Reports')
-@section('page-title', 'Reports')
-
-@extends('layouts.app')
-
-@section('title', 'Reports')
-@section('page-title', 'Reports')
+@section('title', 'Intelligence Reports')
+@section('page-title', 'Intelligence Reports')
 
 @section('content')
-    <div class="space-y-8">
-        <!-- Header -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Analytics & Reports</h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400">Track performance and generate insights.</p>
-                </div>
-                <div class="mt-6 sm:mt-0 flex space-x-4">
-                    <button id="exportReport"
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-success-500 to-success-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                        Export Report
-                    </button>
-                </div>
+    <div class="space-y-6 animate-on-load">
+        {{-- Reports Header --}}
+        <div
+            class="card-premium p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden relative">
+            <div class="relative z-10">
+                <h1 class="text-4xl font-black tracking-tight text-white mb-2">Data <span
+                        class="gradient-text">Intelligence</span></h1>
+                <p class="text-slate-400 font-medium">Extracting actionable insights from the lead ecosystem.</p>
             </div>
+
+            <div class="flex items-center gap-3 relative z-10">
+                <button id="exportReport"
+                    class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3 group">
+                    <i class="fas fa-file-export group-hover:translate-y-[-2px] transition-transform"></i>
+                    <span>Export Protocol</span>
+                </button>
+            </div>
+
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full"></div>
         </div>
 
-        <!-- Key Metrics -->
+        {{-- Core Metrics Terminal --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="stat-card dark:stat-card-dark rounded-2xl p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Total Leads</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $totalLeads }}</p>
+            <div class="card-premium p-6 relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-users text-xl"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center">
-                    <span class="text-sm {{ $leadGrowth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }} font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="{{ $leadGrowth >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' }}">
-                            </path>
-                        </svg>
-                        {{ $leadGrowth >= 0 ? '+' : '' }}{{ $leadGrowth }}% from last month
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest {{ $leadGrowth >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                        {{ $leadGrowth >= 0 ? '+' : '' }}{{ $leadGrowth }}%
                     </span>
+                </div>
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Total Population</h3>
+                <p class="text-3xl font-black text-white mb-2">{{ number_format($totalLeads) }}</p>
+                <div class="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                    <div class="bg-indigo-500 h-full rounded-full" style="width: 70%"></div>
                 </div>
             </div>
 
-            <div class="stat-card dark:stat-card-dark rounded-2xl p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Conversion Rate</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $conversionRate }}%</p>
+            <div class="card-premium p-6 relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-bullseye text-xl"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-success-500 to-success-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                            </path>
-                        </svg>
-                    </div>
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest {{ $conversionRateGrowth >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                        {{ $conversionRateGrowth >= 0 ? '+' : '' }}{{ $conversionRateGrowth }}%
+                    </span>
                 </div>
-                <div class="mt-4">
-                    <div class="flex space-x-4">
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Active</p>
-                            <p class="text-sm font-semibold">{{ $activeLeads }}</p>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Converted</p>
-                            <p class="text-sm font-semibold">{{ $convertedLeads }}</p>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Pending</p>
-                            <p class="text-sm font-semibold">{{ $pendingLeads }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <span class="text-sm {{ $conversionRateGrowth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }} font-medium flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="{{ $conversionRateGrowth >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' }}">
-                                </path>
-                            </svg>
-                            {{ $conversionRateGrowth >= 0 ? '+' : '' }}{{ $conversionRateGrowth }}% from last month
-                        </span>
-                    </div>
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Conversion Ratio</h3>
+                <p class="text-3xl font-black text-white mb-2">{{ $conversionRate }}%</p>
+                <div class="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                    <div class="bg-emerald-500 h-full rounded-full" style="width: {{ $conversionRate }}%"></div>
                 </div>
             </div>
 
-            <div class="stat-card dark:stat-card-dark rounded-2xl p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Categories</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $topCategories->count() }}</p>
+            <div class="card-premium p-6 relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-tags text-xl"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-warning-500 to-warning-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
-                            </path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex items-center">
-                    <span class="text-sm {{ $categoryGrowth >= 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }} font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="{{ $categoryGrowth >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' }}">
-                            </path>
-                        </svg>
-                        {{ $categoryGrowth >= 0 ? '+' : '' }}{{ $categoryGrowth }}% from last month
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest {{ $categoryGrowth >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+                        {{ $categoryGrowth >= 0 ? '+' : '' }}{{ $categoryGrowth }}%
                     </span>
+                </div>
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Sectors Tracked</h3>
+                <p class="text-3xl font-black text-white mb-2">{{ $topCategories->count() }}</p>
+                <div class="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                    <div class="bg-amber-500 h-full rounded-full" style="width: 45%"></div>
                 </div>
             </div>
 
-            <div class="stat-card dark:stat-card-dark rounded-2xl p-6 shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Avg Response Time</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white">0h</p>
+            <div class="card-premium p-6 relative overflow-hidden group">
+                <div class="flex items-center justify-between mb-4">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-rose-500/20 flex items-center justify-center text-rose-400 border border-rose-500/30 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-bolt text-xl"></i>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-danger-500 to-danger-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-rose-500">Warning</span>
                 </div>
-                <div class="mt-4 flex items-center">
-                    <span class="text-sm text-danger-600 dark:text-danger-400 font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-                        </svg>
-                        +2h from last month
-                    </span>
+                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Response Latency</h3>
+                <p class="text-3xl font-black text-white mb-2">0h</p>
+                <div class="w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                    <div class="bg-rose-500 h-full rounded-full" style="width: 15%"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts and Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Lead Performance Chart -->
-            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Lead Performance</h3>
+        {{-- Visual Analytics Grid --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {{-- Performance Matrix --}}
+            <div class="card-premium flex flex-col min-h-[400px]">
+                <div class="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Agent Performance Matrix
+                    </h3>
+                    <div class="flex gap-2">
+                        <div class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Live Stream</span>
+                    </div>
                 </div>
-                <div class="p-8">
-                    <div class="h-64"></div>
+                <div class="p-8 flex-1 flex items-center justify-center relative">
+                    <div class="w-full h-72" id="performanceChartTerminal"></div>
                 </div>
             </div>
 
-            <!-- Conversion Funnel -->
-            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
-                <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Conversion Funnel</h3>
+            {{-- Conversion Funnel --}}
+            <div class="card-premium flex flex-col min-h-[400px]">
+                <div class="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Conversion Funnel Analytics
+                    </h3>
+                    <i class="fas fa-filter text-slate-600 text-[10px]"></i>
                 </div>
-                <div class="p-8 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Leads</span>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $totalLeads }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-primary-600 h-2 rounded-full" style="width: 100%"></div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Leads</span>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $activeLeads }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-success-600 h-2 rounded-full" style="width: {{ $totalLeads > 0 ? ($activeLeads / $totalLeads) * 100 : 0 }}%"></div>
+                <div class="p-10 space-y-10 flex-1 flex flex-col justify-center">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Awareness
+                                (Total)</span>
+                            <span class="text-sm font-black text-white">{{ $totalLeads }}</span>
+                        </div>
+                        <div class="h-6 bg-white/5 rounded-2xl overflow-hidden relative border border-white/5 p-1">
+                            <div class="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-xl"
+                                style="width: 100%"></div>
+                        </div>
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Converted</span>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $convertedLeads }}</span>
+                    <div class="space-y-3 pl-8">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Consideration
+                                (Active)</span>
+                            <span class="text-sm font-black text-white">{{ $activeLeads }}</span>
+                        </div>
+                        <div class="h-6 bg-white/5 rounded-2xl overflow-hidden relative border border-white/5 p-1">
+                            <div class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-xl"
+                                style="width: {{ $totalLeads > 0 ? ($activeLeads / $totalLeads) * 100 : 0 }}%"></div>
+                        </div>
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-warning-600 h-2 rounded-full" style="width: {{ $totalLeads > 0 ? ($convertedLeads / $totalLeads) * 100 : 0 }}%"></div>
+
+                    <div class="space-y-3 pl-16">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Conversion
+                                (Closed)</span>
+                            <span class="text-sm font-black text-white">{{ $convertedLeads }}</span>
+                        </div>
+                        <div class="h-6 bg-white/5 rounded-2xl overflow-hidden relative border border-white/5 p-1">
+                            <div class="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-xl"
+                                style="width: {{ $totalLeads > 0 ? ($convertedLeads / $totalLeads) * 100 : 0 }}%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Detailed Reports -->
-        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50">
-            <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Detailed Reports</h3>
+        {{-- Deep Intelligence Grid --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="card-premium p-6">
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Sector Dominance</h4>
+                <div class="space-y-4">
+                    @forelse($topCategories as $cat)
+                        <div
+                            class="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group hover:bg-white/10 transition-all cursor-default">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                <span class="text-xs font-bold text-slate-300">{{ $cat->name }}</span>
+                            </div>
+                            <span
+                                class="text-[10px] font-black text-white bg-indigo-500/20 px-2 py-1 rounded-lg border border-indigo-500/20">{{ $cat->leads_count }}</span>
+                        </div>
+                    @empty
+                        <p class="text-[10px] font-black text-slate-600 text-center py-8 uppercase tracking-widest">No sector
+                            data</p>
+                    @endforelse
+                </div>
             </div>
-            <div class="p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Top Performing Categories -->
-                    <div class="bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-xl rounded-xl p-6">
-                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Categories</h4>
-                        <div class="space-y-3">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">No categories data available</p>
-                        </div>
-                    </div>
 
-                    <!-- User Performance -->
-                    <div class="bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-xl rounded-xl p-6">
-                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Users</h4>
-                        <div class="space-y-3">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">No user data available</p>
-                        </div>
-                    </div>
+            <div class="card-premium p-6">
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Top Performers</h4>
+                <div class="space-y-4">
+                    <p class="text-[10px] font-black text-slate-600 text-center py-12 uppercase tracking-widest">Awaiting
+                        Performance Data</p>
+                </div>
+            </div>
 
-                    <!-- Recent Activity -->
-                    <div class="bg-gray-50/80 dark:bg-gray-700/80 backdrop-blur-xl rounded-xl p-6">
-                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h4>
-                        <div class="space-y-3">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
-                        </div>
-                    </div>
+            <div class="card-premium p-6">
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Recent Operations</h4>
+                <div class="space-y-4">
+                    <p class="text-[10px] font-black text-slate-600 text-center py-12 uppercase tracking-widest">System Idle
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 @endsection
 
-
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
-        function initChart() {
-            const isDark = document.documentElement.classList.contains('dark');
-            const chart = document.querySelector('.h-64');
-            if (!chart) return;
-
-            const leadPerformanceOptions = {
+        document.addEventListener('DOMContentLoaded', function () {
+            const chartOptions = {
                 series: [{
-                    name: 'Leads',
+                    name: 'Magnitude',
                     data: [{{ $totalLeads }}, {{ $activeLeads }}, {{ $convertedLeads }}, {{ $pendingLeads }}]
                 }],
                 chart: {
                     type: 'bar',
-                    height: 256,
-                    toolbar: {
-                        show: false
-                    },
-                    background: 'transparent',
+                    height: 300,
+                    toolbar: { show: false },
+                    foreColor: '#64748b'
                 },
                 plotOptions: {
                     bar: {
-                        borderRadius: 4,
-                        horizontal: true,
-                        distributed: true,
+                        borderRadius: 12,
+                        horizontal: false,
+                        columnWidth: '50%',
+                        distributed: true
                     }
                 },
-                dataLabels: {
-                    enabled: true,
-                    style: {
-                        colors: [isDark ? '#fff' : '#000']
-                    }
-                },
+                dataLabels: { enabled: false },
                 xaxis: {
-                    categories: ['Total', 'Active', 'Converted', 'Pending'],
+                    categories: ['TOTAL', 'ACTIVE', 'CLOSED', 'PENDING'],
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
                     labels: {
                         style: {
-                            colors: isDark ? '#9ca3af' : '#4b5563'
+                            fontSize: '10px',
+                            fontWeight: 900,
+                            fontFamily: 'Outfit'
                         }
                     }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            colors: isDark ? '#9ca3af' : '#4b5563'
-                        }
-                    }
-                },
-                colors: ['#6366f1', '#22c55e', '#eab308', '#ef4444'],
-                theme: {
-                    mode: isDark ? 'dark' : 'light'
                 },
                 grid: {
-                    borderColor: isDark ? '#374151' : '#e5e7eb',
+                    borderColor: 'rgba(255,255,255,0.05)',
+                    strokeDashArray: 4
                 },
-                legend: {
-                    labels: {
-                        colors: isDark ? '#fff' : '#000'
+                colors: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'],
+                theme: { mode: 'dark' },
+                tooltip: {
+                    theme: 'dark',
+                    y: {
+                        formatter: function (val) { return val + " Units" }
                     }
                 }
             };
 
-            const chartInstance = new ApexCharts(chart, leadPerformanceOptions);
-            chartInstance.render();
+            const chart = new ApexCharts(document.querySelector("#performanceChartTerminal"), chartOptions);
+            chart.render();
 
-            // Update chart on theme change
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class' && 
-                        mutation.target === document.documentElement) {
-                        const isDarkNew = document.documentElement.classList.contains('dark');
-                        chartInstance.updateOptions({
-                            theme: { mode: isDarkNew ? 'dark' : 'light' },
-                            grid: { borderColor: isDarkNew ? '#374151' : '#e5e7eb' },
-                            xaxis: {
-                                labels: { style: { colors: isDarkNew ? '#9ca3af' : '#4b5563' } }
-                            },
-                            yaxis: {
-                                labels: { style: { colors: isDarkNew ? '#9ca3af' : '#4b5563' } }
-                            },
-                            dataLabels: {
-                                style: { colors: [isDarkNew ? '#fff' : '#000'] }
-                            },
-                            legend: {
-                                labels: { colors: isDarkNew ? '#fff' : '#000' }
-                            }
-                        });
-                    }
-                });
-            });
+            // Export logic
+            document.getElementById('exportReport')?.addEventListener('click', async function () {
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> <span>Processing...</span>';
 
-            observer.observe(document.documentElement, {
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initChart();
-
-            // Export Report
-            document.getElementById('exportReport')?.addEventListener('click', async function() {
                 try {
                     const response = await fetch('{{ route("reports.export") }}', {
                         method: 'POST',
@@ -344,22 +270,24 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
                     });
-                    
+
                     if (response.ok) {
                         const blob = await response.blob();
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = 'leads-report.pdf';
+                        a.download = 'nexus-intelligence-report-{{ date("Y-m-d") }}.pdf';
                         document.body.appendChild(a);
                         a.click();
                         window.URL.revokeObjectURL(url);
                     } else {
-                        throw new Error('Export failed');
+                        throw new Error('Export failure');
                     }
                 } catch (error) {
-                    alert('Failed to export report. Please try again later.');
-                    console.error('Export error:', error);
+                    console.error('Export Error:', error);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
                 }
             });
         });

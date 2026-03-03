@@ -35,7 +35,7 @@ class User extends Authenticatable
         'report_manager',
         'lead_manager',
         'max_out',
-        'that_submitted'
+        'death_submitted'
     ];
 
     public function isAdmin(): bool

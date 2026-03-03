@@ -23,7 +23,7 @@ class Lead extends Model
         'Submitted',
         'New Lead',
         'Super Lead',
-        'That Submitted'
+        'Death Submitted'
     ];
 
     protected $fillable = [
@@ -146,8 +146,8 @@ class Lead extends Model
     public function getFullNameAttribute(): string
     {
         $first = trim((string) $this->first_name);
-        $last  = trim((string) $this->surname);
-        $name  = trim($first . ' ' . $last);
+        $last = trim((string) $this->surname);
+        $name = trim($first . ' ' . $last);
         return $name !== '' ? $name : "Lead #{$this->id}";
     }
 
@@ -169,9 +169,12 @@ class Lead extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where(function ($q) use ($userId) {
-            $q->where('created_by', $userId)
-                ->orWhereHas('users', function ($q) use ($userId) {
-                    $q->where('users.id', $userId);
+            $q->where('assigned_to', $userId)
+                ->orWhere('super_agent_id', $userId)
+                ->orWhere('closer_id', $userId)
+                ->orWhere('created_by', $userId)
+                ->orWhereHas('users', function ($q2) use ($userId) {
+                    $q2->where('users.id', $userId);
                 });
         });
     }
@@ -210,7 +213,7 @@ class Lead extends Model
         // Fallback: nothing or your preferred owner column
         return $query->where('assigned_to', $user->id);
     }
-    
+
     public function callbacks()
     {
         // assumes callbacks table has a `lead_id` FK to leads.id
