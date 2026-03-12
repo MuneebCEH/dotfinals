@@ -1,0 +1,4 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/salestech/public_html/dots.salestech.services
+    - /bin/cp -R * $DEPLOYPATH
