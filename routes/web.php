@@ -156,4 +156,9 @@ Route::middleware('auth')->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::post('reports/export', [ReportController::class, 'export'])->name('reports.export');
     });
+    // Announcements
+    Route::get('/announcements', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [\App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::patch('/announcements/{announcement}/toggle', [\App\Http\Controllers\AnnouncementController::class, 'toggleStatus'])->name('announcements.toggle');
+    Route::delete('/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });

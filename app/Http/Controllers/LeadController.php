@@ -867,46 +867,66 @@ class LeadController extends Controller
 
         // ---------- Build TXT content ----------
         $lines = [];
+        $lines[] = $L('Date', $lead->created_at ? $lead->created_at->format('m-d-Y') : now()->format('m-d-Y'));
+        $lines[] = str_repeat('-', 70) . ')';
         $lines[] = $L('Name', $fullName);
-        $lines[] = $L('Street', $lead->street);
+        $lines[] = $L('Phone', $numbers[0] ?? '000-000-0000');
+        $lines[] = $L('Cell', $lead->cell ?? '000-000-0000');
+        $lines[] = $L('Address', $lead->street);
         $lines[] = $L('City', $lead->city);
         $lines[] = $L('State', $lead->state_abbreviation);
-        $lines[] = $L('Zip Code', $lead->zip_code);
+        $lines[] = $L('Zip code', $lead->zip_code);
+        $lines[] = $L('SSN', $lead->ssn ?? '000-00-0000');
+        $lines[] = $L('DOB', $lead->dob ?? 'MM-DD-YYYY');
+        $lines[] = $L('MMN', $lead->mmn);
+        $lines[] = $L('Email', $lead->email);
+        $lines[] = str_repeat('-', 70) . ')';
+        $lines[] = $L('Credit Score', $lead->fico);
+        $lines[] = $L('Total Cards', $lead->total_cards);
+        $lines[] = $L('Total Debt', '$' . ($lead->total_debt ?? '0.00'));
 
-        // â‰¡Æ’Æ’Ã³ All phone numbers FIRST
-        if (count($numbers)) {
-            foreach ($numbers as $i => $num) {
-                $lines[] = $L('Number ' . ($i + 1), $num);
-            }
-        } else {
-            $lines[] = $L('Number', '');
+        $banks = is_array($lead->bank_details) ? $lead->bank_details : [];
+        if (empty($banks)) {
+            // Fallback for older leads or single bank data not yet migrated (though migration should have covered it)
+            $banks = [[
+                'bank_name' => $lead->bank_name,
+                'name_on_card' => $lead->name_on_card,
+                'card_number' => $lead->card_number,
+                'exp_date' => $lead->exp_date,
+                'cvc' => $lead->cvc,
+                'balance' => $lead->balance,
+                'available' => $lead->available,
+                'last_payment_amount' => $lead->last_payment_amount,
+                'last_payment_date' => $lead->last_payment_date,
+                'next_payment_amount' => $lead->next_payment_amount,
+                'next_payment_date' => $lead->next_payment_date,
+                'credit_limit' => $lead->credit_limit,
+                'apr' => $lead->apr,
+                'charge' => $lead->charge,
+                'tollfree' => $lead->tollfree,
+            ]];
         }
 
-        // Identity/contact (kept simple)
-        $lines[] = $L('SSN', $lead->ssn);
-        $lines[] = '';
-
-        // â‰¡Æ’Æ’Âª BANK DETAILS (cards only)
-        $lines[] = 'BANK DETAILS:';
-        if (count($cardNumbers)) {
-            foreach ($cardNumbers as $i => $num) {
-                $lines[] = 'CARD ' . ($i + 1) . ': ' . $num;
-            }
-        } else {
-            $lines[] = 'CARD 1:';
+        foreach ($banks as $index => $bank) {
+            $lines[] = str_repeat('-', 70) . ')';
+            $lines[] = $L('Bank Name', $bank['bank_name'] ?? '');
+            $lines[] = $L('Name on Card', $bank['name_on_card'] ?? '');
+            $lines[] = $L('Card Number', $bank['card_number'] ?? '');
+            $lines[] = $L('Exp Date', ($bank['exp_date'] ?? 'MM-YYYY'));
+            $lines[] = $L('CVC', $bank['cvc'] ?? '');
+            $lines[] = $L('Balance', '$' . ($bank['balance'] ?? '0.00'));
+            $lines[] = $L('Available', '$' . ($bank['available'] ?? '0.00'));
+            $lines[] = $L('Last Payment', '$' . ($bank['last_payment_amount'] ?? '0.00')) . "\t\tDate: " . ($bank['last_payment_date'] ?? 'DD-MM-YY');
+            $lines[] = $L('Next Payment', '$' . ($bank['next_payment_amount'] ?? '0.00')) . "\t\tDate: " . ($bank['next_payment_date'] ?? 'DD-MM-YY');
+            $lines[] = $L('Credit Limit', '$' . ($bank['credit_limit'] ?? '0.00'));
+            $lines[] = $L('Apr', ($bank['apr'] ?? '0.00%'));
+            $lines[] = $L('Charge', '$' . ($bank['charge'] ?? '0.00'));
+            $lines[] = $L('Tollfree', $bank['tollfree'] ?? '1-8xx-xxx-xxxx');
         }
         $lines[] = '';
-
-        // Notes
         $lines[] = 'NOTES:';
         $notes = trim((string) ($lead->notes ?? ''));
-        $lines[] = $notes !== '' ? $notes : '';
-        $lines[] = '';
-
-        // Totals
-        $lines[] = $L('TOTAL DEBT', $lead->balance);                 // maps to your Balance field
-        $lines[] = $L('TOTAL CARDS', (string) count($cardNumbers));
-        // $lines[] = $L('TOTAL CHARGE', '');                           // no field provided
+        $lines[] = $notes !== '' ? $notes : 'No notes available.';
 
         $content = implode(PHP_EOL, $lines);
         $baseName = str_replace(' ', '_', $fullName ?: 'Lead') . '_Details';

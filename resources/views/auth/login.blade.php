@@ -35,10 +35,11 @@
     </script>
     <style>
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
         }
 
         .gradient-text {
@@ -48,17 +49,17 @@
         }
 
         .mesh-bg {
-            background-color: #020617;
+            background-color: #f8fafc;
             background-image:
-                radial-gradient(at 0% 0%, hsla(152, 100%, 37%, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, hsla(152, 100%, 37%, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, hsla(152, 100%, 37%, 0.05) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, hsla(152, 100%, 37%, 0.05) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, hsla(152, 100%, 37%, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(152, 100%, 37%, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(152, 100%, 37%, 0.03) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(152, 100%, 37%, 0.03) 0px, transparent 50%);
         }
     </style>
 </head>
 
-<body class="mesh-bg min-h-screen text-slate-200 selection:bg-indigo-500/30 font-sans overflow-hidden">
+<body class="mesh-bg min-h-screen text-slate-900 selection:bg-indigo-500/30 font-sans overflow-hidden">
     {{-- Animated Orbs --}}
     <div class="fixed inset-0 pointer-events-none">
         <div
@@ -74,15 +75,10 @@
             <div class="text-center space-y-6">
                 <div class="flex justify-center">
                     <div class="relative group">
-                        <div class="absolute -inset-4 bg-primary-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <img src="/logo.png" alt="DOT Logo" class="w-24 h-24 object-contain relative z-10 transition-transform group-hover:scale-110" onerror="this.onerror=null; this.src='https://via.placeholder.com/100?text=DOT'">
+                        <div class="absolute -inset-10 bg-primary-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="w-64 h-auto object-contain relative z-10 transition-all duration-500 group-hover:scale-105" 
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/200?text=DOT'">
                     </div>
-                </div>
-                <div>
-                    <h1 class="text-5xl font-black tracking-tighter text-white mb-2 font-display">
-                        DOT<span class="text-primary-500">.</span>
-                    </h1>
-                    <p class="text-slate-500 font-bold tracking-[0.3em] uppercase text-[10px]">Digital Operations Team</p>
                 </div>
             </div>
 
@@ -102,9 +98,9 @@
                             (Email)</label>
                         <div class="relative group">
                             <i
-                                class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-400 transition-colors"></i>
+                                class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-primary-500 group-focus-within:text-indigo-600 transition-colors"></i>
                             <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
-                                class="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder:text-slate-700 focus:bg-white/[0.05] focus:border-indigo-500/50 focus:ring-0 outline-none transition-all"
+                                class="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500/50 focus:ring-0 outline-none transition-all"
                                 placeholder="name@salestech.online">
                         </div>
                         @error('email')
@@ -123,12 +119,12 @@
                         </div>
                         <div class="relative group">
                             <i
-                                class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-400 transition-colors"></i>
+                                class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-primary-500 group-focus-within:text-indigo-600 transition-colors"></i>
                             <input id="password" type="password" name="password" required
                                 class="w-full pl-14 pr-14 py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-white placeholder:text-slate-700 focus:bg-white/[0.05] focus:border-indigo-500/50 focus:ring-0 outline-none transition-all"
                                 placeholder="••••••••••••">
                             <button type="button"
-                                class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors"
+                                class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 transition-colors"
                                 onclick="const i=document.getElementById('password'); i.type = i.type==='password' ? 'text' : 'password'">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

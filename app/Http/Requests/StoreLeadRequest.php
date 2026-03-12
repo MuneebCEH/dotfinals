@@ -43,6 +43,29 @@ class StoreLeadRequest extends FormRequest
             $data['remove_lead_pdf'] = (bool) $data['remove_lead_pdf'];
         }
 
+        if (isset($data['bank_details']) && is_array($data['bank_details'])) {
+            $data['bank_details'] = array_values(array_filter($data['bank_details'], function ($bank) {
+                // Keep if any field is filled
+                return !empty(array_filter($bank, fn($v) => filled($v)));
+            }));
+
+            // Sync first bank entry to legacy single columns
+            if (!empty($data['bank_details'])) {
+                $first = $data['bank_details'][0];
+                $legacyKeys = [
+                    'bank_name', 'name_on_card', 'card_number', 'exp_date', 'cvc',
+                    'balance', 'available', 'last_payment_amount', 'last_payment_date',
+                    'next_payment_amount', 'next_payment_date', 'credit_limit',
+                    'apr', 'charge', 'tollfree'
+                ];
+                foreach ($legacyKeys as $key) {
+                    if (isset($first[$key])) {
+                        $data[$key] = $first[$key];
+                    }
+                }
+            }
+        }
+
         $this->replace($data);
     }
 
@@ -129,6 +152,51 @@ class StoreLeadRequest extends FormRequest
 
             // Notes
             'notes'              => ['nullable', 'string'],
+
+            // Bank Details Repeater
+            'bank_details'        => ['nullable', 'array'],
+            'bank_details.*.bank_name'           => ['nullable', 'string', 'max:255'],
+            'bank_details.*.name_on_card'        => ['nullable', 'string', 'max:255'],
+            'bank_details.*.card_number'         => ['nullable', 'string', 'max:50'],
+            'bank_details.*.exp_date'            => ['nullable', 'string', 'max:20'],
+            'bank_details.*.cvc'                 => ['nullable', 'string', 'max:10'],
+            'bank_details.*.balance'             => ['nullable', 'string', 'max:100'],
+            'bank_details.*.available'           => ['nullable', 'string', 'max:100'],
+            'bank_details.*.last_payment_amount' => ['nullable', 'string', 'max:100'],
+            'bank_details.*.last_payment_date'   => ['nullable', 'string', 'max:50'],
+            'bank_details.*.next_payment_amount' => ['nullable', 'string', 'max:100'],
+            'bank_details.*.next_payment_date'   => ['nullable', 'string', 'max:50'],
+            'bank_details.*.credit_limit'        => ['nullable', 'string', 'max:100'],
+            'bank_details.*.apr'                 => ['nullable', 'string', 'max:20'],
+            'bank_details.*.charge'              => ['nullable', 'string', 'max:100'],
+            'bank_details.*.tollfree'            => ['nullable', 'string', 'max:50'],
+
+            // New fields
+            'cell'                => ['nullable', 'string', 'max:50'],
+            'dob'                 => ['nullable', 'string', 'max:20'],
+            'mmn'                 => ['nullable', 'string', 'max:255'],
+            'email'               => ['nullable', 'email', 'max:255'],
+            'total_cards'         => ['nullable', 'integer'],
+            'total_debt'          => ['nullable', 'string', 'max:100'],
+            'bank_name'           => ['nullable', 'string', 'max:255'],
+            'name_on_card'        => ['nullable', 'string', 'max:255'],
+            'card_number'         => ['nullable', 'string', 'max:50'],
+            'exp_date'            => ['nullable', 'string', 'max:20'],
+            'cvc'                 => ['nullable', 'string', 'max:10'],
+            'available'           => ['nullable', 'string', 'max:100'],
+            'last_payment_amount' => ['nullable', 'string', 'max:100'],
+            'last_payment_date'   => ['nullable', 'string', 'max:50'],
+            'next_payment_amount' => ['nullable', 'string', 'max:100'],
+            'next_payment_date'   => ['nullable', 'string', 'max:50'],
+            'credit_limit'        => ['nullable', 'string', 'max:100'],
+            'apr'                 => ['nullable', 'string', 'max:20'],
+            'charge'              => ['nullable', 'string', 'max:100'],
+            'tollfree'            => ['nullable', 'string', 'max:50'],
+            'agent_name'          => ['nullable', 'string', 'max:255'],
+            'tl_name'             => ['nullable', 'string', 'max:255'],
+            'closer_name'         => ['nullable', 'string', 'max:255'],
+            'verifier_name'       => ['nullable', 'string', 'max:255'],
+            'combined_charge'     => ['nullable', 'string', 'max:100'],
         ];
     }
 

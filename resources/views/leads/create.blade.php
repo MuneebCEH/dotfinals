@@ -118,282 +118,242 @@
                     </div>
                 @endif
 
-                {{-- SECTION: Identity --}}
-                <div class="space-y-4">
-                    <h4 class="text-base font-semibold text-gray-900 dark:text-white">Identity</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="space-y-6">
+                    {{-- Row: Date / Name --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">First Name
-                                *</label>
-                            <input name="first_name" value="{{ old('first_name') }}" required
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('first_name')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                            <label class="block text-sm font-semibold mb-3">Date (MM-DD-YYYY)</label>
+                            <input name="created_at_display" value="{{ now()->format('m-d-Y') }}" readonly
+                                   class="block w-full px-4 py-3 border rounded-xl bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-0 cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Middle
-                                Initial</label>
-                            <input name="middle_initial" value="{{ old('middle_initial') }}" maxlength="2"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('middle_initial')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Surname
-                                *</label>
-                            <input name="surname" value="{{ old('surname') }}" required
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('surname')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                            <label class="block text-sm font-semibold mb-3">Name</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <input name="first_name" value="{{ old('first_name') }}" placeholder="First Name" required
+                                       class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <input name="middle_initial" value="{{ old('middle_initial') }}" placeholder="M.I." maxlength="2"
+                                       class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                <input name="surname" value="{{ old('surname') }}" placeholder="Last Name" required
+                                       class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                    <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
+
+                    {{-- Row: Phone / Cell --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Gen
-                                Code</label>
-                            <input name="gen_code" value="{{ old('gen_code') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('gen_code')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                            <label class="block text-sm font-semibold mb-3">Phone (000-000-0000)</label>
+                            <input name="numbers[]" value="{{ old('numbers.0') }}" placeholder="000-000-0000"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Age</label>
-                            <input name="age" value="{{ old('age') }}" type="number" min="0"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('age')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">SSN</label>
-                            <input name="ssn" value="{{ old('ssn') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                placeholder="(optional)">
-                            @error('ssn')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                            <label class="block text-sm font-semibold mb-3">Cell (000-000-0000)</label>
+                            <input name="cell" value="{{ old('cell') }}" placeholder="000-000-0000"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                     </div>
-                </div>
 
-                <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
-
-                {{-- SECTION: Address --}}
-                <div class="space-y-4">
-                    <h4 class="text-base font-semibold text-gray-900 dark:text-white">Address</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Street</label>
+                    {{-- Row: Address / City / State / Zip --}}
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div class="md:col-span-1">
+                            <label class="block text-sm font-semibold mb-3">Address</label>
                             <input name="street" value="{{ old('street') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('street')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">City</label>
+                            <label class="block text-sm font-semibold mb-3">City</label>
                             <input name="city" value="{{ old('city') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('city')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">State
-                                Abbreviation</label>
+                            <label class="block text-sm font-semibold mb-3">State</label>
                             <input name="state_abbreviation" value="{{ old('state_abbreviation') }}" maxlength="5"
-                                class="uppercase block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('state_abbreviation')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                                   class="uppercase block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Zip
-                                Code</label>
+                            <label class="block text-sm font-semibold mb-3">Zip code</label>
                             <input name="zip_code" value="{{ old('zip_code') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('zip_code')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         </div>
-                        <div class="md:col-span-2"></div>
                     </div>
-                </div>
 
-                <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
-
-                {{-- SECTION: Contact & Custom Fields --}}
-                <div class="space-y-4">
-                    <h4 class="text-base font-semibold text-gray-900 dark:text-white">Contact & Custom Fields</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {{-- Phone Numbers (dynamic) --}}
+                    {{-- Row: SSN / DOB / MMN / Email --}}
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Phone
-                                Numbers</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Add multiple numbers if available.</p>
-                            <div id="numbersRepeater" class="space-y-3">
-                                @php
-                                    $oldNumbers = old('numbers', []);
-                                    if (empty($oldNumbers)) {
-                                        $oldNumbers = [''];
-                                    }
-                                @endphp
-                                @foreach ($oldNumbers as $n)
-                                    <div class="flex gap-2">
-                                        <input name="numbers[]" value="{{ $n }}"
-                                            class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                            placeholder="(###) ###-####">
-                                        <button type="button"
-                                            class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            onclick="removeNumberRow(this)" title="Remove">&times;</button>
+                            <label class="block text-sm font-semibold mb-3">SSN (000-00-0000)</label>
+                            <input name="ssn" value="{{ old('ssn') }}" placeholder="000-00-0000"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">DOB (MM-DD-YYYY)</label>
+                            <input name="dob" value="{{ old('dob') }}" placeholder="MM-DD-YYYY"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">MMN</label>
+                            <input name="mmn" value="{{ old('mmn') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Email</label>
+                            <input type="email" name="email" value="{{ old('email') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                    </div>
+
+                    <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
+
+                    {{-- Section: Financial Summary --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Credit Score</label>
+                            <input type="number" name="fico" value="{{ old('fico') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Total Cards</label>
+                            <input type="number" name="total_cards" value="{{ old('total_cards') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Total Debt ($)</label>
+                            <input name="total_debt" value="{{ old('total_debt') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="$0.00">
+                        </div>
+                    </div>
+
+                    <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
+
+                    <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
+
+                    {{-- SECTION: Bank Details Repeater --}}
+                    <div id="banksContainer" class="space-y-10">
+                        @php
+                            $banks = old('bank_details', [[]]);
+                        @endphp
+
+                        @foreach ($banks as $index => $bank)
+                            <div class="bank-row space-y-6 relative p-6 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-lg font-bold text-primary-600 flex items-center gap-2">
+                                        <i class="fas fa-university"></i>
+                                        Bank #<span class="bank-index">{{ $index + 1 }}</span>
+                                    </h4>
+                                    @if($index > 0)
+                                        <button type="button" onclick="removeBankRow(this)" class="text-red-500 hover:text-red-700 transition font-semibold text-sm flex items-center gap-1">
+                                            <i class="fas fa-trash-alt"></i> Remove Bank
+                                        </button>
+                                    @endif
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Bank Name</label>
+                                        <input name="bank_details[{{ $index }}][bank_name]" value="{{ $bank['bank_name'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
-                                @endforeach
-                            </div>
-                            <div class="mt-3">
-                                <button type="button" id="addNumberBtn"
-                                    class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v12m6-6H6" />
-                                    </svg>
-                                    Add Number
-                                </button>
-                            </div>
-                            @error('numbers')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                            @error('numbers.*')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- XFC06 --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">XFC06</label>
-                            <input name="xfc06" value="{{ old('xfc06') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('xfc06')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- XFC07 --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">XFC07</label>
-                            <input name="xfc07" value="{{ old('xfc07') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('xfc07')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">DEMO7</label>
-                            <input name="demo7" value="{{ old('demo7') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('demo7')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">DEMO9</label>
-                            <input name="demo9" value="{{ old('demo9') }}"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('demo9')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div></div>
-                    </div>
-                </div>
-
-                <div class="h-px w-full bg-gray-200/70 dark:bg-gray-700/70"></div>
-
-                {{-- SECTION: Financial --}}
-                <div class="space-y-4">
-                    <h4 class="text-base font-semibold text-gray-900 dark:text-white">Financial</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {{-- FICO --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">FICO</label>
-                            <input name="fico" value="{{ old('fico') }}" type="number"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('fico')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Cards JSON (dynamic) --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Cards</label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Capture card labels (e.g., Visa,
-                                Amex). Stored as JSON.</p>
-                            <div id="cardsRepeater" class="space-y-3">
-                                @php
-                                    $oldCardsJson = old('cards_json', []);
-                                    if (empty($oldCardsJson)) {
-                                        $oldCardsJson = [''];
-                                    }
-                                @endphp
-                                @foreach ($oldCardsJson as $c)
-                                    <div class="flex gap-2">
-                                        <input name="cards_json[]" value="{{ $c }}"
-                                            class="flex-1 px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                            placeholder="e.g., Visa / Amex / Mastercard">
-                                        <button type="button"
-                                            class="shrink-0 px-3 rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            onclick="removeCardRow(this)" title="Remove">&times;</button>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Name on Card</label>
+                                        <input name="bank_details[{{ $index }}][name_on_card]" value="{{ $bank['name_on_card'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
-                                @endforeach
-                            </div>
-                            <div class="mt-3">
-                                <button type="button" id="addCardBtn"
-                                    class="inline-flex items-center px-4 py-2 rounded-xl bg-primary-600 text-white shadow hover:shadow-md">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v12m6-6H6" />
-                                    </svg>
-                                    Add Card
-                                </button>
-                            </div>
-                            @error('cards_json')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                            @error('cards_json.*')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Card Number</label>
+                                        <div class="relative">
+                                            <input name="bank_details[{{ $index }}][card_number]" value="{{ $bank['card_number'] ?? '' }}"
+                                                   class="card-number-input block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 pr-12"
+                                                   placeholder="0000 0000 0000 0000">
+                                            <div class="card-status absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                                <i class="card-type-icon text-gray-400 text-lg"></i>
+                                                <i class="card-valid-icon hidden text-sm"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        {{-- Balance --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Balance</label>
-                            <input name="balance" value="{{ old('balance') }}" type="number" step="0.01"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('balance')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Exp Date (MM-YYYY)</label>
+                                        <input name="bank_details[{{ $index }}][exp_date]" value="{{ $bank['exp_date'] ?? '' }}" placeholder="MM-YYYY"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">CVC</label>
+                                        <input name="bank_details[{{ $index }}][cvc]" value="{{ $bank['cvc'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Balance ($)</label>
+                                        <input name="bank_details[{{ $index }}][balance]" value="{{ $bank['balance'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Available ($)</label>
+                                        <input name="bank_details[{{ $index }}][available]" value="{{ $bank['available'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-semibold mb-3">Last Payment ($)</label>
+                                            <input name="bank_details[{{ $index }}][last_payment_amount]" value="{{ $bank['last_payment_amount'] ?? '' }}"
+                                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-semibold mb-3">Date (DD-MM-YY)</label>
+                                            <input name="bank_details[{{ $index }}][last_payment_date]" value="{{ $bank['last_payment_date'] ?? '' }}" placeholder="DD-MM-YY"
+                                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-semibold mb-3">Next Payment ($)</label>
+                                            <input name="bank_details[{{ $index }}][next_payment_amount]" value="{{ $bank['next_payment_amount'] ?? '' }}"
+                                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-semibold mb-3">Date (DD-MM-YY)</label>
+                                            <input name="bank_details[{{ $index }}][next_payment_date]" value="{{ $bank['next_payment_date'] ?? '' }}" placeholder="DD-MM-YY"
+                                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Credit Limit ($)</label>
+                                        <input name="bank_details[{{ $index }}][credit_limit]" value="{{ $bank['credit_limit'] ?? '' }}"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Apr (%)</label>
+                                        <input name="bank_details[{{ $index }}][apr]" value="{{ $bank['apr'] ?? '' }}" placeholder="0.00%"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Charge ($)</label>
+                                        <input name="bank_details[{{ $index }}][charge]" value="{{ $bank['charge'] ?? '' }}" placeholder="$0.00"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold mb-3">Tollfree</label>
+                                        <input name="bank_details[{{ $index }}][tollfree]" value="{{ $bank['tollfree'] ?? '' }}" placeholder="1-8xx-xxx-xxxx"
+                                               class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {{-- Credits --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Credits</label>
-                            <input name="credits" value="{{ old('credits') }}" type="number" step="0.01"
-                                class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            @error('credits')
-                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="md:col-span-2"></div>
+                    <div class="flex justify-center mt-6">
+                        <button type="button" id="addBankBtn" class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border-2 border-dashed border-primary-500 text-primary-600 font-bold rounded-xl hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-300 group">
+                            <i class="fas fa-plus-circle group-hover:scale-110 transition-transform"></i>
+                            Add More Bank
+                        </button>
                     </div>
                 </div>
 
@@ -516,9 +476,35 @@
                                     <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
                                 @enderror
                             </div>
-                        @else
-                            <div class="md:col-span-3"></div>
                         @endif
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mt-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Agent Name</label>
+                            <input name="agent_name" value="{{ old('agent_name') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">TL Name</label>
+                            <input name="tl_name" value="{{ old('tl_name') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Closer Name</label>
+                            <input name="closer_name" value="{{ old('closer_name') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Verifier Name</label>
+                            <input name="verifier_name" value="{{ old('verifier_name') }}"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-3">Combined Charge ($)</label>
+                            <input name="combined_charge" value="{{ old('combined_charge') }}" placeholder="$ 0.00"
+                                   class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        </div>
                     </div>
                 </div>
 
@@ -597,6 +583,118 @@
                 }
                 btn.closest('.flex.gap-2').remove();
             };
+
+            // ===== Banks repeater =====
+            const banksContainer = document.getElementById('banksContainer');
+            const addBankBtn = document.getElementById('addBankBtn');
+
+            addBankBtn?.addEventListener('click', () => {
+                const index = banksContainer.querySelectorAll('.bank-row').length;
+                const template = banksContainer.querySelector('.bank-row').cloneNode(true);
+
+                // Update index numbers in title and input names
+                template.querySelector('.bank-index').textContent = index + 1;
+
+                // Clear input values
+                template.querySelectorAll('input').forEach(input => {
+                    input.value = '';
+                    // Update field name: bank_details[0][...] -> bank_details[X][...]
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        input.setAttribute('name', name.replace(/bank_details\[\d+\]/, `bank_details[${index}]`));
+                    }
+                });
+
+                // Ensure there's a remove button if it's not the first one
+                if (!template.querySelector('button[onclick="removeBankRow(this)"]')) {
+                    const header = template.querySelector('.flex.items-center.justify-between');
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.setAttribute('onclick', 'removeBankRow(this)');
+                    removeBtn.className = 'text-red-500 hover:text-red-700 transition font-semibold text-sm flex items-center gap-1';
+                    removeBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Remove Bank';
+                    header.appendChild(removeBtn);
+                }
+
+                banksContainer.appendChild(template);
+            });
+
+            window.removeBankRow = (btn) => {
+                const row = btn.closest('.bank-row');
+                row.remove();
+
+                // Re-index remaining banks
+                banksContainer.querySelectorAll('.bank-row').forEach((row, i) => {
+                    row.querySelector('.bank-index').textContent = i + 1;
+                    row.querySelectorAll('input').forEach(input => {
+                        const name = input.getAttribute('name');
+                        if (name) {
+                            input.setAttribute('name', name.replace(/bank_details\[\d+\]/, `bank_details[${i}]`));
+                        }
+                    });
+                });
+            };
+
+            // ===== Card Checker Logic =====
+            const cardTypes = [
+                { name: 'visa', icon: 'fab fa-cc-visa', re: /^4/ },
+                { name: 'mastercard', icon: 'fab fa-cc-mastercard', re: /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/ },
+                { name: 'amex', icon: 'fab fa-cc-amex', re: /^3[47]/ },
+                { name: 'discover', icon: 'fab fa-cc-discover', re: /^(6011|622|64|65)/ },
+                { name: 'jcb', icon: 'fab fa-cc-jcb', re: /^35/ },
+                { name: 'diners', icon: 'fab fa-cc-diners-club', re: /^3(0[0-5]|[68])/ }
+            ];
+
+            function validateLuhn(number) {
+                let sum = 0;
+                let shouldDouble = false;
+                for (let i = number.length - 1; i >= 0; i--) {
+                    let digit = parseInt(number.charAt(i));
+                    if (shouldDouble) {
+                        if ((digit *= 2) > 9) digit -= 9;
+                    }
+                    sum += digit;
+                    shouldDouble = !shouldDouble;
+                }
+                return (sum % 10) === 0;
+            }
+
+            function updateCardStatus(input) {
+                const value = input.value.replace(/\D/g, '');
+                const wrapper = input.closest('.relative');
+                const typeIcon = wrapper.querySelector('.card-type-icon');
+                const validIcon = wrapper.querySelector('.card-valid-icon');
+
+                // Detect Type
+                let detected = cardTypes.find(t => t.re.test(value));
+                typeIcon.className = 'card-type-icon text-lg ' + (detected ? detected.icon + ' text-primary-500' : 'fas fa-credit-card text-gray-400');
+
+                // Validate Luhn
+                if (value.length >= 13) {
+                    const isValid = validateLuhn(value);
+                    validIcon.className = 'card-valid-icon text-sm ' + (isValid ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500');
+                    validIcon.classList.remove('hidden');
+                    input.classList.toggle('border-green-500', isValid);
+                    input.classList.toggle('border-red-500', !isValid);
+                } else {
+                    validIcon.classList.add('hidden');
+                    input.classList.remove('border-green-500', 'border-red-500');
+                }
+            }
+
+            // Event delegation for card inputs
+            banksContainer?.addEventListener('input', (e) => {
+                if (e.target.classList.contains('card-number-input')) {
+                    // Format input: add spaces every 4 digits
+                    let value = e.target.value.replace(/\D/g, '').substring(0, 16);
+                    let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                    e.target.value = formatted;
+                    updateCardStatus(e.target);
+                }
+            });
+
+            // Initial validation for existing inputs
+            document.querySelectorAll('.card-number-input').forEach(updateCardStatus);
         </script>
     @endpush
 @endsection

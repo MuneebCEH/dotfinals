@@ -407,7 +407,7 @@
                             <div class="relative">
                                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
                                 <input type="text" name="search" value="{{ request('search') }}"
-                                    class="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-slate-600 focus:border-indigo-500/50 focus:ring-0 transition-all"
+                                    class="w-full pl-12 pr-4 py-4 bg-white/5 border border-gray-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:border-indigo-500/50 focus:ring-0 transition-all"
                                     placeholder="ID, Name, Phone...">
                             </div>
                         </div>
@@ -416,10 +416,11 @@
                             <label class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Filter
                                 by Status</label>
                             <select name="status"
-                                class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-indigo-500/50 focus:ring-0 transition-all">
+                                class="w-full px-4 py-4 bg-white/5 border border-gray-200 rounded-2xl text-slate-900 focus:border-indigo-500/50 focus:ring-0 transition-all">
                                 <option value="">All Scopes</option>
                                 @foreach($statuses as $label)
-                                    <option value="{{ $label }}" {{ request('status') == $label ? 'selected' : '' }}>{{ $label }}
+                                    <option value="{{ $label }}" {{ request('status') == $label ? 'selected' : '' }}
+                                        class="text-slate-900">{{ $label }}
                                     </option>
                                 @endforeach
                             </select>
@@ -431,18 +432,20 @@
                                     class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 block">Assigned
                                     Specialist</label>
                                 <select name="assigned_to"
-                                    class="w-full px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-indigo-500/50 focus:ring-0 transition-all">
+                                    class="w-full px-4 py-4 bg-white/5 border border-gray-200 rounded-2xl text-slate-900 focus:border-indigo-500/50 focus:ring-0 transition-all">
                                     <option value="">Every Agent</option>
                                     @foreach($tos as $to)
-                                        <option value="{{ $to->id }}" {{ request('assigned_to') == $to->id ? 'selected' : '' }}>
-                                            {{ $to->name }}</option>
+                                        <option value="{{ $to->id }}" {{ request('assigned_to') == $to->id ? 'selected' : '' }}
+                                            class="text-slate-900">
+                                            {{ $to->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                         @endif
 
                         <button type="submit"
-                            class="w-full py-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black transition-all border border-white/10">
+                            class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black transition-all border border-indigo-500 shadow-lg">
                             Apply Intelligence Filters
                         </button>
 
@@ -459,7 +462,7 @@
                     <div class="space-y-4">
                         <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
                             <span class="text-xs font-bold text-slate-400">Filtered Depth</span>
-                            <span class="text-sm font-black text-white">{{ $leads->total() }}</span>
+                            <span class="text-sm font-black text-slate-900">{{ $leads->total() }}</span>
                         </div>
                         <div
                             class="flex items-center justify-between p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
@@ -493,81 +496,83 @@
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($leads as $lead)
-                                            <tr class="hover:bg-white/[0.03] transition-all group">
-                                                <td class="px-8 py-6">
-                                                    <div class="flex items-center gap-4">
-                                                        <div
-                                                            class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center font-black text-indigo-400 border border-indigo-500/20 shadow-lg">
-                                                            {{ strtoupper(substr($lead->first_name, 0, 1)) }}
-                                                        </div>
-                                                        <div>
-                                                            <p
-                                                                class="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">
-                                                                {{ $lead->first_name }} {{ $lead->surname }}
-                                                            </p>
-                                                            <div class="flex items-center gap-2 mt-1">
-                                                                <span class="text-[10px] font-bold text-slate-500">#{{ $lead->id }}</span>
-                                                                <span class="w-1 h-1 rounded-full bg-slate-700"></span>
-                                                                <span
-                                                                    class="text-[10px] font-bold text-slate-500 uppercase">{{ $lead->city }}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    @php
-                                                        $state = strtolower($lead->status);
-                                                        $colorClass = match (true) {
-                                                            str_contains($state, 'success') => 'emerald',
-                                                            str_contains($state, 'call') => 'amber',
-                                                            str_contains($state, 'dead') => 'rose',
-                                                            str_contains($state, 'max') => 'orange',
-                                                            default => 'indigo'
-                                                        };
-                                                    @endphp
-                                <div
-                                                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-{{ $colorClass }}-500/10 text-{{ $colorClass }}-400 border border-{{ $colorClass }}-500/20">
-                                                        <div class="w-1.5 h-1.5 rounded-full bg-{{ $colorClass }}-500"></div>
-                                                        <span
-                                                            class="text-[10px] font-black uppercase tracking-wider">{{ $lead->status }}</span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <div class="flex items-center gap-3">
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold text-slate-400">
-                                                            <i class="fas fa-user-shield"></i>
-                                                        </div>
-                                                        <span
-                                                            class="text-xs font-bold text-slate-300">{{ $lead->assignee?->name ?? 'None' }}</span>
-                                                    </div>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <p class="text-[11px] font-black text-slate-400">
-                                                        {{ $lead->created_at->format('d M Y') }}</p>
-                                                    <p class="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">
-                                                        {{ $lead->created_at->diffForHumans() }}</p>
-                                                </td>
-                                                <td class="px-8 py-6">
-                                                    <div class="flex items-center justify-end gap-2">
-                                                        <a href="{{ route('leads.edit', $lead) }}"
-                                                            class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-indigo-600 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5 hover:border-indigo-500 shadow-lg">
-                                                            <i class="fas fa-fingerprint"></i>
-                                                        </a>
-                                                        @if($isAdmin)
-                                                            <form action="{{ route('leads.destroy', $lead) }}" method="POST"
-                                                                onsubmit="return confirm('Purge this intelligence entry?')" class="inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-rose-600 rounded-xl text-slate-400 hover:text-white transition-all border border-white/5 hover:border-rose-500 shadow-lg">
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                <tr class="hover:bg-white/[0.03] transition-all group">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div
+                                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center font-black text-indigo-400 border border-indigo-500/20 shadow-lg">
+                                                {{ strtoupper(substr($lead->first_name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-sm font-black text-slate-900 group-hover:text-indigo-400 transition-colors">
+                                                    {{ $lead->first_name }} {{ $lead->surname }}
+                                                </p>
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <span class="text-[10px] font-bold text-slate-500">#{{ $lead->id }}</span>
+                                                    <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                                                    <span
+                                                        class="text-[10px] font-bold text-slate-500 uppercase">{{ $lead->city }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        @php
+                                            $state = strtolower($lead->status);
+                                            $colorClass = match (true) {
+                                                str_contains($state, 'success') => 'emerald',
+                                                str_contains($state, 'call') => 'amber',
+                                                str_contains($state, 'dead') => 'rose',
+                                                str_contains($state, 'max') => 'orange',
+                                                default => 'indigo'
+                                            };
+                                        @endphp
+                                        <div
+                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-{{ $colorClass }}-500/10 text-{{ $colorClass }}-700 border border-{{ $colorClass }}-500/20">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-{{ $colorClass }}-500"></div>
+                                            <span
+                                                class="text-[10px] font-black uppercase tracking-wider">{{ $lead->status }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold text-slate-400">
+                                                <i class="fas fa-user-shield"></i>
+                                            </div>
+                                            <span
+                                                class="text-xs font-bold text-slate-800">{{ $lead->assignee?->name ?? 'None' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <p class="text-[11px] font-black text-slate-900">
+                                            {{ $lead->created_at->format('d M Y') }}
+                                        </p>
+                                        <p class="text-[10px] text-slate-600 font-bold uppercase tracking-tighter">
+                                            {{ $lead->created_at->diffForHumans() }}
+                                        </p>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('leads.edit', $lead) }}"
+                                                class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-indigo-600 rounded-xl text-slate-700 hover:text-white transition-all border border-gray-200 hover:border-indigo-500 shadow-lg">
+                                                <i class="fas fa-fingerprint"></i>
+                                            </a>
+                                            @if($isAdmin)
+                                                <form action="{{ route('leads.destroy', $lead) }}" method="POST"
+                                                    onsubmit="return confirm('Purge this intelligence entry?')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-rose-600 rounded-xl text-slate-700 hover:text-white transition-all border border-gray-200 hover:border-rose-500 shadow-lg">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
                                 <tr>
                                     <td colspan="5" class="px-8 py-32 text-center">
@@ -585,7 +590,7 @@
                 </div>
 
                 {{-- Pagination Island --}}
-                <div class="p-8 border-t border-white/5 bg-black/10">
+                <div class="p-8 border-t border-gray-200 bg-gray-50">
                     {{ $leads->links() }}
                 </div>
             </div>
@@ -804,19 +809,19 @@
             const html = rows.map(r => {
                 const name = r.querySelector('label').textContent.trim();
                 return `
-                      <div class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
-                        <span class="truncate">${name}</span>
-                        <span class="font-medium">${perUser}</span>
-                      </div>`;
+                          <div class="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800">
+                            <span class="truncate">${name}</span>
+                            <span class="font-medium">${perUser}</span>
+                          </div>`;
             }).join('');
 
             preview.innerHTML = `
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="font-medium">Preview</div>
-                        <div class="text-gray-500">Each user will get ${perUser} lead(s)</div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${html}</div>
-                `;
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="font-medium">Preview</div>
+                            <div class="text-gray-500">Each user will get ${perUser} lead(s)</div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${html}</div>
+                    `;
             preview.classList.remove('hidden');
         }
 
@@ -1074,9 +1079,9 @@
 
                 if (!users.length) {
                     wrap.innerHTML = `
-                <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-300">
-                  No team members are currently online.
-                </div>`;
+                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-sm text-gray-600 dark:text-gray-300">
+                      No team members are currently online.
+                    </div>`;
                     return;
                 }
 
@@ -1090,25 +1095,25 @@
                     const load = parseInt(ASSIGNED_COUNTS[id] ?? 0, 10) || 0;
 
                     return `
-              <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border ${eligible
+                  <div class="user-row flex items-center justify-between gap-3 p-3 rounded-xl border ${eligible
                             ? 'border-emerald-200 dark:border-emerald-900/40 bg-white dark:bg-gray-800'
                             : 'opacity-60 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/40'}"
-                   data-name="${name.toLowerCase()}"
-                   data-email=""
-                   data-load="${load}"
-                   data-eligible="${eligible ? '1' : '0'}">
-                <div class="flex items-center gap-3 min-w-0">
-                  <input type="checkbox" name="assignee_ids[]" value="${id}"
-                    class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    ${eligible ? '' : 'disabled'}>
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <div class="min-w-0">
-                    <label class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate cursor-pointer">${name}</label>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">—</p>
-                  </div>
-                </div>
-                <span class="shrink-0 text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">${load} assigned</span>
-              </div>`;
+                       data-name="${name.toLowerCase()}"
+                       data-email=""
+                       data-load="${load}"
+                       data-eligible="${eligible ? '1' : '0'}">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <input type="checkbox" name="assignee_ids[]" value="${id}"
+                        class="user-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        ${eligible ? '' : 'disabled'}>
+                      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                      <div class="min-w-0">
+                        <label class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate cursor-pointer">${name}</label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">—</p>
+                      </div>
+                    </div>
+                    <span class="shrink-0 text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">${load} assigned</span>
+                  </div>`;
                 }).join('');
 
                 wrap.innerHTML = rowsHtml;

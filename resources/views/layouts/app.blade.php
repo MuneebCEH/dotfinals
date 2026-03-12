@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
 
 <head>
     <meta charset="utf-8">
@@ -30,7 +30,7 @@
         :root {
             --primary: #00bf63;
             --primary-hover: #009e52;
-            --bg-deep: #020617;
+            --bg-deep: #f8fafc;
             --sidebar-width: 280px;
         }
 
@@ -41,7 +41,7 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-deep);
-            color: #f8fafc;
+            color: #1e293b;
             overflow-x: hidden;
         }
 
@@ -53,9 +53,9 @@
             height: 100%;
             z-index: -1;
             background:
-                radial-gradient(circle at 10% 20%, rgba(0, 191, 99, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 191, 99, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(2, 6, 23, 1) 0%, rgba(2, 6, 23, 1) 100%);
+                radial-gradient(circle at 10% 20%, rgba(0, 191, 99, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 191, 99, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, #f8fafc 0%, #ffffff 100%);
         }
 
         .floating-sidebar {
@@ -64,14 +64,15 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             z-index: 50;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         .main-content {
@@ -82,11 +83,12 @@
         }
 
         .glass-nav {
-            background: rgba(30, 41, 59, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 16px;
             margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .nav-item {
@@ -95,7 +97,7 @@
             padding: 12px 16px;
             margin: 4px 12px;
             border-radius: 12px;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 600;
             font-size: 0.9rem;
             transition: all 0.2s;
@@ -103,8 +105,8 @@
         }
 
         .nav-item:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            background: rgba(0, 191, 99, 0.05);
         }
 
         .nav-item.active {
@@ -114,17 +116,17 @@
         }
 
         .card-premium {
-            background: rgba(30, 41, 59, 0.4);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             border-radius: 20px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .card-premium:hover {
             transform: translateY(-4px);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border-color: rgba(0, 191, 99, 0.2);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
         }
 
         .gradient-text {
@@ -134,7 +136,7 @@
         }
 
         /* Responsive Mobile Sidebar */
-        @media (max-width: 1024px) {
+        @media (max-width: 1280px) {
             .floating-sidebar {
                 left: -300px;
             }
@@ -145,6 +147,12 @@
 
             .main-content {
                 margin-left: 0;
+            }
+
+            .floating-sidebar.open~.main-content {
+                margin-left: 0;
+                opacity: 0.5;
+                pointer-events: none;
             }
         }
 
@@ -166,28 +174,62 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Global Text Color Fixes */
-        .card-premium label, 
+        /* Global Text & Icon Color Fixes */
+        .card-premium label,
         .card-premium p,
-        .card-premium h1, 
-        .card-premium h2, 
-        .card-premium h3, 
-        .card-premium h4 {
-            color: #f8fafc !important;
+        .card-premium h1,
+        .card-premium h2,
+        .card-premium h3,
+        .card-premium h4,
+        header h1,
+        header p,
+        .nav-item span,
+        .text-slate-100,
+        .text-slate-200,
+        .text-slate-300,
+        .text-slate-400,
+        .text-gray-100,
+        .text-gray-200,
+        .text-gray-300,
+        .text-gray-400 {
+            color: #1e293b !important;
         }
 
-        input:not([type="checkbox"]), select, textarea {
-            color: #f8fafc !important;
-            background-color: rgba(30, 41, 59, 0.5) !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
+        /* Force dark text for specific white classes unless on a primary button or active nav */
+        :not(.bg-indigo-600):not(.bg-primary):not(.bg-primary-600).text-white,
+        :not(.nav-item.active).text-white {
+            color: #1e293b !important;
         }
 
-        input::placeholder, textarea::placeholder {
-            color: rgba(255, 255, 255, 0.4) !important;
+        .nav-item i,
+        i.fas,
+        i.fab,
+        i.far {
+            color: var(--primary) !important;
+        }
+
+        .nav-item.active i,
+        .nav-item.active span {
+            color: white !important;
+        }
+
+        input:not([type="checkbox"]),
+        select,
+        textarea {
+            color: #1e293b !important;
+            background-color: rgba(255, 255, 255, 0.8) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(0, 0, 0, 0.3) !important;
         }
     </style>
 
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    @if (file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @elseif (file_exists(public_path('build/manifest.json')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
         <script src="https://cdn.tailwindcss.com"></script>
@@ -492,18 +534,11 @@
 
     {{-- Sidebar --}}
     <aside class="floating-sidebar" :class="{ 'open': sidebarOpen }">
-        <div class="px-8 py-6 flex flex-col items-center justify-center">
-            <div class="flex items-center gap-2 mb-2">
-                <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
-                    <img src="/logo.png" alt="DOT Logo" class="w-10 h-10 object-contain"
-                        onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fas fa-dot-circle text-primary\'></i>'">
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-xl font-black text-white tracking-widest leading-none">DOT.</span>
-                </div>
-            </div>
-            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center">Digital Operations Team
-            </p>
+        <div class="px-8 py-8 flex flex-col items-center justify-center">
+            <a href="{{ route('dashboard') }}" class="group transition-transform hover:scale-105 duration-300">
+                <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="max-w-[180px] h-auto object-contain"
+                    onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'flex items-center gap-2\'><i class=\'fas fa-dot-circle text-primary text-3xl\'></i><span class=\'text-2xl font-black text-slate-900 tracking-tighter\'>DOT.</span></div>'">
+            </a>
         </div>
 
         <nav class="flex-1 overflow-y-auto mt-4 px-2">
@@ -520,6 +555,12 @@
                     <span>Intelligence Reports</span>
                 </a>
             @endif
+
+            <a href="{{ route('announcements.index') }}"
+                class="nav-item {{ $currentRoute === 'announcements.index' ? 'active' : '' }}">
+                <i class="fas {{ $isAdmin ? 'fa-bullhorn' : 'fa-bell' }} w-5"></i>
+                <span>{{ $isAdmin ? 'Announcement Room' : 'Team Notifications' }}</span>
+            </a>
 
             <a href="{{ route('profile.edit') }}"
                 class="nav-item {{ $currentRoute === 'profile.edit' ? 'active' : '' }}">
@@ -636,22 +677,22 @@
                 <!-- Notifications Button & Dropdown (hidden for admins) -->
                 @if ($user->role == 'user' || $user->role == 'report_manager')
                             <div class="relative" x-data="{
-                                                                        ...notificationsDropdown({
-                                                                            initialUnread: {{ $user->role == 'report_manager'
+                                                                                                            ...notificationsDropdown({
+                                                                                                                initialUnread: {{ $user->role == 'report_manager'
                     ? auth()->user()->unreadNotifications()->whereJsonContains('data->issue_status', 'open')->count()
                     : auth()->user()->unreadNotifications()->count() }},
-                                                                            isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
-                                                                            userId: {{ auth()->id() }},
-                                                                            unreadRtCount: 0,
-                                                                            unreadDbCount: {{ auth()->user()->unreadNotifications()->count() }}
-                                                                        }),
-                                                                        getNotificationUrl(item) {
-                                                                            if (!this._isReportManager && item.id) {
-                                                                                return `/leads/${item.id}/edit`;
-                                                                            }
-                                                                            return item.url || '#';
-                                                                        }
-                                                                    }" x-init="init()">
+                                                                                                                isReportManager: {{ $user->role == 'report_manager' ? 'true' : 'false' }},
+                                                                                                                userId: {{ auth()->id() }},
+                                                                                                                unreadRtCount: 0,
+                                                                                                                unreadDbCount: {{ auth()->user()->unreadNotifications()->count() }}
+                                                                                                            }),
+                                                                                                            getNotificationUrl(item) {
+                                                                                                                if (!this._isReportManager && item.id) {
+                                                                                                                    return `/leads/${item.id}/edit`;
+                                                                                                                }
+                                                                                                                return item.url || '#';
+                                                                                                            }
+                                                                                                        }" x-init="init()">
                                 <button @click="toggle()"
                                     class="p-2 text-gray-500 hover:text-white relative hover:bg-white/5 rounded-lg transition-colors"
                                     aria-label="Notifications">
@@ -734,7 +775,7 @@
                             {{ strtoupper(substr($user->name, 0, 1)) }}
                         </div>
                         <div class="hidden md:block text-left">
-                            <p class="text-xs font-extrabold text-white leading-none">{{ $user->name }}</p>
+                            <p class="text-xs font-extrabold text-slate-900 leading-none">{{ $user->name }}</p>
                             <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-tighter">
                                 {{ $user->role }}
                             </p>

@@ -50,10 +50,13 @@
 
         {{-- Content Grid --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {{-- Identity --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Identity</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Personal Information --}}
+            <div class="{{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-primary-600 rounded-full"></span>
+                    Personal Information
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <dt class="{{ $dt }}">First Name</dt>
                         <dd class="{{ $dd }}">{{ $lead->first_name ?? '—' }}</dd>
@@ -70,15 +73,82 @@
                         <dt class="{{ $dt }}">Gen Code</dt>
                         <dd class="{{ $dd }}">{{ $lead->gen_code ?? '—' }}</dd>
                     </div>
+                    <div>
+                        <dt class="{{ $dt }}">SSN</dt>
+                        <dd class="{{ $dd }}">
+                            @php $ssn = $lead->ssn; @endphp
+                            <span x-data="{ show: false }" class="inline-flex items-center gap-2" x-cloak>
+                                <span x-text="show ? '{{ $ssn ?? '—' }}' : '{{ $ssn ? str_repeat('•', max(strlen($ssn) - 4, 0)) . substr($ssn, -4) : '—' }}'"></span>
+                                @if ($ssn)
+                                    <button type="button" class="text-[10px] px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600"
+                                            x-on:click="show = !show" x-text="show ? 'Hide' : 'Show'"></button>
+                                @endif
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">DOB</dt>
+                        <dd class="{{ $dd }}">{{ $lead->dob ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">MMN</dt>
+                        <dd class="{{ $dd }}">{{ $lead->mmn ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Age</dt>
+                        <dd class="{{ $dd }}">{{ $lead->age ?? '—' }}</dd>
+                    </div>
                 </dl>
             </div>
 
-            {{-- Address --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Address</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Contact Information --}}
+            <div class="{{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-green-600 rounded-full"></span>
+                    Contact Information
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <dt class="{{ $dt }}">Email Address</dt>
+                        <dd class="{{ $dd }}">{{ $lead->email ?? '—' }}</dd>
+                    </div>
                     <div>
-                        <dt class="{{ $dt }}">Street</dt>
+                        <dt class="{{ $dt }}">Primary Phone</dt>
+                        @php
+                            $numbers = is_array($lead->numbers) ? $lead->numbers : json_decode($lead->numbers ?? '[]', true);
+                        @endphp
+                        <dd class="{{ $dd }}">{{ $numbers[0] ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Cell Phone</dt>
+                        <dd class="{{ $dd }}">{{ $lead->cell ?? '—' }}</dd>
+                    </div>
+                    <div class="md:col-span-2">
+                        <dt class="{{ $dt }}">Additional Numbers</dt>
+                        <dd class="{{ $dd }}">
+                            @if(count($numbers ?? []) > 1)
+                                <div class="flex flex-wrap gap-2 mt-1">
+                                    @foreach(array_slice($numbers, 1) as $num)
+                                        <span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">{{ $num }}</span>
+                                    @endforeach
+                                </div>
+                            @else
+                                —
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+
+            {{-- Address Information --}}
+            <div class="{{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                    Address Details
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <dt class="{{ $dt }}">Street Address</dt>
                         <dd class="{{ $dd }}">{{ $lead->street ?? '—' }}</dd>
                     </div>
                     <div>
@@ -96,110 +166,156 @@
                 </dl>
             </div>
 
-            {{-- Contact & Sensitive --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Contact & Sensitive</h3>
-                <dl class="space-y-3">
+            {{-- Financial Overview --}}
+            <div class="{{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-purple-600 rounded-full"></span>
+                    Financial Summary
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <dt class="{{ $dt }} mb-1">SSN</dt>
-                        <dd class="{{ $dd }}">
-                            @php $ssn = $lead->ssn; @endphp
-                            <span x-data="{ show: false }" class="inline-flex items-center gap-2" x-cloak>
-                                <span
-                                    x-text="show ? '{{ $ssn ?? '—' }}' : '{{ $ssn ? str_repeat('•', max(strlen($ssn) - 4, 0)) . substr($ssn, -4) : '—' }}'"></span>
-                                @if ($ssn)
-                                    <button type="button"
-                                        class="text-xs px-2 py-0.5 rounded-lg border border-gray-300/60 dark:border-gray-600/60"
-                                        x-on:click="show = !show" x-text="show ? 'Hide' : 'Show'"></button>
-                                @endif
-                            </span>
-                        </dd>
-                    </div>
-                    <div>
-
-
-                    </div>
-                </dl>
-            </div>
-
-            {{-- Custom & Demographics --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Custom & Demographics</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <dt class="{{ $dt }}">Age</dt>
-                        <dd class="{{ $dd }}">{{ $lead->age ?? '—' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="{{ $dt }}">XFC06</dt>
-                        <dd class="{{ $dd }}">{{ $lead->xfc06 ?? '—' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="{{ $dt }}">XFC07</dt>
-                        <dd class="{{ $dd }}">{{ $lead->xfc07 ?? '—' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="{{ $dt }}">DEMO7</dt>
-                        <dd class="{{ $dd }}">{{ $lead->demo7 ?? '—' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="{{ $dt }}">DEMO9</dt>
-                        <dd class="{{ $dd }}">{{ $lead->demo9 ?? '—' }}</dd>
-                    </div>
-                </dl>
-            </div>
-
-            {{-- Financial --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Financial</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <dt class="{{ $dt }}">FICO</dt>
+                        <dt class="{{ $dt }}">Credit Score</dt>
                         <dd class="{{ $dd }}">{{ $lead->fico ?? '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="{{ $dt }}">Cards</dt>
-                        @if (is_array($lead->cards_json) && count($lead->cards_json) > 0)
-                            @php $cards = implode(', ', $lead->cards_json); @endphp
-                            <dd class="{{ $dd }}">{{ $cards ?? '—' }}</dd>
-                        @else
-                            <dd class="{{ $dd }}">—</dd>
-                        @endif
+                        <dt class="{{ $dt }}">Total Cards</dt>
+                        <dd class="{{ $dd }}">{{ $lead->total_cards ?? '—' }}</dd>
                     </div>
                     <div>
-                        <dt class="{{ $dt }}">Balance</dt>
-                        <dd class="{{ $dd }}">{{ $lead->balance ?? '—' }}</dd>
-                    </div>
-                    <div>
-                        <dt class="{{ $dt }}">Credits</dt>
-                        <dd class="{{ $dd }}">{{ $lead->credits ?? '—' }}</dd>
+                        <dt class="{{ $dt }}">Total Debt</dt>
+                        <dd class="{{ $dd }}">{{ $lead->total_debt ? '$' . number_format($lead->total_debt, 2) : '—' }}</dd>
                     </div>
                 </dl>
             </div>
 
-            {{-- Assignment --}}
-            <div class="{{ $card }} p-6">
-                <h3 class="text-lg font-bold mb-4">Assignment</h3>
-                <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {{-- Bank & Card Details --}}
+            <div class="lg:col-span-2 {{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-amber-600 rounded-full"></span>
+                    Bank & Card Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <dl class="space-y-4">
+                        <div>
+                            <dt class="{{ $dt }}">Bank Name</dt>
+                            <dd class="{{ $dd }}">{{ $lead->bank_name ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Name on Card</dt>
+                            <dd class="{{ $dd }}">{{ $lead->name_on_card ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Card Number</dt>
+                            <dd class="{{ $dd }}">{{ $lead->card_number ?? '—' }}</dd>
+                        </div>
+                    </dl>
+                    <dl class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <dt class="{{ $dt }}">Exp Date</dt>
+                                <dd class="{{ $dd }}">{{ $lead->exp_date ?? '—' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="{{ $dt }}">CVC</dt>
+                                <dd class="{{ $dd }}">{{ $lead->cvc ?? '—' }}</dd>
+                            </div>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Balance</dt>
+                            <dd class="{{ $dd }}">{{ $lead->balance ? '$' . number_format($lead->balance, 2) : '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Available</dt>
+                            <dd class="{{ $dd }}">{{ $lead->available ? '$' . number_format($lead->available, 2) : '—' }}</dd>
+                        </div>
+                    </dl>
+                    <dl class="space-y-4">
+                        <div>
+                            <dt class="{{ $dt }}">Last Payment</dt>
+                            <dd class="{{ $dd }}">
+                                @if($lead->last_payment_amount)
+                                    ${{ number_format($lead->last_payment_amount, 2) }} <span class="text-xs text-gray-500 font-normal">on {{ $lead->last_payment_date }}</span>
+                                @else
+                                    —
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Next Payment</dt>
+                            <dd class="{{ $dd }}">
+                                @if($lead->next_payment_amount)
+                                    ${{ number_format($lead->next_payment_amount, 2) }} <span class="text-xs text-gray-500 font-normal">on {{ $lead->next_payment_date }}</span>
+                                @else
+                                    —
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="{{ $dt }}">Credit Limit</dt>
+                            <dd class="{{ $dd }}">{{ $lead->credit_limit ? '$' . number_format($lead->credit_limit, 2) : '—' }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
                     <div>
-                        <dt class="{{ $dt }}">TO</dt>
+                        <dt class="{{ $dt }}">APR</dt>
+                        <dd class="{{ $dd }}">{{ $lead->apr ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Monthly Charge</dt>
+                        <dd class="{{ $dd }}">{{ $lead->charge ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Tollfree Number</dt>
+                        <dd class="{{ $dd }}">{{ $lead->tollfree ?? '—' }}</dd>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Assignment Info --}}
+            <div class="lg:col-span-2 {{ $card }}">
+                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-gray-600 rounded-full"></span>
+                    System & Assignment
+                </h3>
+                <dl class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                        <dt class="{{ $dt }}">Assigned TO</dt>
                         <dd class="{{ $dd }}">{{ optional($lead->assignee)->name ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="{{ $dt }}">Super Agent</dt>
                         <dd class="{{ $dd }}">{{ optional($lead->superAgent)->name ?? '—' }}</dd>
                     </div>
-
                     @if ($hasCloserColumn)
-                        <div>
-                            <dt class="{{ $dt }}">Closer</dt>
-                            <dd class="{{ $dd }}">{{ optional($lead->closer)->name ?? '—' }}</dd>
-                        </div>
+                    <div>
+                        <dt class="{{ $dt }}">Closer</dt>
+                        <dd class="{{ $dd }}">{{ optional($lead->closer)->name ?? '—' }}</dd>
+                    </div>
                     @endif
-
                     <div>
                         <dt class="{{ $dt }}">Created By</dt>
                         <dd class="{{ $dd }}">{{ optional($lead->creator)->name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Agent Name</dt>
+                        <dd class="{{ $dd }}">{{ $lead->agent_name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">TL Name</dt>
+                        <dd class="{{ $dd }}">{{ $lead->tl_name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Closer Name</dt>
+                        <dd class="{{ $dd }}">{{ $lead->closer_name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Verifier Name</dt>
+                        <dd class="{{ $dd }}">{{ $lead->verifier_name ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="{{ $dt }}">Combined Charge</dt>
+                        <dd class="{{ $dd }}">{{ $lead->combined_charge ?? '—' }}</dd>
                     </div>
                 </dl>
             </div>
