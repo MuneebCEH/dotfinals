@@ -536,7 +536,7 @@
     <aside class="floating-sidebar" :class="{ 'open': sidebarOpen }">
         <div class="px-8 py-8 flex flex-col items-center justify-center">
             <a href="{{ route('dashboard') }}" class="group transition-transform hover:scale-105 duration-300">
-                <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="max-w-[180px] h-auto object-contain"
+                <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="max-w-[180px] h-auto object-contain mix-blend-multiply"
                     onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'flex items-center gap-2\'><i class=\'fas fa-dot-circle text-primary text-3xl\'></i><span class=\'text-2xl font-black text-slate-900 tracking-tighter\'>DOT.</span></div>'">
             </a>
         </div>

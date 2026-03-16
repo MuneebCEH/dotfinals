@@ -13,6 +13,13 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # Route Vite build directory requests to public/build
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
+
+    # Route common static assets to public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)\.(png|jpg|jpeg|gif|webp|svg|css|js|woff|woff2|ttf|eot|ico)$ public/$1.$2 [L]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

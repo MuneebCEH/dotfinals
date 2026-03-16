@@ -76,7 +76,7 @@
                 <div class="flex justify-center">
                     <div class="relative group">
                         <div class="absolute -inset-10 bg-primary-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                        <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="w-64 h-auto object-contain relative z-10 transition-all duration-500 group-hover:scale-105" 
+                        <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="w-64 h-auto object-contain mix-blend-multiply relative z-10 transition-all duration-500 group-hover:scale-105" 
                              onerror="this.onerror=null; this.src='https://via.placeholder.com/200?text=DOT'">
                     </div>
                 </div>

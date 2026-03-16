@@ -63,7 +63,7 @@
                     </ul>
                 </div>
                 <div class="bg-white dark:bg-[#161615] relative lg:-ml-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-r-lg aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden flex items-center justify-center p-12">
-                    <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="w-full h-auto object-contain transition-all duration-700 hover:scale-105">
+                    <img src="{{ asset('logo.png') }}" alt="DOT Logo" class="w-full h-auto object-contain mix-blend-multiply transition-all duration-700 hover:scale-105">
                 </div>
                     {{-- Light Mode 12 SVG --}}
                     <svg class="w-[448px] max-w-none relative -mt-[4.9rem] -ml-8 lg:ml-0 lg:-mt-[6.6rem] dark:hidden" viewBox="0 0 440 376" fill="none" xmlns="http://www.w3.org/2000/svg">
