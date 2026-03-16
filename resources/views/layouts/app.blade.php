@@ -662,6 +662,21 @@
                     <span>Death Leads</span>
                 </a>
             @endif
+            
+            @if ($isReportManager)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Service Desk</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ route('issues.index') }}"
+                    class="nav-item {{ $currentRoute === 'issues.index' ? 'active' : '' }}">
+                    <i class="fas fa-file-contract w-5"></i>
+                    <span>Report Manager</span>
+                </a>
+            @endif
 
             @if ($isRegularUser)
                 <div class="px-6 mb-4 mt-8">
