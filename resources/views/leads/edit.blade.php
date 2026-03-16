@@ -450,7 +450,7 @@
 
                     {{-- Report button (does not submit lead form) - Show only if user can report AND lead doesn't have existing issues --}}
                     @php
-                        $canReport = auth()->user()->role === 'admin' || $lead->assigned_to === auth()->id();
+                        $canReport = auth()->user()->role === 'admin' || auth()->user()->role === 'user' || $lead->assigned_to === auth()->id();
                         $hasExistingIssue = $lead->issues()->exists();
                     @endphp
 

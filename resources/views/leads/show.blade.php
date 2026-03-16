@@ -31,7 +31,66 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3"
+                     x-data="{
+                        issueOpen: false,
+                        isSubmitting: false
+                     }"
+                     @keydown.escape.window="issueOpen=false">
+                    @php
+                        $canReport = auth()->user()->role === 'admin' || auth()->user()->role === 'user' || $lead->assigned_to === auth()->id();
+                        $hasExistingIssue = $lead->issues()->exists();
+                    @endphp
+
+                    @if ($canReport && !$hasExistingIssue)
+                        <button type="button" @click="issueOpen = true"
+                                class="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Request Report
+                        </button>
+
+                        {{-- Modal teleported --}}
+                        <template x-teleport="body">
+                            <div x-cloak x-show="issueOpen" x-transition.opacity
+                                 class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="issueOpen=false"></div>
+                                <div role="dialog" aria-modal="true" class="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-800/90 shadow-2xl">
+                                    <div class="px-6 py-4 bg-gradient-to-r from-primary-500 to-primary-600 text-white flex items-center justify-between">
+                                        <h3 class="text-lg font-semibold">Report a Request</h3>
+                                        <button @click="issueOpen=false" class="p-1 rounded hover:bg-white/20"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    <form method="POST" action="{{ route('leads.issues.store', $lead) }}" class="p-6 space-y-4 overflow-y-auto" style="max-height: calc(90vh - 140px);">
+                                        @csrf
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+                                            <input name="title" required maxlength="160" class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Priority</label>
+                                            <select name="priority" class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80">
+                                                <option value="normal" selected>Normal</option>
+                                                <option value="low">Low</option>
+                                                <option value="high">High</option>
+                                                <option value="urgent">Urgent</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
+                                            <textarea name="description" required maxlength="5000" rows="5" class="mt-1 w-full px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80"></textarea>
+                                        </div>
+                                        <div class="flex justify-end gap-2 pt-4">
+                                            <button type="button" @click="issueOpen=false" class="px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-700/80 hover:bg-gray-50 dark:hover:bg-gray-700 transition">Cancel</button>
+                                            <button type="submit" class="px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow hover:shadow-md transition">Submit Request</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </template>
+                    @endif
+
                     @if (auth()->user()->isAdmin() || $lead->assigned_to === auth()->id())
                         <a href="{{ route('leads.edit', $lead) }}"
                             class="px-4 py-2 rounded-xl bg-warning-600 text-white hover:opacity-90 transition">Edit</a>
