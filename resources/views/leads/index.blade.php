@@ -542,7 +542,7 @@
                                                 <i class="fas fa-user-shield"></i>
                                             </div>
                                             <span
-                                                class="text-xs font-bold text-slate-800">{{ $lead->assignee?->name ?? 'None' }}</span>
+                                                class="text-xs font-bold text-slate-800">{{ $lead->creator?->name ?? 'None' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
