@@ -53,12 +53,6 @@
                     return false;
                 }
                 this.isSubmitting = true;
-
-                // Add reload after 2 seconds
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-
                 return true;
             }
         }">
