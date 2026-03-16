@@ -89,6 +89,8 @@
             border-radius: 16px;
             margin-bottom: 24px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            position: relative;
+            z-index: 100;
         }
 
         .nav-item {
@@ -176,18 +178,18 @@
 
         /* Global Text & Icon Color Fixes */
         .card-premium label,
-        .card-premium p,
+        .card-premium p:not(.notif-text),
         .card-premium h1,
         .card-premium h2,
-        .card-premium h3,
+        .card-premium h3:not(.notif-title),
         .card-premium h4,
         header h1,
         header p,
         .nav-item span,
-        .text-slate-100,
-        .text-slate-200,
-        .text-slate-300,
-        .text-slate-400,
+        .text-slate-100:not(.notif-info),
+        .text-slate-200:not(.notif-info),
+        .text-slate-300:not(.notif-info),
+        .text-slate-400:not(.notif-info),
         .text-gray-100,
         .text-gray-200,
         .text-gray-300,
@@ -195,9 +197,9 @@
             color: #1e293b !important;
         }
 
-        /* Force dark text for specific white classes unless on a primary button or active nav */
-        :not(.bg-indigo-600):not(.bg-primary):not(.bg-primary-600).text-white,
-        :not(.nav-item.active).text-white {
+        /* Force dark text for specific white classes unless on a primary button or active nav or notifications */
+        :not(.bg-indigo-600):not(.bg-primary):not(.bg-primary-600):not(.notif-container).text-white,
+        :not(.nav-item.active):not(.notif-container).text-white {
             color: #1e293b !important;
         }
 
@@ -799,18 +801,18 @@
                                                                 class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary-400 group-hover:scale-110 transition-transform">
                                                                 <i class="fas fa-satellite-dish"></i>
                                                             </div>
-                                                            <div class="flex-1 min-w-0">
-                                                                <p class="text-sm font-bold text-white flex items-center gap-2">
+                                                            <div class="flex-1 min-w-0 notif-container">
+                                                                <p class="text-sm font-bold text-white flex items-center gap-2 notif-title" style="color: white !important;">
                                                                     <span
                                                                         x-text="it.issue ? `Issue #${it.issue.id}` : `Lead #${it.id}`"></span>
                                                                     <span x-show="it.unread"
                                                                         class="h-1.5 w-1.5 rounded-full bg-red-500 shadow-lg shadow-red-500/40"></span>
                                                                 </p>
-                                                                <p class="text-xs text-slate-200 line-clamp-2 mt-0.5"
+                                                                <p class="text-xs text-slate-200 line-clamp-2 mt-0.5 notif-text" style="color: #e2e8f0 !important;"
                                                                     x-text="it.message || it.first_name + ' ' + it.surname"></p>
                                                                 <div class="flex items-center gap-3 mt-2">
                                                                     <span
-                                                                        class="text-[10px] font-black uppercase text-slate-300 tracking-tighter"
+                                                                        class="text-[10px] font-black uppercase text-slate-300 tracking-tighter notif-info" style="color: #cbd5e1 !important;"
                                                                         x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)"></span>
                                                                     <span
                                                                         class="px-2 py-0.5 rounded-md bg-primary-500/10 text-primary-400 text-[9px] font-black uppercase tracking-wider"
