@@ -225,6 +225,21 @@
         textarea::placeholder {
             color: rgba(0, 0, 0, 0.3) !important;
         }
+
+        /* Ticker Animation */
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            padding-right: 100%;
+            animation: ticker 25s linear infinite;
+        }
+        .ticker-container:hover .ticker-content {
+            animation-play-state: paused;
+        }
     </style>
 
     @if (file_exists(public_path('hot')))
@@ -532,6 +547,27 @@
 <body x-data="{ sidebarOpen: false }">
     <div class="mesh-bg"></div>
 
+    @if($activeTicker)
+    <div class="fixed top-0 left-0 w-full z-[100] h-10 bg-{{ $activeTicker->theme_color === 'red' ? 'rose' : ($activeTicker->theme_color === 'green' ? 'emerald' : ($activeTicker->theme_color === 'blue' ? 'sky' : ($activeTicker->theme_color === 'yellow' ? 'amber' : $activeTicker->theme_color))) }}-600 text-white flex items-center overflow-hidden border-b border-white/10 shadow-lg">
+        <div class="flex items-center gap-3 px-6 h-full bg-black/10 backdrop-blur-md z-10 border-r border-white/10 shrink-0">
+            <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em]">Live Alert</span>
+        </div>
+        <div class="ticker-container flex-1 h-full flex items-center">
+            <div class="ticker-content text-sm font-bold tracking-tight">
+                {{ $activeTicker->message }} &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; {{ $activeTicker->message }} &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; {{ $activeTicker->message }}
+            </div>
+        </div>
+    </div>
+    <style>
+        .floating-sidebar { top: 60px !important; height: calc(100vh - 80px) !important; }
+        .main-content { padding-top: 60px !important; }
+    </style>
+    @endif
+
     {{-- Sidebar --}}
     <aside class="floating-sidebar" :class="{ 'open': sidebarOpen }">
         <div class="px-8 py-8 flex flex-col items-center justify-center">
@@ -588,6 +624,11 @@
                     class="nav-item {{ $currentRoute === 'reports.index' ? 'active' : '' }}">
                     <i class="fas fa-file-invoice w-5"></i>
                     <span>Global Reports</span>
+                </a>
+                <a href="{{ route('ticker-alerts.index') }}"
+                    class="nav-item {{ $currentRoute === 'ticker-alerts.index' ? 'active' : '' }}">
+                    <i class="fas fa-bullhorn w-5"></i>
+                    <span>Push Alert</span>
                 </a>
             @endif
 

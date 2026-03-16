@@ -155,6 +155,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::post('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        // Live Push Alert Ticker
+        Route::get('ticker-alerts', [\App\Http\Controllers\TickerAlertController::class, 'index'])->name('ticker-alerts.index');
+        Route::post('ticker-alerts', [\App\Http\Controllers\TickerAlertController::class, 'store'])->name('ticker-alerts.store');
+        Route::patch('ticker-alerts/{ticker}/toggle', [\App\Http\Controllers\TickerAlertController::class, 'toggleStatus'])->name('ticker-alerts.toggle');
+        Route::delete('ticker-alerts/{ticker}', [\App\Http\Controllers\TickerAlertController::class, 'destroy'])->name('ticker-alerts.destroy');
     });
     // Announcements
     Route::get('/announcements', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');

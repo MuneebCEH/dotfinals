@@ -8,6 +8,7 @@ use App\Observers\LeadObserver;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,6 +53,12 @@ class AppServiceProvider extends ServiceProvider
                 $attendance->notes = trim(($attendance->notes ?? '') . "\n[Auto-checkout on logout]");
                 $attendance->save();
             }
+        });
+
+        // Share the active ticker alert with all views
+        View::composer('*', function ($view) {
+            $ticker = \App\Models\TickerAlert::where('is_active', true)->latest()->first();
+            $view->with('activeTicker', $ticker);
         });
     }
 }
