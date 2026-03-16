@@ -671,6 +671,10 @@
                     <i class="fas fa-th-large w-5"></i>
                     <span>Overview</span>
                 </a>
+                <a href="{{ route('leads.create') }}" class="nav-item {{ $currentRoute === 'leads.create' ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle w-5"></i>
+                    <span>Onboard Lead</span>
+                </a>
                 <a href="{{ route('leads.mine') }}" class="nav-item {{ $currentRoute === 'leads.mine' ? 'active' : '' }}">
                     <i class="fas fa-list-ul w-5"></i>
                     <span>My Workspace</span>

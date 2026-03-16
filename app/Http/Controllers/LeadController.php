@@ -362,7 +362,9 @@ class LeadController extends Controller
 
     public function create()
     {
-        abort_unless($this->isElevated(), 403);
+        $u = auth()->user();
+        $canCreate = $u->isAdmin() || $u->role === 'lead_manager' || $u->role === 'user';
+        abort_unless($canCreate, 403);
 
         $categories = Category::orderBy('name')->get();
         $tos = User::where('role', 'user')->orderBy('name')->get();           // Î“Ã‡Â£Select TOÎ“Ã‡Â¥
@@ -379,8 +381,10 @@ class LeadController extends Controller
 
         if (!Auth::user()->isAdmin()) {
             unset($data['assigned_to'], $data['super_agent_id']);
-            // If you want to auto-assign to creator, uncomment:
-            // $data['assigned_to'] = Auth::id();
+            // Auto-assign to the creator if they are an agent
+            if (Auth::user()->role === 'user') {
+                $data['assigned_to'] = Auth::id();
+            }
         }
 
         $data['numbers'] = collect($data['numbers'] ?? [])
