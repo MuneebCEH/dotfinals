@@ -90,7 +90,7 @@
             margin-bottom: 24px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             position: relative;
-            z-index: 100;
+            z-index: 110;
         }
 
         .nav-item {
@@ -566,8 +566,8 @@
         </div>
     </div>
     <style>
-        .floating-sidebar { top: 60px !important; height: calc(100vh - 80px) !important; }
-        .main-content { padding-top: 60px !important; }
+        .floating-sidebar { top: 70px !important; height: calc(100vh - 90px) !important; }
+        .main-content { padding-top: 80px !important; }
     </style>
     @endif
 
@@ -776,7 +776,7 @@
                                     x-transition:leave="transition ease-in duration-150"
                                     x-transition:leave-start="opacity-100 translate-y-0"
                                     x-transition:leave-end="opacity-0 translate-y-2"
-                                    class="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 z-[100]">
+                                    class="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl py-2 z-[120]">
                                     <div class="px-5 py-4 border-b border-white/10 flex justify-between items-center">
                                         <h3 class="font-bold text-white tracking-tight">Intelligence Stream</h3>
                                         <button @click="markAllRead()"
