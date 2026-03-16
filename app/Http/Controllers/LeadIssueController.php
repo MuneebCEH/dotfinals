@@ -35,10 +35,10 @@ class LeadIssueController extends Controller
         $query = LeadIssue::with(['lead', 'reporter'])
             ->latest();
 
-        // ðŸ”‘ Only show issues assigned to logged-in report manager
-        if ($user->role === 'report_manager') {
-            $query->where('resolver_id', $user->id);
-        }
+        // All managers should see all issues now (global visibility)
+        // if ($user->role === 'report_manager') {
+        //     $query->where('resolver_id', $user->id);
+        // }
 
         if ($s = $request->get('status')) {
             $query->where('status', $s);
@@ -57,7 +57,7 @@ class LeadIssueController extends Controller
 
         // Count for tabs (also restricted to this manager)
         $counts = LeadIssue::selectRaw('status, COUNT(*) as c')
-            ->when($user->role === 'report_manager', fn($q) => $q->where('resolver_id', $user->id))
+            // ->when($user->role === 'report_manager', fn($q) => $q->where('resolver_id', $user->id))
             ->groupBy('status')
             ->pluck('c', 'status');
 
