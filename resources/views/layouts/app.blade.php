@@ -675,8 +675,8 @@
                     <i class="fas fa-list-ul w-5"></i>
                     <span>My Workspace</span>
                 </a>
-                <a href="{{ route('leads.callbacks') }}"
-                    class="nav-item {{ $currentRoute === 'leads.callbacks' ? 'active' : '' }}">
+                <a href="{{ route('callbacks.index') }}"
+                    class="nav-item {{ $currentRoute === 'callbacks.index' ? 'active' : '' }}">
                     <i class="fas fa-phone-alt w-5"></i>
                     <span>Followups</span>
                 </a>
