@@ -377,63 +377,162 @@
                     </div>
 
                     <div class="p-6 space-y-6">
-                        @php $lead = $issue->lead; @endphp
-                        {{-- keep your existing lead sections here --}}
-                        @if ($lead->notes)
-                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                                <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
-                                    Notes
+                        @php 
+                            $lead = $issue->lead; 
+                            $dt = 'text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1';
+                            $dd = 'text-base font-semibold text-gray-900 dark:text-white';
+                            $hasCloserColumn = \Illuminate\Support\Facades\Schema::hasColumn('leads', 'closer_id');
+                        @endphp
+                        
+                        {{-- Content Grid --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Personal Information --}}
+                            <div class="space-y-4">
+                                <h3 class="text-sm font-bold flex items-center gap-2">
+                                    <span class="w-1.5 h-4 bg-primary-600 rounded-full"></span>
+                                    Personal Information
                                 </h3>
-                                <div class="prose dark:prose-invert max-w-none">
-                                    <p class="text-gray-900 dark:text-white whitespace-pre-wrap">{{ $lead->notes }}</p>
-                                </div>
+                                <dl class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <dt class="{{ $dt }}">First Name</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->first_name ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Surname</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->surname ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">SSN</dt>
+                                        <dd class="{{ $dd }}">
+                                            @php $ssn = $lead->ssn; @endphp
+                                            <span x-data="{ show: false }" class="inline-flex items-center gap-2">
+                                                <span x-text="show ? '{{ $ssn ?? '—' }}' : '{{ $ssn ? str_repeat('•', max(strlen($ssn) - 4, 0)) . substr($ssn, -4) : '—' }}'"></span>
+                                                @if ($ssn)
+                                                    <button type="button" class="text-[9px] px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600"
+                                                            x-on:click="show = !show" x-text="show ? 'Hide' : 'Show'"></button>
+                                                @endif
+                                            </span>
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">DOB</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->dob ?? '—' }}</dd>
+                                    </div>
+                                </dl>
                             </div>
-                        @endif
 
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4">
-                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0 1 18 0z"></path>
-                                </svg>
-                                Timestamps
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Created</label>
-                                    <p class="text-gray-900 dark:text-white">
-                                        {{ $lead->created_at->format('M d, Y g:i A') }}</p>
-                                </div>
-                                <div>
-                                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400">Last
-                                        Updated</label>
-                                    <p class="text-gray-900 dark:text-white">
-                                        {{ $lead->updated_at->format('M d, Y g:i A') }}</p>
-                                </div>
+                            {{-- Contact Information --}}
+                            <div class="space-y-4">
+                                <h3 class="text-sm font-bold flex items-center gap-2">
+                                    <span class="w-1.5 h-4 bg-green-600 rounded-full"></span>
+                                    Contact
+                                </h3>
+                                <dl class="grid grid-cols-1 gap-4">
+                                    <div>
+                                        <dt class="{{ $dt }}">Primary Phone</dt>
+                                        @php
+                                            $numbers = is_array($lead->numbers) ? $lead->numbers : json_decode($lead->numbers ?? '[]', true);
+                                        @endphp
+                                        <dd class="{{ $dd }}">{{ $numbers[0] ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Cell Phone</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->cell ?? '—' }}</dd>
+                                    </div>
+                                </dl>
                             </div>
+
+                            {{-- Address Details --}}
+                            <div class="md:col-span-2 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                                <h3 class="text-sm font-bold flex items-center gap-2">
+                                    <span class="w-1.5 h-4 bg-blue-600 rounded-full"></span>
+                                    Address Details
+                                </h3>
+                                <dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="col-span-2">
+                                        <dt class="{{ $dt }}">Street</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->street ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">City</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->city ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">State/Zip</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->state_abbreviation ?? '' }} {{ $lead->zip_code ?? '—' }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            {{-- Financial & Bank --}}
+                            <div class="md:col-span-2 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                                <h3 class="text-sm font-bold flex items-center gap-2">
+                                    <span class="w-1.5 h-4 bg-amber-600 rounded-full"></span>
+                                    Bank & Card Summary
+                                </h3>
+                                <dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <dt class="{{ $dt }}">Bank Name</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->bank_name ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Card Number</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->card_number ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Exp/CVC</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->exp_date ?? '—' }} / {{ $lead->cvc ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Balance/Avail</dt>
+                                        <dd class="{{ $dd }}">
+                                            @if($lead->balance) ${{ number_format($lead->balance, 2) }} @else — @endif 
+                                            / 
+                                            @if($lead->available) ${{ number_format($lead->available, 2) }} @else — @endif
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            {{-- System Info --}}
+                            <div class="md:col-span-2 space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                                <h3 class="text-sm font-bold flex items-center gap-2">
+                                    <span class="w-1.5 h-4 bg-gray-600 rounded-full"></span>
+                                    System Info
+                                </h3>
+                                <dl class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <dt class="{{ $dt }}">Agent Name</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->agent_name ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">TL Name</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->tl_name ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Closer Name</dt>
+                                        <dd class="{{ $dd }}">{{ $lead->closer_name ?? '—' }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="{{ $dt }}">Created At</dt>
+                                        <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $lead->created_at->format('M d, Y g:i A') }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+
+                            @if ($lead->notes)
+                                <div class="md:col-span-2 space-y-2 pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                                    <h3 class="text-sm font-bold">Notes</h3>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $lead->notes }}</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
                     <div
                         class="flex justify-end gap-3 p-6 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-700/20 rounded-b-2xl">
                         <button onclick="closeLeadModal()"
-                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-xl transition-colors">Close</button>
-                        <a href="{{ route('leads.pdf', $lead) }}" target="_blank"
-                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors inline-flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4M14 4h6m0 0v6m0-6L10 14">
-                                </path>
-                            </svg>
-                            Download Lead Details
-                        </a>
+                            class="px-6 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-xl font-bold transition-colors">Close</button>
                     </div>
                 </div>
             </div>
