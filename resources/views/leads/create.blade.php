@@ -425,7 +425,7 @@
                             @enderror
                         </div>
 
-                        @if (auth()->user()?->isAdmin())
+                        @if (auth()->user()?->isAdmin() || auth()->user()?->role === 'user')
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Select
                                     TO</label>

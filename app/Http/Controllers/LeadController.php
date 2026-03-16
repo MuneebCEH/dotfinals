@@ -379,12 +379,13 @@ class LeadController extends Controller
     {
         $data = $request->validated();
 
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user()->isAdmin() && Auth::user()->role !== 'user') {
             unset($data['assigned_to'], $data['super_agent_id']);
-            // Auto-assign to the creator if they are an agent
-            if (Auth::user()->role === 'user') {
-                $data['assigned_to'] = Auth::id();
-            }
+        }
+
+        // If it's a standard agent and they DIDN'T select a TO, auto-assign to themselves
+        if (Auth::user()->role === 'user' && empty($data['assigned_to'])) {
+            $data['assigned_to'] = Auth::id();
         }
 
         $data['numbers'] = collect($data['numbers'] ?? [])
@@ -488,8 +489,8 @@ class LeadController extends Controller
             $data['numbers'] = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
             $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
 
-            // Non-elevated users can't change assignment fields
-            if (!$this->isElevated()) {
+            // Non-elevated users can't change assignment fields (except Standard Agents who are now allowed)
+            if (!$this->isElevated() && $user->role !== 'user') {
                 unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
             }
 
