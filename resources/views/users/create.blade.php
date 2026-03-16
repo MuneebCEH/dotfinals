@@ -69,16 +69,15 @@
                                         class="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white appearance-none focus:border-indigo-500/50 focus:ring-0 transition-all cursor-pointer">
                                         <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>Standard Agent
                                         </option>
-                                        <option value="closer" {{ old('role') === 'closer' ? 'selected' : '' }}>Closer
-                                            Authority</option>
+                                        <option value="closer" {{ old('role') === 'closer' ? 'selected' : '' }}>Closer</option>
                                         <option value="super_agent" {{ old('role') === 'super_agent' ? 'selected' : '' }}>
-                                            Supervisor</option>
-                                        <option value="report_manager" {{ old('role') === 'report_manager' ? 'selected' : '' }}>Intel Analyst</option>
+                                            Super agent</option>
+                                        <option value="report_manager" {{ old('role') === 'report_manager' ? 'selected' : '' }}>Report Manager</option>
                                         <option value="lead_manager" {{ old('role') === 'lead_manager' ? 'selected' : '' }}>
-                                            Logistics Manager</option>
+                                            TL Manager</option>
                                         <option value="max_out" {{ old('role') === 'max_out' ? 'selected' : '' }}>VM Protocol
                                         </option>
-                                        <option value="death_submitted" {{ old('role') === 'death_submitted' ? 'selected' : '' }}>Archive Specialist</option>
+                                        <option value="death_submitted" {{ old('role') === 'death_submitted' ? 'selected' : '' }}>verification manager</option>
                                         <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>System
                                             Administrator</option>
                                     </select>

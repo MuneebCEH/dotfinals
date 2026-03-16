@@ -16,7 +16,7 @@
                 <h1 class="text-4xl font-black tracking-tight text-white mb-2">{{ $user->name }}</h1>
                 <div class="flex items-center gap-3">
                     <span class="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-wider border border-indigo-500/20">
-                        {{ str_replace('_', ' ', $user->role) }}
+                        {{ $user->role_label }}
                     </span>
                     <span class="text-slate-500 text-xs font-bold">{{ $user->email }}</span>
                 </div>

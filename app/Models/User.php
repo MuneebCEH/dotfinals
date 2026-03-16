@@ -91,4 +91,23 @@ class User extends Authenticatable
     {
         return $this->notifications_read_at;
     }
+
+    /**
+     * Get human-readable label for the user's role
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        $map = [
+            'user'            => 'Standard Agent',
+            'closer'          => 'Closer',
+            'super_agent'     => 'Super agent',
+            'report_manager'  => 'Report Manager',
+            'lead_manager'    => 'TL Manager',
+            'max_out'         => 'VM Protocol',
+            'death_submitted' => 'verification manager',
+            'admin'           => 'System Administrator',
+        ];
+
+        return $map[$this->role] ?? str_replace('_', ' ', $this->role);
+    }
 }

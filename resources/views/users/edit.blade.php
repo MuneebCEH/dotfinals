@@ -72,12 +72,12 @@
                                         <option value="user" {{ old('role', $user->role) === 'user' ? 'selected' : '' }}>
                                             Standard Agent</option>
                                         <option value="closer" {{ old('role', $user->role) === 'closer' ? 'selected' : '' }}>
-                                            Closer Authority</option>
-                                        <option value="super_agent" {{ old('role', $user->role) === 'super_agent' ? 'selected' : '' }}>Supervisor</option>
-                                        <option value="report_manager" {{ old('role', $user->role) === 'report_manager' ? 'selected' : '' }}>Intel Analyst</option>
-                                        <option value="lead_manager" {{ old('role', $user->role) === 'lead_manager' ? 'selected' : '' }}>Logistics Manager</option>
+                                            Closer</option>
+                                        <option value="super_agent" {{ old('role', $user->role) === 'super_agent' ? 'selected' : '' }}>Super agent</option>
+                                        <option value="report_manager" {{ old('role', $user->role) === 'report_manager' ? 'selected' : '' }}>Report Manager</option>
+                                        <option value="lead_manager" {{ old('role', $user->role) === 'lead_manager' ? 'selected' : '' }}>TL Manager</option>
                                         <option value="max_out" {{ old('role', $user->role) === 'max_out' ? 'selected' : '' }}>VM Protocol</option>
-                                        <option value="death_submitted" {{ old('role', $user->role) === 'death_submitted' ? 'selected' : '' }}>Archive Specialist</option>
+                                        <option value="death_submitted" {{ old('role', $user->role) === 'death_submitted' ? 'selected' : '' }}>verification manager</option>
                                         <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>
                                             System Administrator</option>
                                     </select>
@@ -166,7 +166,7 @@
                         <div>
                             <p class="text-xs font-black text-white uppercase tracking-wider">{{ $user->name }}</p>
                             <p class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">
-                                {{ str_replace('_', ' ', $user->role) }}</p>
+                                {{ $user->role_label }}</p>
                         </div>
                     </div>
                     <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full"></div>

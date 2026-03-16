@@ -818,9 +818,7 @@
                         </div>
                         <div class="hidden md:block text-left">
                             <p class="text-xs font-extrabold text-slate-900 leading-none">{{ $user->name }}</p>
-                            <p class="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-tighter">
-                                {{ $user->role }}
-                            </p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase leading-none mt-1">{{ Auth::user()->role_label }}</p>
                         </div>
                         <i
                             class="fas fa-chevron-down text-[10px] text-slate-500 group-hover:text-white transition-colors"></i>

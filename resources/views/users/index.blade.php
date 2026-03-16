@@ -133,7 +133,7 @@
                                                                     @endphp
                                      <span
                                                                         class="inline-flex items-center px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-{{ $rColor }}-500/10 text-{{ $rColor }}-400 border border-{{ $rColor }}-500/20">
-                                                                        {{ str_replace('_', ' ', $user->role) }}
+                                                                         {{ $user->role_label }}
                                                                     </span>
                                                                 </td>
                                                                 <td class="px-8 py-6">
