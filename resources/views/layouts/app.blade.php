@@ -806,11 +806,11 @@
                                                                     <span x-show="it.unread"
                                                                         class="h-1.5 w-1.5 rounded-full bg-red-500 shadow-lg shadow-red-500/40"></span>
                                                                 </p>
-                                                                <p class="text-xs text-slate-400 line-clamp-2 mt-0.5"
+                                                                <p class="text-xs text-slate-200 line-clamp-2 mt-0.5"
                                                                     x-text="it.message || it.first_name + ' ' + it.surname"></p>
                                                                 <div class="flex items-center gap-3 mt-2">
                                                                     <span
-                                                                        class="text-[10px] font-black uppercase text-slate-500 tracking-tighter"
+                                                                        class="text-[10px] font-black uppercase text-slate-300 tracking-tighter"
                                                                         x-text="timeAgo(it.issue ? it.issue.updated_at : it.updated_at)"></span>
                                                                     <span
                                                                         class="px-2 py-0.5 rounded-md bg-primary-500/10 text-primary-400 text-[9px] font-black uppercase tracking-wider"
