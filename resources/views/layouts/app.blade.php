@@ -236,6 +236,7 @@
             white-space: nowrap;
             padding-right: 100%;
             animation: ticker 25s linear infinite;
+            color: white !important;
         }
         .ticker-container:hover .ticker-content {
             animation-play-state: paused;
@@ -554,7 +555,7 @@
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em]">Live Alert</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white">Live Alert</span>
         </div>
         <div class="ticker-container flex-1 h-full flex items-center">
             <div class="ticker-content text-sm font-bold tracking-tight">
