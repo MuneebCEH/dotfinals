@@ -58,7 +58,7 @@
                 $leadQuery->where('status', 'Death Submitted');
             } elseif ($isMaxOutUser) {
                 $leadQuery->where('status', 'Max Out');
-            } elseif ($isRegularUser || $isLeadManager) {
+            } elseif ($isRegularUser || $isLeadManager || $user->isSuperAgent()) {
                 // Use the shared visibility logic from the model if possible, 
                 // or replicate forUser() here for metrics consistency.
                 $leadQuery->where(function ($query) use ($userId) {
