@@ -538,13 +538,20 @@
 
 @php
     $user = auth()->user();
-    $isAdmin = $user && ((method_exists($user, 'isAdmin') && $user->isAdmin()) || (method_exists($user, 'hasRole') && $user->hasRole('admin')) || ($user->role ?? null) === 'admin');
-    $isSuperAgent = $user && ((method_exists($user, 'isSuperAgent') && $user->isSuperAgent()) || ($user->role ?? null) === 'super_agent');
-    $isSuperAgent1 = $user && ((method_exists($user, 'isSuperAgent1') && $user->isSuperAgent1()) || ($user->role ?? null) === 'super_agent_1');
-    $isMaxOutUser = $user && (($user->role ?? null) === 'max_out');
-    $isThatSubmittedUser = $user && (($user->role ?? null) === 'death_submitted');
-    $isRegularUser = $user && (($user->role ?? null) === 'user');
-    $isReportManager = $user && (($user->role ?? null) === 'report_manager');
+    $role = $user->role ?? null;
+    
+    // Use model methods for standard roles
+    $isAdmin = $user && $user->isAdmin();
+    $isLeadManager = $user && $user->isLeadManager();
+    $isSuperAgent = $user && $user->isSuperAgent();
+    $isCloser = $user && $user->isCloser();
+    
+    // Custom roles/shorthands
+    $isSuperAgent1 = $user && ($role === 'super_agent_1');
+    $isMaxOutUser = $user && ($role === 'max_out');
+    $isThatSubmittedUser = $user && ($role === 'death_submitted');
+    $isRegularUser = $user && ($role === 'user');
+    $isReportManager = $user && ($role === 'report_manager');
 @endphp
 
 <body x-data="{ sidebarOpen: false }">
@@ -615,6 +622,10 @@
                     <i class="fas fa-th-large w-5"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="{{ route('leads.create') }}" class="nav-item {{ $currentRoute === 'leads.create' ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle w-5"></i>
+                    <span>Onboard Lead</span>
+                </a>
                 <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
                     <i class="fas fa-address-book w-5"></i>
                     <span>Leads Vault</span>
@@ -680,9 +691,9 @@
                 </a>
             @endif
 
-            @if ($isRegularUser)
+            @if ($isRegularUser || $isLeadManager)
                 <div class="px-6 mb-4 mt-8">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Agent Zone</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ $isLeadManager ? 'TL Manager Zone' : 'Agent Zone' }}</p>
                 </div>
                 <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
                     <i class="fas fa-th-large w-5"></i>
@@ -738,7 +749,7 @@
 
             <div class="flex items-center gap-6">
                 <!-- Notifications Button & Dropdown (hidden for admins) -->
-                @if ($user->role == 'user' || $user->role == 'report_manager')
+                @if ($user->role == 'user' || $user->role == 'report_manager' || $user->role == 'lead_manager')
                             <div class="relative" x-data="{
                                                                                                             ...notificationsDropdown({
                                                                                                                 initialUnread: {{ $user->role == 'report_manager'
