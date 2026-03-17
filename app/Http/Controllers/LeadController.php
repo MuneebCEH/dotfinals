@@ -317,12 +317,8 @@ class LeadController extends Controller
 
         $query = Lead::query()
             ->with(['assignee'])
-            // visibility: super_agent sees by super_agent_id, others by assigned_to
-            ->when($isSuperAgent, function ($q) use ($user) {
-                $q->where('super_agent_id', $user->id);
-            }, function ($q) use ($user) {
-                $q->where('assigned_to', $user->id);
-            });
+            // Use the comprehensive visibility scope
+            ->visibleTo($user);
 
         // Î“Â¥Ã® Always exclude submitted & deal leads regardless of role
         $query->where(function ($q) {

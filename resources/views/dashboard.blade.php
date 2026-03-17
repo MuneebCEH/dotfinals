@@ -28,6 +28,7 @@
         $isRegularUser = $user->role === 'user';
         $isMaxOutUser = $user->role === 'max_out';
         $isThatSubmittedUser = $user->role === 'death_submitted';
+        $isLeadManager = $user->role === 'lead_manager';
 
         // Pakistan timezone anchors
         $pakistanNow = now()->setTimezone('Asia/Karachi');
@@ -57,11 +58,15 @@
                 $leadQuery->where('status', 'Death Submitted');
             } elseif ($isMaxOutUser) {
                 $leadQuery->where('status', 'Max Out');
-            } elseif ($isRegularUser) {
+            } elseif ($isRegularUser || $isLeadManager) {
+                // Use the shared visibility logic from the model if possible, 
+                // or replicate forUser() here for metrics consistency.
                 $leadQuery->where(function ($query) use ($userId) {
                     $query->where('assigned_to', $userId)
                         ->orWhere('super_agent_id', $userId)
-                        ->orWhere('closer_id', $userId);
+                        ->orWhere('closer_id', $userId)
+                        ->orWhere('created_by', $userId)
+                        ->orWhereHas('users', fn($q) => $q->where('users.id', $userId));
                 });
             }
         }
