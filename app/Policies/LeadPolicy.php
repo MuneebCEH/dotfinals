@@ -31,8 +31,8 @@ class LeadPolicy
 
     public function create(User $user): bool
     {
-        // Admins, Lead Managers, and Standard Agents can create leads
-        return $user->isAdmin() || in_array($user->role, ['lead_manager', 'user']);
+        // Admins, Lead Managers, Super Agents, and Standard Agents can create leads
+        return $user->isAdmin() || in_array($user->role, ['lead_manager', 'super_agent', 'user']);
     }
 
     public function update(User $user, Lead $lead): bool
