@@ -385,7 +385,7 @@ class LeadController extends Controller
         $data = $request->validated();
 
         if (!Auth::user()->isAdmin() && !in_array(Auth::user()->role, ['user', 'lead_manager', 'super_agent'])) {
-            unset($data['assigned_to'], $data['super_agent_id']);
+            unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
         }
 
         // If it's a standard agent and they DIDN'T select a TO, auto-assign to themselves
@@ -494,8 +494,8 @@ class LeadController extends Controller
             $data['numbers'] = isset($data['numbers']) ? array_values(array_filter($data['numbers'], fn($v) => filled($v))) : [];
             $data['cards_json'] = isset($data['cards_json']) ? array_values(array_filter($data['cards_json'], fn($v) => filled($v))) : [];
 
-            // Non-elevated users can't change assignment fields (except Standard Agents and TL Managers who are now allowed)
-            if (!$this->isElevated() && $user->role !== 'user' && $user->role !== 'lead_manager') {
+            // Non-elevated users can't change assignment fields (except Standard Agents, TL Managers, and Super Agents who are now allowed)
+            if (!$this->isElevated() && !in_array($user->role, ['user', 'lead_manager', 'super_agent'])) {
                 unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
             }
 
