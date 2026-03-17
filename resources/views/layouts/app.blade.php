@@ -545,6 +545,7 @@
     $isThatSubmittedUser = $user && (($user->role ?? null) === 'death_submitted');
     $isRegularUser = $user && (($user->role ?? null) === 'user');
     $isReportManager = $user && (($user->role ?? null) === 'report_manager');
+    $isLeadManager = $user && (($user->role ?? null) === 'lead_manager');
 @endphp
 
 <body x-data="{ sidebarOpen: false }">
@@ -704,6 +705,24 @@
                 <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
                     <i class="fas fa-search w-5"></i>
                     <span>Lead Search</span>
+                </a>
+            @endif
+
+            @if ($isLeadManager)
+                <div class="px-6 mb-4 mt-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">TL Manager Zone</p>
+                </div>
+                <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
+                    <i class="fas fa-th-large w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="{{ route('leads.create') }}" class="nav-item {{ $currentRoute === 'leads.create' ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle w-5"></i>
+                    <span>Onboard Lead</span>
+                </a>
+                <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
+                    <i class="fas fa-address-book w-5"></i>
+                    <span>Leads Vault</span>
                 </a>
             @endif
         </nav>
