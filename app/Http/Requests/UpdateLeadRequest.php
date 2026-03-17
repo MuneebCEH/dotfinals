@@ -93,7 +93,11 @@ class UpdateLeadRequest extends FormRequest
             'category_id'        => ['nullable', 'exists:categories,id'],
             'status'             => ['required', Rule::in(\App\Models\Lead::STATUSES)],
 
-            'assigned_to'        => ['nullable', 'exists:users,id'],
+            'assigned_to'        => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where(fn($q) => $q->whereIn('role', ['user', 'lead_manager'])),
+            ],
             'super_agent_id'     => ['nullable', 'exists:users,id'],
             'closer_id'          => ['nullable', 'exists:users,id'],
 
