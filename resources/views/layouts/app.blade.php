@@ -539,12 +539,17 @@
 @php
     $user = auth()->user();
     $role = $user->role ?? null;
-    $isAdmin = $user && ((method_exists($user, 'isAdmin') && $user->isAdmin()) || (method_exists($user, 'hasRole') && $user->hasRole('admin')) || $role === 'admin');
-    $isSuperAgent = $user && ((method_exists($user, 'isSuperAgent') && $user->isSuperAgent()) || $role === 'super_agent');
-    $isSuperAgent1 = $user && ((method_exists($user, 'isSuperAgent1') && $user->isSuperAgent1()) || $role === 'super_agent_1');
+    
+    // Use model methods for standard roles
+    $isAdmin = $user && $user->isAdmin();
+    $isLeadManager = $user && $user->isLeadManager();
+    $isSuperAgent = $user && $user->isSuperAgent();
+    $isCloser = $user && $user->isCloser();
+    
+    // Custom roles/shorthands
+    $isSuperAgent1 = $user && ($role === 'super_agent_1');
     $isMaxOutUser = $user && ($role === 'max_out');
     $isThatSubmittedUser = $user && ($role === 'death_submitted');
-    $isLeadManager = $user && ($role === 'lead_manager' || (method_exists($user, 'hasRole') && $user->hasRole('lead_manager')));
     $isRegularUser = $user && ($role === 'user');
     $isReportManager = $user && ($role === 'report_manager');
 @endphp
