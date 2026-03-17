@@ -594,7 +594,7 @@
                 <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Core Navigation</p>
             </div>
 
-            @if ($isSuperAgent || $isSuperAgent1 || $isAdmin)
+            @if ($isSuperAgent1 || $isAdmin)
                 <a href="{{ route('reports.index') }}"
                     class="nav-item {{ $currentRoute === 'reports.index' ? 'active' : '' }}">
                     <i class="fas fa-chart-line w-5"></i>
