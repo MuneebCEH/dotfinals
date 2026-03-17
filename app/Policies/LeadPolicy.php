@@ -21,28 +21,34 @@ class LeadPolicy
 
     public function view(User $user, Lead $lead): bool
     {
-        return $user->isAdmin() || $lead->assignee_id === $user->id;
+        // Admin or the user is involved in the lead
+        return $user->isAdmin() || 
+               $lead->assigned_to === $user->id || 
+               $lead->super_agent_id === $user->id || 
+               $lead->closer_id === $user->id ||
+               $lead->created_by === $user->id;
+    }
+
+    public function create(User $user): bool
+    {
+        // Admins, Lead Managers, and Standard Agents can create leads
+        return $user->isAdmin() || in_array($user->role, ['lead_manager', 'user']);
     }
 
     public function update(User $user, Lead $lead): bool
     {
-        return $user->isAdmin() || $lead->assignee_id === $user->id;
+        // Same logic as view for lead involvement, but lead_manager can also update
+        return $user->isAdmin() || 
+               $user->role === 'lead_manager' ||
+               $lead->assigned_to === $user->id || 
+               $lead->super_agent_id === $user->id || 
+               $lead->closer_id === $user->id ||
+               $lead->created_by === $user->id;
     }
-
-
-    public function create(User $user): bool
-    {
-        return $user->isAdmin();
-    }
-
-    // public function update(User $user, Lead $lead): bool
-    // {
-    //     // admin or assigned
-    //     return $user->isAdmin() || $lead->assignee()->where('user_id', $user->id)->exists();
-    // }
 
     public function delete(User $user, Lead $lead): bool
     {
-        return $user->isAdmin();
+        // Admins and Lead Managers can delete
+        return $user->isAdmin() || $user->role === 'lead_manager';
     }
 }

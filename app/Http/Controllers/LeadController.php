@@ -143,7 +143,11 @@ class LeadController extends Controller
             return true;
         }
 
-        return (int) $lead->assigned_to === (int) $u->id;
+        // Generic involvement: assigned, created, or in pivot
+        return (int) $lead->assigned_to === (int) $u->id || 
+               (int) $lead->created_by === (int) $u->id ||
+               ((int) $lead->super_agent_id === (int) $u->id) ||
+               ((int) $lead->closer_id === (int) $u->id);
     }
 
     protected function canEditLead(?User $u, Lead $lead): bool
