@@ -274,7 +274,7 @@
                                                     class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-[10px] text-slate-900 font-black uppercase tracking-widest transition-all">
                                                     <i class="fas fa-external-link-alt text-indigo-600"></i> Open
                                                 </a>
-                                                @if (auth()->user()->isAdmin() || auth()->user()->isLeadManager() || $lead->assigned_to === auth()->id())
+                                                @if (auth()->user()->isAdmin() || auth()->user()->isLeadManager() || auth()->user()->isSuperAgent() || $lead->assigned_to === auth()->id())
                                                     <a href="{{ route('leads.edit', $lead) }}"
                                                         class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-indigo-600 hover:text-white rounded-lg text-[10px] text-slate-900 font-black uppercase tracking-widest transition-all border border-gray-200 hover:border-indigo-500">
                                                         <i class="fas fa-edit"></i> Edit

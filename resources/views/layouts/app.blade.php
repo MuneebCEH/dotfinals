@@ -691,9 +691,13 @@
                 </a>
             @endif
 
-            @if ($isRegularUser || $isLeadManager)
+            @if ($isRegularUser || $isLeadManager || $isSuperAgent)
                 <div class="px-6 mb-4 mt-8">
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">{{ $isLeadManager ? 'TL Manager Zone' : 'Agent Zone' }}</p>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        @if($isLeadManager) TL Manager Zone
+                        @elseif($isSuperAgent) Super Agent Zone
+                        @else Agent Zone @endif
+                    </p>
                 </div>
                 <a href="{{ route('dashboard') }}" class="nav-item {{ $currentRoute === 'dashboard' ? 'active' : '' }}">
                     <i class="fas fa-th-large w-5"></i>
