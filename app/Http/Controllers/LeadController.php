@@ -473,7 +473,7 @@ class LeadController extends Controller
         $statuses = self::STATUSES;
 
         // for elevated: fill selects; others will see read-only or limited fields in Blade as you prefer
-        $tos = User::where('role', 'user')->orderBy('name')->get();
+        $tos = User::whereIn('role', ['user', 'lead_manager'])->orderBy('name')->get();
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();
         $closers = User::where('role', 'closer')->orderBy('name')->get();
 
