@@ -133,7 +133,7 @@ class StoreLeadRequest extends FormRequest
             'assigned_to'        => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id')->where(fn($q) => $q->where('role', 'user')),
+                Rule::exists('users', 'id')->where(fn($q) => $q->whereIn('role', ['user', 'lead_manager'])),
             ],
             'super_agent_id'     => [
                 'nullable',
