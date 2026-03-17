@@ -368,7 +368,7 @@ class LeadController extends Controller
     public function create()
     {
         $u = auth()->user();
-        $canCreate = $u->isAdmin() || $u->role === 'lead_manager' || $u->role === 'user';
+        $canCreate = $u->isAdmin() || $u->role === 'lead_manager' || $u->role === 'super_agent' || $u->role === 'user';
         abort_unless($canCreate, 403);
 
         $categories = Category::orderBy('name')->get();
@@ -384,7 +384,7 @@ class LeadController extends Controller
     {
         $data = $request->validated();
 
-        if (!Auth::user()->isAdmin() && Auth::user()->role !== 'user' && Auth::user()->role !== 'lead_manager') {
+        if (!Auth::user()->isAdmin() && !in_array(Auth::user()->role, ['user', 'lead_manager', 'super_agent'])) {
             unset($data['assigned_to'], $data['super_agent_id']);
         }
 
