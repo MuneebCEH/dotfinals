@@ -111,7 +111,7 @@ class LeadController extends Controller
             return false;
         }
 
-        if ($this->isElevated()) {
+        if ($this->canSeeAllLeads()) {
             return true;
         }
 
@@ -166,9 +166,14 @@ class LeadController extends Controller
     }
 
 
-    /**
-     * Treat lead_manager as elevated (admin-like).
-     */
+    /** Admin-only check for global data visibility */
+    protected function canSeeAllLeads(): bool
+    {
+        $u = auth()->user();
+        return $u && $u->isAdmin();
+    }
+
+    /** Admin-like (admin OR lead_manager) for management features */
     protected function isElevated(): bool
     {
         $u = auth()->user();
@@ -210,8 +215,8 @@ class LeadController extends Controller
 
         $query = Lead::query()
             ->with(['category', 'assignee'])
-            // If NOT elevated, show only leads assigned to this user
-            ->when(!$isElevated, fn($q) => $q->where('assigned_to', auth()->id()))
+            // Restrict leads based on user role involvement (unless Admin)
+            ->visibleTo(auth()->user())
             // Search filter
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%' . trim($request->q) . '%';

@@ -214,31 +214,14 @@ class Lead extends Model
 
     public function scopeVisibleTo($query, \App\Models\User $user)
     {
-        // Admins & lead managers see all
-        if (
-            (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
-            (method_exists($user, 'hasRole') && $user->hasRole('lead_manager')) ||
-            (($user->role ?? null) === 'lead_manager')
-        ) {
+        // Admins see all
+        if (method_exists($user, 'isAdmin') && $user->isAdmin()) {
             return $query;
         }
 
-        // Super agents: only where they are the super_agent_id
-        if (
-            (method_exists($user, 'isSuperAgent') && $user->isSuperAgent()) ||
-            (method_exists($user, 'hasRole') && $user->hasRole('super_agent')) ||
-            (($user->role ?? null) === 'super_agent')
-        ) {
-            return $query->where('super_agent_id', $user->id);
-        }
-
-        // Closers (or normal users): only their assigned leads
-        if (method_exists($user, 'isCloser') && $user->isCloser()) {
-            return $query->where('assigned_to', $user->id);
-        }
-
-        // Fallback: nothing or your preferred owner column
-        return $query->where('assigned_to', $user->id);
+        // lead_manager, Super agents, Closers, and regular Users: 
+        // restrict to leads they are involved in (assigned, created, etc.)
+        return $query->forUser($user->id);
     }
 
     public function callbacks()
