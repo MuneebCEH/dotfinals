@@ -372,7 +372,7 @@ class LeadController extends Controller
         abort_unless($canCreate, 403);
 
         $categories = Category::orderBy('name')->get();
-        $tos = User::whereIn('role', ['user', 'lead_manager'])->orderBy('name')->get();           // “Select TO”
+        $tos = User::whereIn('role', $u->role === 'user' ? ['lead_manager'] : ['user', 'lead_manager'])->orderBy('name')->get();           // “Select TO”
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();    // Î“Ã‡Â£Select Super AgentÎ“Ã‡Â¥
         $closers = User::where('role', 'closer')->orderBy('name')->get();         // Î“Ã‡Â£Select CloserÎ“Ã‡Â¥
         $statuses = self::STATUSES; // your hardcoded list
@@ -473,7 +473,7 @@ class LeadController extends Controller
         $statuses = self::STATUSES;
 
         // for elevated: fill selects; others will see read-only or limited fields in Blade as you prefer
-        $tos = User::whereIn('role', ['user', 'lead_manager'])->orderBy('name')->get();
+        $tos = User::whereIn('role', Auth::user()->role === 'user' ? ['lead_manager'] : ['user', 'lead_manager'])->orderBy('name')->get();
         $superAgents = User::where('role', 'super_agent')->orderBy('name')->get();
         $closers = User::where('role', 'closer')->orderBy('name')->get();
 
