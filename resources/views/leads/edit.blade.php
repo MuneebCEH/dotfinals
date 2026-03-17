@@ -500,41 +500,43 @@
                             @enderror
                         </div>
 
-                        {{-- Super Agent --}}
-                        <div>
-                            <label class="block text-sm font-semibold mb-3">Select Super Agent</label>
-                            <select name="super_agent_id"
-                                    class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                <option value="">Select Super Agent</option>
-                                @foreach ($superAgents as $agent)
-                                    <option value="{{ $agent->id }}"
-                                        {{ old('super_agent_id', $lead->super_agent_id) == $agent->id ? 'selected' : '' }}>
-                                        {{ $agent->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('super_agent_id')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->isLeadManager())
+                            {{-- Super Agent --}}
+                            <div>
+                                <label class="block text-sm font-semibold mb-3">Select Super Agent</label>
+                                <select name="super_agent_id"
+                                        class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="">Select Super Agent</option>
+                                    @foreach ($superAgents as $agent)
+                                        <option value="{{ $agent->id }}"
+                                            {{ old('super_agent_id', $lead->super_agent_id) == $agent->id ? 'selected' : '' }}>
+                                            {{ $agent->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('super_agent_id')
+                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        {{-- Closer --}}
-                        <div>
-                            <label class="block text-sm font-semibold mb-3">Select Closer</label>
-                            <select name="closer_id"
-                                    class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                                <option value="">Select Closer</option>
-                                @foreach ($closers as $closer)
-                                    <option value="{{ $closer->id }}"
-                                        {{ old('closer_id', $lead->closer_id) == $closer->id ? 'selected' : '' }}>
-                                        {{ $closer->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('closer_id')
-                            <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            {{-- Closer --}}
+                            <div>
+                                <label class="block text-sm font-semibold mb-3">Select Closer</label>
+                                <select name="closer_id"
+                                        class="block w-full px-4 py-3 border rounded-xl bg-white/80 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="">Select Closer</option>
+                                    @foreach ($closers as $closer)
+                                        <option value="{{ $closer->id }}"
+                                            {{ old('closer_id', $lead->closer_id) == $closer->id ? 'selected' : '' }}>
+                                            {{ $closer->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('closer_id')
+                                <p class="text-danger-600 text-sm mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endif
                     @endif
                 </div>
 
