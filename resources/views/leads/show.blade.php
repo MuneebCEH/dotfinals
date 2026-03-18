@@ -38,7 +38,7 @@
                      }"
                      @keydown.escape.window="issueOpen=false">
                     @php
-                        $canReport = auth()->user()->isAdmin() || auth()->user()->isLeadManager() || auth()->user()->isSuperAgent() || auth()->user()->role === 'user' || $lead->assigned_to === auth()->id();
+                        $canReport = auth()->user()->isAdmin() || auth()->user()->isLeadManager() || auth()->user()->isSuperAgent();
                         $hasExistingIssue = $lead->issues()->exists();
                     @endphp
 
