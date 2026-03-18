@@ -688,6 +688,15 @@
                     <i class="fas fa-plus-circle w-5"></i>
                     <span>Onboard Lead</span>
                 </a>
+                <a href="{{ route('leads.mine') }}" class="nav-item {{ $currentRoute === 'leads.mine' ? 'active' : '' }}">
+                    <i class="fas fa-list-ul w-5"></i>
+                    <span>My Workspace</span>
+                </a>
+                <a href="{{ route('callbacks.index') }}"
+                    class="nav-item {{ $currentRoute === 'callbacks.index' ? 'active' : '' }}">
+                    <i class="fas fa-phone-alt w-5"></i>
+                    <span>Followups</span>
+                </a>
                 <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
                     <i class="fas fa-search w-5"></i>
                     <span>Lead Search</span>

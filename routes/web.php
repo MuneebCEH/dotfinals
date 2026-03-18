@@ -122,7 +122,7 @@ Route::middleware('auth')->group(function () {
     */
 
     // Regular user / super_agent / closer
-    Route::middleware(['role:user|super_agent|closer|lead_manager'])->group(function () {
+    Route::middleware(['role:user|super_agent|closer|lead_manager|report_manager'])->group(function () {
         Route::get('my-leads', [LeadController::class, 'myLeads'])->name('leads.mine');
         Route::put('my-leads/{lead}', [LeadController::class, 'updateAssigned'])->name('leads.assigned.update');
     });
