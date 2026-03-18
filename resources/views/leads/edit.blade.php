@@ -481,7 +481,7 @@
                         @enderror
                     </div>
 
-                    @if (auth()->user()?->isAdmin() || auth()->user()?->isLeadManager() || auth()->user()?->isSuperAgent() || auth()->user()?->role === 'user')
+                    @if (auth()->user()?->isAdmin() || auth()->user()?->isLeadManager() || auth()->user()?->isSuperAgent() || auth()->user()?->role === 'user' || auth()->user()?->role === 'report_manager')
                         {{-- TO / assignee --}}
                         <div>
                             <label class="block text-sm font-semibold mb-3">Select TO</label>
@@ -500,7 +500,7 @@
                             @enderror
                         </div>
 
-                        @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->isLeadManager())
+                        @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->isLeadManager() || auth()->user()?->role === 'report_manager')
                             {{-- Super Agent --}}
                             <div>
                                 <label class="block text-sm font-semibold mb-3">Select Super Agent</label>

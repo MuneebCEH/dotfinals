@@ -419,7 +419,7 @@
                             @enderror
                         </div>
 
-                        @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->role === 'user' || auth()->user()?->role === 'lead_manager')
+                        @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->role === 'user' || auth()->user()?->role === 'lead_manager' || auth()->user()?->role === 'report_manager')
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Select
                                     TO</label>
@@ -437,7 +437,7 @@
                                 @enderror
                             </div>
 
-                            @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->isLeadManager())
+                            @if (auth()->user()?->isAdmin() || auth()->user()?->isSuperAgent() || auth()->user()?->isLeadManager() || auth()->user()?->role === 'report_manager')
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Select
                                         Super Agent</label>
