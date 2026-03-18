@@ -31,15 +31,21 @@ class LeadPolicy
 
     public function create(User $user): bool
     {
-        // Admins, Lead Managers, Super Agents, and Standard Agents can create leads
-        return $user->isAdmin() || in_array($user->role, ['lead_manager', 'super_agent', 'user']);
+        // Admins, Lead Managers, Super Agents, Report Managers, and Standard Agents can create leads
+        return $user->isAdmin() || in_array($user->role, ['lead_manager', 'super_agent', 'report_manager', 'user']);
     }
 
     public function update(User $user, Lead $lead): bool
     {
-        // Same logic as view for lead involvement, but lead_manager can also update
+        // Standard Agents cannot update leads (as requested previously)
+        if ($user->role === 'user') {
+            return false;
+        }
+
+        // Admin, Lead Manager, Report Manager, or involved in the lead
         return $user->isAdmin() || 
                $user->role === 'lead_manager' ||
+               $user->role === 'report_manager' ||
                $lead->assigned_to === $user->id || 
                $lead->super_agent_id === $user->id || 
                $lead->closer_id === $user->id ||

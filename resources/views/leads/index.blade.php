@@ -382,7 +382,7 @@
             </div>
 
             <div class="flex items-center gap-3 relative z-10">
-                @if (auth()->user()?->isAdmin() || auth()->user()?->isLeadManager() || auth()->user()?->role === 'user')
+                @if (auth()->user()?->isAdmin() || auth()->user()?->isLeadManager() || auth()->user()?->role === 'user' || auth()->user()?->role === 'report_manager')
                     <a href="{{ route('leads.create') }}"
                         class="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-3 group">
                         <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i>
