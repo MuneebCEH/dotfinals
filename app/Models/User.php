@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->role === 'super_agent';
     }
 
+    public function isReportManager(): bool
+    {
+        return $this->role === 'report_manager';
+    }
+
     /** Regular agents (TO list): regular users */
     public function scopeAgents(Builder $q): Builder
     {

@@ -152,6 +152,9 @@ class LeadController extends Controller
 
     protected function canEditLead(?User $u, Lead $lead): bool
     {
+        if ($u && $u->role === 'user') {
+            return false;
+        }
         return $this->canViewLead($u, $lead);
     }
 
@@ -368,7 +371,7 @@ class LeadController extends Controller
     public function create()
     {
         $u = auth()->user();
-        $canCreate = $u->isAdmin() || $u->role === 'lead_manager' || $u->role === 'super_agent' || $u->role === 'user';
+        $canCreate = $u->isAdmin() || in_array($u->role, ['lead_manager', 'super_agent', 'report_manager', 'user']);
         abort_unless($canCreate, 403);
 
         $categories = Category::orderBy('name')->get();
@@ -384,7 +387,7 @@ class LeadController extends Controller
     {
         $data = $request->validated();
 
-        if (!Auth::user()->isAdmin() && !in_array(Auth::user()->role, ['user', 'lead_manager', 'super_agent'])) {
+        if (!Auth::user()->isAdmin() && !in_array(Auth::user()->role, ['lead_manager', 'super_agent', 'report_manager'])) {
             unset($data['assigned_to'], $data['super_agent_id'], $data['closer_id']);
         }
 

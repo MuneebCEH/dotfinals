@@ -91,7 +91,7 @@
                         </template>
                     @endif
 
-                    @if (auth()->user()->isAdmin() || $lead->assigned_to === auth()->id())
+                    @if (auth()->user()->isAdmin() || auth()->user()->isLeadManager() || auth()->user()->isReportManager() || ($lead->assigned_to === auth()->id() && auth()->user()->role !== 'user'))
                         <a href="{{ route('leads.edit', $lead) }}"
                             class="px-4 py-2 rounded-xl bg-warning-600 text-white hover:opacity-90 transition">Edit</a>
                     @endif

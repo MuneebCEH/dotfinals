@@ -684,6 +684,14 @@
                     <i class="fas fa-th-large w-5"></i>
                     <span>Dashboard</span>
                 </a>
+                <a href="{{ route('leads.create') }}" class="nav-item {{ $currentRoute === 'leads.create' ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle w-5"></i>
+                    <span>Onboard Lead</span>
+                </a>
+                <a href="{{ route('leads.index') }}" class="nav-item {{ $currentRoute === 'leads.index' ? 'active' : '' }}">
+                    <i class="fas fa-search w-5"></i>
+                    <span>Lead Search</span>
+                </a>
                 <a href="{{ route('issues.index') }}"
                     class="nav-item {{ $currentRoute === 'issues.index' ? 'active' : '' }}">
                     <i class="fas fa-file-contract w-5"></i>
