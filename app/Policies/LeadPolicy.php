@@ -21,9 +21,13 @@ class LeadPolicy
 
     public function view(User $user, Lead $lead): bool
     {
-        // Admin or the user is involved in the lead
-        return $user->isAdmin() || 
-               $lead->assigned_to === $user->id || 
+        // Admin, Lead Manager, or Report Manager can view all
+        if ($user->isAdmin() || in_array($user->role, ['lead_manager', 'report_manager'])) {
+            return true;
+        }
+
+        // Otherwise, the user must be involved in the lead
+        return $lead->assigned_to === $user->id || 
                $lead->super_agent_id === $user->id || 
                $lead->closer_id === $user->id ||
                $lead->created_by === $user->id;
