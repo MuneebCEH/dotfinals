@@ -177,7 +177,7 @@ class LeadController extends Controller
     protected function canSeeAllLeads(): bool
     {
         $u = auth()->user();
-        return $u && $u->isAdmin();
+        return $u && ($u->isAdmin() || in_array($u->role, ['lead_manager', 'report_manager']));
     }
 
     /** Admin-like (admin OR lead_manager) for management features */
@@ -187,11 +187,7 @@ class LeadController extends Controller
         if (!$u)
             return false;
 
-        $isLeadManager = method_exists($u, 'hasRole')
-            ? $u->hasRole('lead_manager')
-            : (($u->role ?? null) === 'lead_manager');
-
-        return $u->isAdmin() || $isLeadManager;
+        return $u->isAdmin() || in_array($u->role, ['lead_manager', 'report_manager']);
     }
 
     public function index(Request $request)

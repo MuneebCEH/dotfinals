@@ -555,10 +555,12 @@
                                     </td>
                                     <td class="px-8 py-6">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('leads.edit', $lead) }}"
-                                                class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-indigo-600 rounded-xl text-slate-700 hover:text-white transition-all border border-gray-200 hover:border-indigo-500 shadow-lg">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            @if (auth()->user()->isAdmin() || auth()->user()->isLeadManager() || auth()->user()->isReportManager() || auth()->user()->isSuperAgent() || $lead->assigned_to === auth()->id())
+                                                <a href="{{ route('leads.edit', $lead) }}"
+                                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-indigo-600 rounded-xl text-slate-700 hover:text-white transition-all border border-gray-200 hover:border-indigo-500 shadow-lg">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endif
                                             @if($isAdmin)
                                                 <form action="{{ route('leads.destroy', $lead) }}" method="POST"
                                                     onsubmit="return confirm('Purge this intelligence entry?')" class="inline">
