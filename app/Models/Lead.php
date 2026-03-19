@@ -89,6 +89,7 @@ class Lead extends Model
         'bank_details' => 'array',
         'age' => 'integer',
         'fico' => 'integer',
+        'total_cards' => 'integer',
         'balance' => 'float',
         'credits' => 'float',
         'ssn' => 'encrypted'
