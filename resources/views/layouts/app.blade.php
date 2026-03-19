@@ -1135,6 +1135,13 @@
                             this.unreadDbCount = 0;
                         });
 
+                        // Request desktop notification permission for Report Managers
+                        if (this._isReportManager && ("Notification" in window)) {
+                            if (Notification.permission === "default") {
+                                Notification.requestPermission();
+                            }
+                        }
+
                         if (this._url) this._tick();
                     },
 
@@ -1196,6 +1203,10 @@
                                         // Increment unread count if item is unread
                                         if (it.unread) {
                                             this.unreadRtCount++;
+                                            // Desktop notification for Report Managers
+                                            if (this._isReportManager) {
+                                                this._showDesktopNote(it);
+                                            }
                                         }
                                     }
                                 }
@@ -1233,6 +1244,32 @@
                         const h = Math.floor(m / 60);
                         if (h < 24) return `${h}h ago`;
                         return `${Math.floor(h / 24)}d ago`;
+                    },
+
+                    _showDesktopNote(item) {
+                        if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+                        const title = item.issue ? `New Issue: ${item.issue.title}` : `New Lead: ${item.first_name} ${item.surname}`;
+                        const body = item.message || (item.issue ? item.issue.description : `Status: ${item.status}`);
+                        
+                        try {
+                            const n = new Notification(title, {
+                                body: body,
+                                icon: '/logo.png'
+                            });
+                            n.onclick = () => {
+                                window.focus();
+                                // Using the globally defined getNotificationUrl if available in the scope
+                                if (typeof getNotificationUrl === 'function') {
+                                    window.location.href = getNotificationUrl(item);
+                                } else {
+                                    // Fallback if needed, though it should be in the parent x-data
+                                    window.location.href = item.issue ? `/issues/${item.issue.id}` : `/leads/${item.id}`;
+                                }
+                            };
+                        } catch (e) {
+                            console.error("Desktop notification failed", e);
+                        }
                     }
                 }
             }
