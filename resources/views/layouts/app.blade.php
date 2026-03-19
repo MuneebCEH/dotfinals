@@ -1046,8 +1046,9 @@
                         }
                         // For report managers, only show open issues where they are the resolver
                         if (item.issue &&
-                            item.issue.resolver_id === this._userId &&
+                            item.issue.resolver_id == this._userId &&
                             item.issue.status === 'open') {
+                            console.log("Notif match for RM:", item);
                             return true;
                         }
                         return false;
@@ -1056,7 +1057,8 @@
                     _isUnread(itemDate, issueDate) {
                         const lastSeen = getLastSeen();
                         if (!lastSeen) return true;
-                        const compareDate = issueDate || itemDate;
+                        // Use the most recent of the two dates if both are provided
+                        const compareDate = (issueDate && new Date(issueDate) > new Date(itemDate)) ? issueDate : itemDate;
                         return new Date(compareDate) > new Date(lastSeen);
                     },
 
@@ -1197,14 +1199,15 @@
                                     if (this.shouldShowNotification(it)) {
                                         this._seen.add(key);
                                         // compute unread flag against last_seen
-                                        const relevantDate = it.issue ? it.issue.updated_at : it.updated_at;
                                         it.unread = this._isUnread(it.updated_at, it.issue?.updated_at);
                                         this.rtItems.unshift(it);
+
                                         // Increment unread count if item is unread
                                         if (it.unread) {
                                             this.unreadRtCount++;
                                             // Desktop notification for Report Managers
                                             if (this._isReportManager) {
+                                                console.log("Triggering desktop note for:", it);
                                                 this._showDesktopNote(it);
                                             }
                                         }
@@ -1213,12 +1216,8 @@
                                 if (this.rtItems.length > 100) this.rtItems.length = 100;
                             }
 
-                            // Prefer server-provided count; otherwise compute locally
-                            if (typeof data.unread_count === 'number') {
-                                this.unreadRtCount = data.unread_count;
-                            } else {
-                                this._recomputeUnread();
-                            }
+                            // Force recompute to ensure notifications are triggered if needed
+                            this._recomputeUnread();
 
                             this._interval = 10000; // reset after success
                         } catch (e) {
@@ -1229,11 +1228,6 @@
                         }
                     },
 
-                    _isUnread(iso) {
-                        if (!iso) return false;
-                        const lastSeen = getLastSeen();
-                        return lastSeen ? (new Date(iso) > new Date(lastSeen)) : true;
-                    },
 
                     timeAgo(iso) {
                         const d = new Date(iso);
@@ -1247,23 +1241,27 @@
                     },
 
                     _showDesktopNote(item) {
-                        if (!("Notification" in window) || Notification.permission !== "granted") return;
+                        console.log("Attempting desktop notification...", Notification.permission);
+                        if (!("Notification" in window) || Notification.permission !== "granted") {
+                            console.warn("Notification permission not granted or API missing");
+                            return;
+                        }
 
                         const title = item.issue ? `New Issue: ${item.issue.title}` : `New Lead: ${item.first_name} ${item.surname}`;
                         const body = item.message || (item.issue ? item.issue.description : `Status: ${item.status}`);
                         
                         try {
                             const n = new Notification(title, {
-                                body: body,
-                                icon: '/logo.png'
+                                body: body
                             });
+                            console.log("Notification instance created");
                             n.onclick = () => {
                                 window.focus();
-                                // Using the globally defined getNotificationUrl if available in the scope
                                 if (typeof getNotificationUrl === 'function') {
                                     window.location.href = getNotificationUrl(item);
+                                } else if (item.url) {
+                                    window.location.href = item.url;
                                 } else {
-                                    // Fallback if needed, though it should be in the parent x-data
                                     window.location.href = item.issue ? `/issues/${item.issue.id}` : `/leads/${item.id}`;
                                 }
                             };
