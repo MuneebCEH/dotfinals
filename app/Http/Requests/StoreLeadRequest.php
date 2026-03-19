@@ -66,6 +66,15 @@ class StoreLeadRequest extends FormRequest
             }
         }
 
+        // Normalize total_cards: empty string to null, otherwise cast to int if possible
+        if (isset($data['total_cards'])) {
+            if ($data['total_cards'] === '') {
+                $data['total_cards'] = null;
+            } elseif (is_numeric($data['total_cards'])) {
+                $data['total_cards'] = (int) $data['total_cards'];
+            }
+        }
+
         $this->replace($data);
     }
 
